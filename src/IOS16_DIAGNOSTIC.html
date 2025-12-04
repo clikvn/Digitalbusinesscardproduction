@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iOS 16 Diagnostic Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 20px;
+      background-color: #ffffff;
+      color: #000000;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      color: #e11d48;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    
+    h2 {
+      color: #334155;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+    
+    .test-section {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .test-result {
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-top: 8px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    .pass {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    
+    .fail {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    
+    .info {
+      background-color: #dbeafe;
+      color: #1e40af;
+      border: 1px solid: #93c5fd;
+    }
+    
+    button {
+      background-color: #e11d48;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 16px;
+      font-weight: 600;
+    }
+    
+    button:active {
+      background-color: #be123c;
+    }
+    
+    pre {
+      background-color: #1e293b;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    
+    .color-test {
+      width: 100%;
+      height: 40px;
+      border-radius: 4px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 iOS 16 Diagnostic Page</h1>
+  <p style="margin-bottom: 20px;">This page tests what features work on your iOS 16 device.</p>
+
+  <div class="test-section">
+    <h2>📱 Device Information</h2>
+    <div id="device-info"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>🎨 CSS Color Support Test</h2>
+    <p>Testing if your browser supports different color formats:</p>
+    
+    <div>
+      <strong>HSL Color (iOS 2.0+):</strong>
+      <div class="color-test" style="background-color: hsl(25 91% 46%);">
+        HSL Color - Should be orange
+      </div>
+    </div>
+    
+    <div style="margin-top: 12px;">
+      <strong>OKLCH Color (iOS 16.4+):</strong>
+      <div class="color-test" style="background-color: oklch(0.6171 0.1375 39.0427); background-color: hsl(0 0% 50%);">
+        OKLCH Color - Should be orange (or gray if not supported)
+      </div>
+    </div>
+    
+    <div id="color-test-result" class="test-result info" style="margin-top: 12px;">
+      Testing...
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>📐 CSS Viewport Units Test</h2>
+    <div id="viewport-test"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>✨ CSS Features Test</h2>
+    <div id="css-features"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>💻 JavaScript Features Test</h2>
+    <div id="js-features"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>🌐 Web APIs Test</h2>
+    <div id="web-apis"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>📦 Storage Test</h2>
+    <div id="storage-test"></div>
+  </div>
+
+  <button onclick="copyResults()">📋 Copy Results</button>
+  <button onclick="location.reload()">🔄 Reload Tests</button>
+
+  <script>
+    // Utility functions
+    function addResult(containerId, label, status, details = '') {
+      const container = document.getElementById(containerId);
+      const resultDiv = document.createElement('div');
+      resultDiv.className = `test-result ${status}`;
+      resultDiv.innerHTML = `<strong>${label}:</strong> ${status.toUpperCase()}${details ? ' - ' + details : ''}`;
+      container.appendChild(resultDiv);
+    }
+
+    // Device Information
+    function testDeviceInfo() {
+      const ua = navigator.userAgent;
+      const container = document.getElementById('device-info');
+      
+      // Extract iOS version
+      const iosMatch = ua.match(/iPhone OS (\d+)_(\d+)_?(\d+)?/);
+      const iosVersion = iosMatch ? `${iosMatch[1]}.${iosMatch[2]}${iosMatch[3] ? '.' + iosMatch[3] : ''}` : 'Unknown';
+      
+      container.innerHTML = `
+        <div class="test-result info"><strong>iOS Version:</strong> ${iosVersion}</div>
+        <div class="test-result info"><strong>Safari Version:</strong> ${/Version\/(\d+\.\d+)/.test(ua) ? RegExp.$1 : 'Unknown'}</div>
+        <div class="test-result info"><strong>Screen Size:</strong> ${window.screen.width} x ${window.screen.height}</div>
+        <div class="test-result info"><strong>Viewport Size:</strong> ${window.innerWidth} x ${window.innerHeight}</div>
+        <div class="test-result info"><strong>Device Pixel Ratio:</strong> ${window.devicePixelRatio}</div>
+      `;
+    }
+
+    // CSS Color Support
+    function testColorSupport() {
+      const testDiv = document.createElement('div');
+      testDiv.style.cssText = 'position: absolute; left: -9999px;';
+      document.body.appendChild(testDiv);
+      
+      // Test OKLCH
+      testDiv.style.backgroundColor = 'oklch(0.6171 0.1375 39.0427)';
+      const computedColor = window.getComputedStyle(testDiv).backgroundColor;
+      
+      document.body.removeChild(testDiv);
+      
+      const container = document.getElementById('color-test-result');
+      
+      if (computedColor === '' || computedColor === 'rgba(0, 0, 0, 0)' || computedColor === 'transparent') {
+        container.className = 'test-result fail';
+        container.innerHTML = '<strong>❌ OKLCH NOT SUPPORTED</strong> - This is why your app was showing blank! HSL colors work fine.';
+      } else {
+        container.className = 'test-result pass';
+        container.innerHTML = '<strong>✅ OKLCH SUPPORTED</strong> - Your iOS version supports oklch() colors. The issue is likely cache-related.';
+      }
+    }
+
+    // Viewport Units
+    function testViewportUnits() {
+      const container = document.getElementById('viewport-test');
+      const testDiv = document.createElement('div');
+      testDiv.style.cssText = 'position: absolute; left: -9999px;';
+      document.body.appendChild(testDiv);
+      
+      const tests = [
+        { unit: '100vh', name: 'Standard vh' },
+        { unit: '100dvh', name: 'Dynamic vh (dvh)' },
+        { unit: '100svh', name: 'Small vh (svh)' },
+        { unit: '100lvh', name: 'Large vh (lvh)' }
+      ];
+      
+      tests.forEach(test => {
+        testDiv.style.height = test.unit;
+        const computed = window.getComputedStyle(testDiv).height;
+        const supported = computed !== '0px' && computed !== '';
+        addResult('viewport-test', test.name, supported ? 'pass' : 'fail', supported ? computed : 'Not supported');
+      });
+      
+      document.body.removeChild(testDiv);
+    }
+
+    // CSS Features
+    function testCSSFeatures() {
+      const features = [
+        { name: 'backdrop-filter', css: 'backdrop-filter: blur(10px);', property: 'backdropFilter' },
+        { name: ':has() selector', test: () => CSS.supports('selector(:has(div))') },
+        { name: '@container queries', test: () => CSS.supports('@container (width > 0px)') || CSS.supports('container-type: inline-size') },
+        { name: 'color-mix()', css: 'background-color: color-mix(in srgb, red, blue);', property: 'backgroundColor' }
+      ];
+      
+      features.forEach(feature => {
+        let supported = false;
+        
+        if (feature.test) {
+          try {
+            supported = feature.test();
+          } catch (e) {
+            supported = false;
+          }
+        } else if (feature.css) {
+          const testDiv = document.createElement('div');
+          testDiv.style.cssText = 'position: absolute; left: -9999px; ' + feature.css;
+          document.body.appendChild(testDiv);
+          const computed = window.getComputedStyle(testDiv)[feature.property];
+          supported = computed !== '' && computed !== 'none';
+          document.body.removeChild(testDiv);
+        }
+        
+        addResult('css-features', feature.name, supported ? 'pass' : 'fail');
+      });
+    }
+
+    // JavaScript Features
+    function testJSFeatures() {
+      const features = [
+        { name: 'Optional chaining (?.)', test: () => { const obj = {}; return obj?.prop === undefined; } },
+        { name: 'Nullish coalescing (??)', test: () => (null ?? 'default') === 'default' },
+        { name: 'Async/await', test: () => typeof (async () => {}) === 'function' },
+        { name: 'Promise.all', test: () => typeof Promise.all === 'function' },
+        { name: 'Array.at()', test: () => typeof [].at === 'function' },
+        { name: 'Object.hasOwn', test: () => typeof Object.hasOwn === 'function' },
+        { name: 'structuredClone', test: () => typeof structuredClone === 'function' },
+        { name: 'findLast', test: () => typeof [].findLast === 'function' }
+      ];
+      
+      features.forEach(feature => {
+        let supported = false;
+        try {
+          supported = feature.test();
+        } catch (e) {
+          supported = false;
+        }
+        addResult('js-features', feature.name, supported ? 'pass' : 'fail');
+      });
+    }
+
+    // Web APIs
+    function testWebAPIs() {
+      const apis = [
+        { name: 'navigator.share', test: () => typeof navigator.share === 'function' },
+        { name: 'navigator.canShare', test: () => typeof navigator.canShare === 'function' },
+        { name: 'visualViewport', test: () => typeof window.visualViewport !== 'undefined' },
+        { name: 'IntersectionObserver', test: () => typeof IntersectionObserver === 'function' },
+        { name: 'localStorage', test: () => typeof Storage !== 'undefined' && typeof localStorage === 'object' },
+        { name: 'sessionStorage', test: () => typeof Storage !== 'undefined' && typeof sessionStorage === 'object' }
+      ];
+      
+      apis.forEach(api => {
+        let supported = false;
+        try {
+          supported = api.test();
+        } catch (e) {
+          supported = false;
+        }
+        addResult('web-apis', api.name, supported ? 'pass' : 'fail');
+      });
+    }
+
+    // Storage Test
+    function testStorage() {
+      const container = document.getElementById('storage-test');
+      
+      try {
+        localStorage.setItem('test', 'value');
+        const value = localStorage.getItem('test');
+        localStorage.removeItem('test');
+        addResult('storage-test', 'localStorage Read/Write', 'pass', 'Working correctly');
+      } catch (e) {
+        addResult('storage-test', 'localStorage Read/Write', 'fail', e.message);
+      }
+      
+      try {
+        sessionStorage.setItem('test', 'value');
+        const value = sessionStorage.getItem('test');
+        sessionStorage.removeItem('test');
+        addResult('storage-test', 'sessionStorage Read/Write', 'pass', 'Working correctly');
+      } catch (e) {
+        addResult('storage-test', 'sessionStorage Read/Write', 'fail', e.message);
+      }
+    }
+
+    // Copy Results
+    function copyResults() {
+      const results = [];
+      results.push('=== iOS 16 Diagnostic Results ===\n');
+      results.push(`User Agent: ${navigator.userAgent}\n`);
+      results.push(`Screen: ${window.screen.width}x${window.screen.height}`);
+      results.push(`Viewport: ${window.innerWidth}x${window.innerHeight}`);
+      results.push(`\nTest Results:\n`);
+      
+      document.querySelectorAll('.test-result').forEach(el => {
+        results.push(el.textContent);
+      });
+      
+      const text = results.join('\n');
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('✅ Results copied to clipboard!');
+        }).catch(() => {
+          alert('❌ Failed to copy. Please screenshot this page instead.');
+        });
+      } else {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          alert('✅ Results copied to clipboard!');
+        } catch (e) {
+          alert('❌ Failed to copy. Please screenshot this page instead.');
+        }
+        document.body.removeChild(textarea);
+      }
+    }
+
+    // Run all tests on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      testDeviceInfo();
+      testColorSupport();
+      testViewportUnits();
+      testCSSFeatures();
+      testJSFeatures();
+      testWebAPIs();
+      testStorage();
+    });
+  </script>
+</body>
+</html>

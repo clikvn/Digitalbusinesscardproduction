@@ -1,0 +1,14 @@
+# Supabase Configuration
+# This configuration disables Edge Functions deployment since we use direct client calls with RLS
+
+[functions]
+# Disable Edge Functions deployment
+enabled = false
+
+[api]
+# Enable API for direct client access
+enabled = true
+
+[auth]
+# Auth settings
+enabled = true
