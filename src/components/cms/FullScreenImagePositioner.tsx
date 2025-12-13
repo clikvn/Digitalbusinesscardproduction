@@ -124,30 +124,39 @@ export function FullScreenImagePositioner({
         </div>
       </div>
 
-      {/* Profile Card */}
-      <div className="absolute backdrop-blur-lg backdrop-filter bg-[rgba(255,222,207,0.33)] bottom-[18px] box-border content-stretch flex flex-col h-[50vh] items-center justify-between left-[4.27%] pb-[clamp(20px,3vh,24px)] pt-[clamp(16px,2vh,20px)] px-[24px] right-[4.27%] rounded-[24px] pointer-events-none">
-        <div className="content-stretch flex flex-col gap-[clamp(4px,0.5vh,8px)] items-center relative shrink-0 w-full">
-          <div className="overflow-clip relative shrink-0 size-[20px]">
-            <div className="absolute inset-[33.33%_20.83%]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 12 7">
-                <path clipRule="evenodd" d={svgPaths.p2c9b2300} fill="var(--fill-0, #F8FAFC)" fillRule="evenodd" />
-              </svg>
+      {/* Gradient Layer - Matches Gradient.tsx */}
+      <div className="absolute inset-0 flex items-end justify-center pointer-events-none" data-name="Gradient">
+        <div className="w-full max-w-[500px] px-[16px]">
+          {/* Profile Card - Matches HomeProfileCard.tsx exactly */}
+          <div className="backdrop-blur-lg backdrop-filter bg-[rgba(255,222,207,0.33)] box-border content-stretch flex flex-col items-center justify-between mb-[16px] rounded-[24px] w-full pointer-events-none" style={{ height: 'calc(var(--vh, 1vh) * 50)', paddingTop: '16px', paddingBottom: '24px', paddingLeft: '24px', paddingRight: '24px' }} data-name="home-profile-card">
+            {/* Container - Top Section with Name and Title */}
+            <div className="content-stretch flex flex-col gap-[clamp(4px,0.5vh,8px)] items-center relative shrink-0 w-full">
+              <div className="overflow-clip relative shrink-0 size-[20px]">
+                <div className="absolute inset-[33.33%_20.83%]">
+                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 12 7">
+                    <path clipRule="evenodd" d={svgPaths.p2c9b2300} fill="var(--fill-0, #F8FAFC)" fillRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] min-w-full not-italic relative shrink-0 text-[clamp(24px,5vh,40px)] text-slate-50 tracking-[-0.576px] w-[min-content]">
+                <p className="leading-[1.17]">{profileName || "Your Name"}</p>
+              </div>
+              <div className="box-border content-stretch flex gap-[16px] items-center pb-0 pt-[8px] px-0 relative shrink-0 w-full">
+                <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-nowrap text-slate-50">
+                  <p className="leading-[20px]">{profileTitle || "Your Title"}</p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] min-w-full not-italic relative shrink-0 text-[clamp(24px,5vh,40px)] text-slate-50 tracking-[-0.576px] w-[min-content]">
-            <p className="leading-[1.17]">{profileName || "Your Name"}</p>
-          </div>
-          <div className="box-border content-stretch flex gap-[16px] items-center pb-0 pt-[8px] px-0 relative shrink-0 w-full">
-            <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-nowrap text-slate-50">
-              <p className="leading-[20px]">{profileTitle || "Your Title"}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-[#c96442] h-[48px] relative rounded-[12px] shrink-0 w-full">
-          <div className="flex flex-row items-center justify-center size-full">
-            <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-nowrap text-slate-50">
-              <p className="leading-[20px]">Contact</p>
+
+            {/* Bottom Section - Contact Button */}
+            <div className="flex flex-col gap-[16px] w-full shrink-0" data-name="button-block">
+              <div className="bg-[#c96442] h-[48px] relative rounded-[12px] shrink-0 w-full">
+                <div className="flex flex-row items-center justify-center size-full">
+                  <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-nowrap text-slate-50">
+                    <p className="leading-[20px]">Contact</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -23,6 +23,9 @@ export function HomeBackgroundImage() {
 
   return (
     <div className="relative shrink-0 w-full overflow-hidden" style={{ height: 'calc(var(--vh, 1vh) * 100)' }} data-name="home-background-image">
+      {/* Background Gradient - Black to Terracotta */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-black/50 to-[#c96442]" />
+      
       <div className="absolute bottom-0 left-0 right-0 top-0" data-name="img">
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0">
@@ -36,6 +39,7 @@ export function HomeBackgroundImage() {
               }}
             />
           </div>
+          {/* Bottom Gradient Overlay - Fades portrait into background */}
           <div className="absolute left-0 right-0 bottom-0 bg-gradient-to-b from-transparent to-[#c96442]" style={{ height: 'min(550px, calc(var(--vh, 1vh) * 70))' }} />
         </div>
       </div>

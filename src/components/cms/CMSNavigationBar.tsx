@@ -57,7 +57,7 @@ export function CMSNavigationBar({
         {currentPage === "overview" && (
           <button 
             onClick={onMenuClick}
-            className="md:hidden shrink-0 size-[20px]" 
+            className="shrink-0 size-[20px]" 
             aria-label="Menu"
           >
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">

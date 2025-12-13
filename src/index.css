@@ -691,10 +691,6 @@
     right: .01%;
   }
 
-  .right-\[4\.27\%\] {
-    right: 4.27%;
-  }
-
   .right-\[6\.67\%\] {
     right: 6.67%;
   }
@@ -731,10 +727,6 @@
     bottom: calc(var(--spacing) * 24);
   }
 
-  .bottom-\[18px\] {
-    bottom: 18px;
-  }
-
   .bottom-\[20\.83\%\] {
     bottom: 20.83%;
   }
@@ -765,10 +757,6 @@
 
   .left-4 {
     left: calc(var(--spacing) * 4);
-  }
-
-  .left-\[4\.27\%\] {
-    left: 4.27%;
   }
 
   .left-\[50\%\] {
@@ -1232,10 +1220,6 @@
 
   .h-\[48px\] {
     height: 48px;
-  }
-
-  .h-\[50vh\] {
-    height: 50vh;
   }
 
   .h-\[56px\] {
@@ -2478,6 +2462,11 @@
     }
   }
 
+  .from-black {
+    --tw-gradient-from: var(--color-black);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+
   .from-black\/70 {
     --tw-gradient-from: #000000b3;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -2569,6 +2558,18 @@
   @supports (color: color-mix(in lab, red, red)) {
     .via-black\/40 {
       --tw-gradient-via: color-mix(in oklab, var(--color-black) 40%, transparent);
+    }
+  }
+
+  .via-black\/50 {
+    --tw-gradient-via: #00000080;
+    --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-via-stops);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .via-black\/50 {
+      --tw-gradient-via: color-mix(in oklab, var(--color-black) 50%, transparent);
     }
   }
 
@@ -2896,10 +2897,6 @@
     padding-top: 30px;
   }
 
-  .pt-\[clamp\(16px\,2vh\,20px\)\] {
-    padding-top: clamp(16px, 2vh, 20px);
-  }
-
   .pr-8 {
     padding-right: calc(var(--spacing) * 8);
   }
@@ -2962,10 +2959,6 @@
 
   .pb-\[24px\] {
     padding-bottom: 24px;
-  }
-
-  .pb-\[clamp\(20px\,3vh\,24px\)\] {
-    padding-bottom: clamp(20px, 3vh, 24px);
   }
 
   .pl-2 {
