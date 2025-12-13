@@ -69,6 +69,9 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
   const [threads, setThreads] = useState<ConversationThread[]>([]);
   const [currentThreadId, setCurrentThreadIdState] = useState<string | null>(null);
 
+  // AI Tab state
+  const [aiActiveTab, setAIActiveTab] = useState<'ai' | 'products' | 'favourite'>('ai');
+
   // Sync query data to local state
   useEffect(() => {
     if (queryData && !data) {
@@ -514,7 +517,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
           </SheetDescription>
           <div className="flex flex-col h-full relative">
             {/* Header */}
-            <div className="h-[46px] shrink-0 relative z-20 border-b border-[#ebebeb]">
+            <div className="h-[46px] shrink-0 relative z-20 border-b border-[#ebebeb] bg-[#FAF9F5]">
               <div className="flex h-[46px] items-center justify-between px-[12px]">
                 {/* Menu icon */}
                 <button onClick={() => setThreadsOpen(true)} className="shrink-0 size-[24px]" aria-label="Menu">
@@ -525,11 +528,56 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
                   </svg>
                 </button>
                 
-                {/* Title */}
-                <div className="flex-1 text-center">
-                  <p className="leading-[20px] text-[#3d3929] text-sm">
-                    AI Agent
-                  </p>
+                {/* Tabs */}
+                <div className="flex-1 flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => setAIActiveTab('ai')}
+                    className={`px-0 pb-[6px] border-b-[1.4px] transition-colors ${
+                      aiActiveTab === 'ai' 
+                        ? 'border-[#3D3D3A] text-[#3D3D3A]' 
+                        : 'border-transparent text-[#7A776C]'
+                    }`}
+                    style={{ 
+                      fontFamily: 'Arial', 
+                      fontSize: '16px', 
+                      lineHeight: '23px',
+                      fontWeight: 400,
+                    }}
+                  >
+                    AI Assistant
+                  </button>
+                  <button
+                    onClick={() => setAIActiveTab('products')}
+                    className={`px-0 pb-[6px] border-b-[1.4px] transition-colors ${
+                      aiActiveTab === 'products' 
+                        ? 'border-[#3D3D3A] text-[#3D3D3A]' 
+                        : 'border-transparent text-[#7A776C]'
+                    }`}
+                    style={{ 
+                      fontFamily: 'Arial', 
+                      fontSize: '16px', 
+                      lineHeight: '23px',
+                      fontWeight: 400,
+                    }}
+                  >
+                    Products
+                  </button>
+                  <button
+                    onClick={() => setAIActiveTab('favourite')}
+                    className={`px-0 pb-[6px] border-b-[1.4px] transition-colors ${
+                      aiActiveTab === 'favourite' 
+                        ? 'border-[#3D3D3A] text-[#3D3D3A]' 
+                        : 'border-transparent text-[#7A776C]'
+                    }`}
+                    style={{ 
+                      fontFamily: 'Arial', 
+                      fontSize: '16px', 
+                      lineHeight: '23px',
+                      fontWeight: 400,
+                    }}
+                  >
+                    Favourite
+                  </button>
                 </div>
                 
                 {/* Close button */}
@@ -560,6 +608,8 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
                 onSelectThread={handleSelectThread}
                 onNewThread={handleNewThread}
                 onDeleteThread={handleDeleteThread}
+                activeTab={aiActiveTab}
+                onTabChange={setAIActiveTab}
               />
             ) : (
               <AIAssistant
@@ -573,6 +623,8 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
                 onSelectThread={handleSelectThread}
                 onNewThread={handleNewThread}
                 onDeleteThread={handleDeleteThread}
+                activeTab={aiActiveTab}
+                onTabChange={setAIActiveTab}
               />
             )}
 

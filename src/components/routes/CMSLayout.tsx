@@ -12,6 +12,7 @@ export function CMSLayout() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [userId, setUserId] = useState<string | undefined>();
   
   // Use the hook to fetch data
   const { data } = useBusinessCard(userCode);
@@ -31,6 +32,7 @@ export function CMSLayout() {
         navigate(`/${userCode}/auth`);
       } else {
         setIsAuthorized(true);
+        setUserId(session.user.id);
       }
     };
 
@@ -87,6 +89,7 @@ export function CMSLayout() {
           onNavigateToCMS={handleNavigateToCMS}
           cmsSection={null}
           onOpenAIAssistant={handleOpenAIAssistant}
+          userId={userId}
         />
       </div>
     );
@@ -118,6 +121,7 @@ export function CMSLayout() {
         onNavigateToCMS={handleNavigateToCMS}
         cmsSection={section}
         onOpenAIAssistant={handleOpenAIAssistant}
+        userId={userId}
       />
     </div>
   );

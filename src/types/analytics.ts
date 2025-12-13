@@ -182,7 +182,18 @@ export const CLICK_TARGET_LABELS: Record<string, string> = {
 };
 
 export function getClickTargetLabel(target: string): string {
-  return CLICK_TARGET_LABELS[target] || target;
+  // Check predefined labels first
+  if (CLICK_TARGET_LABELS[target]) {
+    return CLICK_TARGET_LABELS[target];
+  }
+  
+  // Handle portfolio item format: portfolio.item.{title}
+  if (target.startsWith('portfolio.item.')) {
+    return target.substring('portfolio.item.'.length);
+  }
+  
+  // Fallback to raw target
+  return target;
 }
 
 // Helper to categorize click targets

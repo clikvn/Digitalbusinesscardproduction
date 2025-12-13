@@ -1,6 +1,8 @@
 import React from "react";
 import { Home, Mail, User, Briefcase, Sparkles, LogOut, LogIn, CreditCard, Share2, BarChart3 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "../ui/sheet";
+import { useUserPlan } from "../../hooks/useUserPlan";
+import { Badge } from "../ui/badge";
 
 export function NavigationMenu({ 
   isOpen, 
@@ -16,7 +18,8 @@ export function NavigationMenu({
   onLogout,
   onNavigateToCMS,
   cmsSection,
-  onOpenAIAssistant
+  onOpenAIAssistant,
+  userId
 }: { 
   isOpen: boolean;
   onClose: () => void;
@@ -32,10 +35,25 @@ export function NavigationMenu({
   onNavigateToCMS?: (section: string) => void;
   cmsSection?: string | null;
   onOpenAIAssistant?: () => void;
+  userId?: string;
 }) {
+  const { data: userPlan } = useUserPlan(userId);
+  
   const handleNavigation = (navigateFn: () => void) => {
     navigateFn();
     onClose();
+  };
+
+  const getPlanBadgeVariant = (planName?: string) => {
+    switch (planName) {
+      case 'admin':
+        return 'default'; // Dark badge
+      case 'premium':
+        return 'secondary'; // Gray badge
+      case 'free':
+      default:
+        return 'outline'; // Outline badge
+    }
   };
 
   return (
@@ -45,6 +63,15 @@ export function NavigationMenu({
         <SheetDescription className="sr-only">
           Navigate to different sections of the app
         </SheetDescription>
+        
+        {/* Plan Badge - positioned at top left, same row as X button */}
+        {isAuthenticated && userPlan && (
+          <div className="absolute top-4 left-4">
+            <Badge variant={getPlanBadgeVariant(userPlan.plan_name)} className="text-xs">
+              {userPlan.display_name}
+            </Badge>
+          </div>
+        )}
         
         <div className="flex flex-col px-4 mt-12 gap-1 overflow-y-auto flex-1 pb-6">
           {/* Top Section - Main Navigation */}

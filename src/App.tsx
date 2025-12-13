@@ -1,15 +1,14 @@
-// Load polyfills FIRST before any other imports
-// This fixes iOS 16.0-16.3 CSSStyleSheet constructor error
-import "../polyfills/constructable-stylesheets.js";
-
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
+import { HelmetProvider } from "react-helmet-async";
 import { queryClient } from "./lib/query-client";
 import { PublicLayout } from "./components/routes/PublicLayout";
 import { CMSLayout } from "./components/routes/CMSLayout";
 import { AuthScreen } from "./components/screens/AuthScreen";
 import { ensureDefaultUserExists } from "./utils/storage";
+import { Toaster } from "./components/ui/sonner";
 
 function AppContent() {
   // Calculate and set actual viewport height (accounting for mobile browser chrome)
@@ -96,10 +95,42 @@ function AppContent() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <Helmet>
+        {/* Page Title and Description */}
+        <title>CLIK DIGITAL BUSINESS CARD</title>
+        <meta name="description" content="Digital business card platform by CLIK JSC" />
+        <meta name="author" content="CLIK JSC" />
+        
+        {/* Open Graph / Facebook Meta Tags (for sharing on social media) */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="CLIK DIGITAL BUSINESS CARD" />
+        <meta property="og:description" content="Digital business card platform by CLIK JSC" />
+        <meta property="og:site_name" content="CLIK" />
+        
+        {/* Twitter Card Meta Tags (for sharing on Twitter/X) */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="CLIK DIGITAL BUSINESS CARD" />
+        <meta name="twitter:description" content="Digital business card platform by CLIK JSC" />
+        
+        {/* Essential viewport meta tag for mobile compatibility */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        
+        {/* Additional mobile optimization meta tags */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        
+        {/* Prevent auto-zoom on input focus (iOS Safari) */}
+        <meta name="format-detection" content="telephone=no" />
+      </Helmet>
+      
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AppContent />
+          <Toaster />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }

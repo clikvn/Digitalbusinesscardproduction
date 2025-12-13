@@ -37,6 +37,11 @@ export function PortfolioItemDisplay({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const totalDuration = 45; // Mock duration in seconds
   
+  // Track portfolio item view on mount
+  useEffect(() => {
+    trackClickEvent(`portfolio.item.${title}`);
+  }, [title, trackClickEvent]);
+  
   // Touch handling for swipe navigation
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -335,7 +340,7 @@ export function PortfolioItemDisplay({
           className="fixed inset-0 z-[99999] bg-black flex flex-col"
           style={{ 
             width: '100vw',
-            height: '100vh', // Changed from 100dvh for iOS 16 compatibility
+            height: '100dvh',
             position: 'fixed',
             top: 0,
             left: 0,
@@ -359,7 +364,7 @@ export function PortfolioItemDisplay({
             className="w-full h-full flex items-center justify-center"
             style={{ 
               width: '100vw',
-              height: '100vh' // Changed from 100dvh for iOS 16 compatibility
+              height: '100dvh'
             }}
           >
             <video

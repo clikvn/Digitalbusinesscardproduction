@@ -44,6 +44,7 @@ export function AvatarImagePositioner({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if ((e.target as HTMLElement).closest('.controls-area')) return;
+    e.preventDefault(); // Prevent default touch behavior
     const touch = e.touches[0];
     setIsDragging(true);
     setDragStart({
@@ -87,6 +88,7 @@ export function AvatarImagePositioner({
   return (
     <div 
       className="fixed inset-0 z-50 bg-black"
+      style={{ touchAction: 'none' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

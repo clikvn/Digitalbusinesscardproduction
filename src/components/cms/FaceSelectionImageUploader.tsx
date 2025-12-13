@@ -792,7 +792,7 @@ export function FaceSelectionImageUploader({
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
                 className="max-w-full touch-none"
-                style={{ maxHeight: '600px', cursor: 'crosshair' }}
+                style={{ maxHeight: '600px', cursor: 'crosshair', touchAction: 'none' }}
               />
             </div>
           </div>

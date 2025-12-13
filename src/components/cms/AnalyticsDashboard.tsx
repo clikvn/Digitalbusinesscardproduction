@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Eye, MousePointerClick, Users, Share2, Home, User, Briefcase, Mail, Phone, Calendar, MapPin, Link2, MessageCircle, ChevronDown, Search, X, ExternalLink, Bookmark } from 'lucide-react';
+import { Eye, MousePointerClick, Users, Share2, Home, User, Briefcase, Mail, Phone, Calendar, MapPin, Link2, MessageCircle, ChevronDown, Search, X, ExternalLink, Bookmark, Play, Image, Maximize2 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -49,14 +49,32 @@ function PageStatsBlock({
   title,
   pageViews,
   elements,
-  showElements = true
+  showElements = true,
+  interactionMetrics
 }: {
   icon: any;
   title: string;
   pageViews: number;
   elements: { label: string; clicks: number }[];
   showElements?: boolean;
+  interactionMetrics?: Array<{ label: string; value: number }>;
 }) {
+  // Merge interaction metrics into elements list
+  const allElements = useMemo(() => {
+    if (!interactionMetrics || interactionMetrics.length === 0) {
+      return elements;
+    }
+    
+    // Convert interaction metrics to element format
+    const metricElements = interactionMetrics.map(metric => ({
+      label: metric.label,
+      clicks: metric.value
+    }));
+    
+    // Prepend interaction metrics to the beginning
+    return [...metricElements, ...elements];
+  }, [elements, interactionMetrics]);
+
   return (
     <Card className="p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -65,12 +83,16 @@ function PageStatsBlock({
         <span className="ml-auto text-sm text-muted-foreground">{pageViews} views</span>
       </div>
       
-      {showElements && elements.length > 0 ? (
+      {showElements && allElements.length > 0 ? (
         <div className="space-y-2">
-          {elements.map((element, index) => {
+          {allElements.map((element, index) => {
             // Get icon based on element label - improved matching
             const getElementIcon = (label: string) => {
               const lower = label.toLowerCase();
+              // Portfolio interaction metrics
+              if (lower === 'play video') return Play;
+              if (lower === 'open image') return Image;
+              if (lower === 'open virtual tour') return Maximize2;
               // Phone
               if (lower === 'phone' || lower.includes('call')) return Phone;
               // Email
@@ -116,7 +138,7 @@ function PageStatsBlock({
             );
           })}
         </div>
-      ) : showElements && elements.length === 0 ? (
+      ) : showElements && allElements.length === 0 ? (
         <p className="text-sm text-muted-foreground py-2">No interactions yet</p>
       ) : null}
     </Card>
@@ -197,6 +219,37 @@ export function AnalyticsDashboard() {
     // Unique people = unique individuals (90-day localStorage persistence via visitor_id)
     // This counts unique people, not repeat visits
     return dashboard.overallMetrics.uniquePeople || dashboard.overallMetrics.uniqueVisitors || 0;
+  }, [dashboard]);
+
+  // Calculate portfolio interaction metrics (video play, image open, virtual tour open)
+  const portfolioInteractionMetrics = useMemo(() => {
+    if (!dashboard) return { videoPlay: 0, imageOpen: 0, virtualTourOpen: 0 };
+    
+    const metrics = { videoPlay: 0, imageOpen: 0, virtualTourOpen: 0 };
+    
+    // Find portfolio page data
+    const portfolioPage = dashboard.pageBreakdown.find(p => p.screenId === 'portfolio');
+    if (portfolioPage && portfolioPage.topElements) {
+      // Extract videoPlay, imageOpen, and virtualTourOpen counts
+      portfolioPage.topElements.forEach(el => {
+        if (el && el.label) {
+          const lower = el.label.toLowerCase();
+          // Match against the exact labels from CLICK_TARGET_LABELS
+          // Use exact match to prevent false positives from portfolio item titles
+          if (lower === 'play video') {
+            metrics.videoPlay += el.count || 0;
+          }
+          else if (lower === 'open image') {
+            metrics.imageOpen += el.count || 0;
+          }
+          else if (lower === 'open virtual tour') {
+            metrics.virtualTourOpen += el.count || 0;
+          }
+        }
+      });
+    }
+    
+    return metrics;
   }, [dashboard]);
 
   // Get all available elements for each screen from business card data
@@ -294,10 +347,6 @@ export function AnalyticsDashboard() {
           type: 'portfolio-item' 
         });
       });
-    }
-    // Add navigation if there are multiple items
-    if (profile.portfolio && profile.portfolio.length > 1) {
-      elements.portfolio.push({ label: 'Next/Previous', type: 'navigation' });
     }
 
     return elements;
@@ -399,15 +448,15 @@ export function AnalyticsDashboard() {
 
       {/* Filter Bar */}
       <Card className="p-4">
-        <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 1fr auto' }}>
+        <div className="grid gap-3" style={{ gridTemplateColumns: selectedContactName ? '1fr auto 1fr' : '1fr 1fr auto' }}>
           {/* Time Period Filter */}
-          <div>
+          <div className="min-w-0">
             <label className="text-xs text-muted-foreground mb-1.5 block">Time Period</label>
             <Select 
               value={filters.period} 
               onValueChange={(value: AnalyticsPeriod) => setFilters(prev => ({ ...prev, period: value }))}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" style={{ height: '40px' }}>
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
               <SelectContent>
@@ -422,17 +471,21 @@ export function AnalyticsDashboard() {
           </div>
 
           {/* Group Filter */}
-          <div>
+          <div className="min-w-0">
             <label className="text-xs text-muted-foreground mb-1.5 block">Group</label>
             {selectedContactGroup ? (
-              // Show contact's group (disabled when contact is selected)
-              <div className="flex items-center gap-2 h-10 px-3 py-2 border rounded-md bg-muted/50 min-w-[140px] opacity-60 cursor-not-allowed" title={`${selectedContactName} belongs to ${selectedContactGroup.label}`}>
+              // Show icon-only button when contact is selected (smaller width)
+              <button
+                disabled
+                className="flex items-center justify-center w-10 border border-input rounded-md bg-muted/50 opacity-60 cursor-not-allowed"
+                style={{ height: '40px' }}
+                title={`${selectedContactName} belongs to ${selectedContactGroup.label}`}
+              >
                 {(() => {
                   const IconComponent = (LucideIcons as any)[selectedContactGroup.icon];
-                  return IconComponent ? <IconComponent className="w-4 h-4 flex-shrink-0" /> : null;
+                  return IconComponent ? <IconComponent className="w-4 h-4" /> : null;
                 })()}
-                <span className="text-sm flex-1 truncate">{selectedContactGroup.label}</span>
-              </div>
+              </button>
             ) : (
               // Normal group filter (enabled when no contact selected)
               <Select 
@@ -442,7 +495,7 @@ export function AnalyticsDashboard() {
                   groupId: value === 'all' ? undefined : value 
                 }))}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" style={{ height: '40px' }}>
                   <SelectValue placeholder="All groups" />
                 </SelectTrigger>
                 <SelectContent>
@@ -464,11 +517,11 @@ export function AnalyticsDashboard() {
           </div>
 
           {/* Contact Search Button */}
-          <div>
+          <div className="min-w-0">
             <label className="text-xs text-muted-foreground mb-1.5 block">Contact</label>
             {selectedContactName ? (
-              <div className="flex items-center gap-2 h-10 px-3 py-2 border rounded-md bg-card min-w-[200px]">
-                <span className="text-sm flex-1 truncate">{selectedContactName}</span>
+              <div className="flex items-center gap-2 px-3 border border-input rounded-md bg-background" style={{ height: '40px' }}>
+                <span className="text-sm flex-1 truncate min-w-0">{selectedContactName}</span>
                 <button
                   onClick={handleClearContact}
                   className="flex-shrink-0 text-muted-foreground hover:text-foreground"
@@ -479,7 +532,8 @@ export function AnalyticsDashboard() {
             ) : (
               <Button
                 variant="outline"
-                className="w-10 h-9 p-0 justify-center"
+                className="w-10 p-0 justify-center"
+                style={{ height: '40px' }}
                 onClick={() => setIsContactSearchOpen(true)}
               >
                 <Search className="w-4 h-4" />
@@ -604,6 +658,20 @@ export function AnalyticsDashboard() {
           title="Portfolio Screen"
           pageViews={portfolioStats.views}
           elements={portfolioStats.elements}
+          interactionMetrics={[
+            {
+              label: 'Play Video',
+              value: portfolioInteractionMetrics.videoPlay,
+            },
+            {
+              label: 'Open Image',
+              value: portfolioInteractionMetrics.imageOpen,
+            },
+            {
+              label: 'Open Virtual Tour',
+              value: portfolioInteractionMetrics.virtualTourOpen,
+            },
+          ]}
         />
       </div>
 

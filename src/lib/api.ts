@@ -1002,6 +1002,8 @@ export const api = {
      * The database trigger automatically creates user code and business card
      */
     signup: async (email: string, password: string, name: string) => {
+      console.log('[signup] Starting signup process...');
+      
       // Create user with Supabase auth
       const { data: signupData, error: signupError } = await supabase.auth.signUp({
         email,
@@ -1013,24 +1015,34 @@ export const api = {
         },
       });
 
+      console.log('[signup] signUp response:', { data: signupData, error: signupError });
+
       if (signupError) {
+        console.error('[signup] Signup error:', signupError);
         throw signupError;
       }
 
       if (!signupData.user) {
+        console.error('[signup] No user returned from signUp');
         throw new Error('Signup failed - no user returned');
       }
 
       const userId = signupData.user.id;
+      console.log('[signup] User created successfully:', userId);
+      console.log('[signup] Calling initialize_user_data...');
 
       // Initialize user data via RPC function (no trigger)
       const { data: initData, error: initError } = await supabase
-        .rpc('initialize_user_data');
+        .rpc('initialize_user_data', { p_user_id: userId });
+
+      console.log('[signup] initialize_user_data response:', { data: initData, error: initError });
 
       if (initError || !initData?.success) {
-        console.error('Failed to initialize user data:', initError || initData);
+        console.error('[signup] Failed to initialize user data:', initError || initData);
         throw new Error('Account created but setup incomplete. Please contact support.');
       }
+
+      console.log('[signup] Signup complete! User code:', initData.user_code);
 
       return { 
         user: signupData.user, 
@@ -1081,5 +1093,96 @@ export const api = {
 
       return { url: publicUrl };
     },
+  },
+
+  // ============================================
+  // PORTRAIT TEMPLATES API
+  // ============================================
+
+  templates: {
+    /**
+     * Get portrait style templates from external API
+     */
+    get: async (userCode: string) => {
+      try {
+        const response = await fetch('https://portrait-generator-568865197474.europe-west1.run.app/templates');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch templates: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return { templates: data.templates || [] };
+      } catch (error: any) {
+        console.error('Error fetching templates:', error);
+        throw new Error(`Failed to load templates: ${error.message}`);
+      }
+    },
+  },
+
+  // ============================================
+  // QUOTA API
+  // ============================================
+
+  quota: {
+    /**
+     * Check if user can use a feature based on quota limits
+     */
+    check: async (userId: string, featureName: string) => {
+      try {
+        const { data, error } = await supabase.rpc('check_user_quota', {
+          p_user_id: userId,
+          p_feature_name: featureName
+        });
+
+        if (error) {
+          console.error('Quota check error:', error);
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          throw new Error('No quota data returned');
+        }
+
+        const quotaData = data[0];
+        return {
+          allowed: quotaData.can_use,
+          planName: quotaData.plan_name,
+          hourlyUsed: quotaData.hourly_used,
+          hourlyLimit: quotaData.hourly_limit,
+          monthlyUsed: quotaData.monthly_used,
+          monthlyLimit: quotaData.monthly_limit,
+          hourlyRemaining: quotaData.hourly_remaining,
+          monthlyRemaining: quotaData.monthly_remaining,
+          hourlyResetAt: quotaData.hourly_reset_at,
+          monthlyResetAt: quotaData.monthly_reset_at
+        };
+      } catch (error: any) {
+        console.error('Error checking quota:', error);
+        throw new Error(`Failed to check quota: ${error.message}`);
+      }
+    },
+
+    /**
+     * Log feature usage after successful generation
+     */
+    logUsage: async (userId: string, featureName: string) => {
+      try {
+        const { error } = await supabase
+          .from('usage_logs')
+          .insert({
+            user_id: userId,
+            feature_name: featureName
+          });
+
+        if (error) {
+          console.error('Usage logging error:', error);
+          throw error;
+        }
+      } catch (error: any) {
+        console.error('Error logging usage:', error);
+        // Don't throw - usage logging failure shouldn't block the feature
+      }
+    }
   },
 };

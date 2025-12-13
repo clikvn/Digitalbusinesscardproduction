@@ -32,6 +32,7 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<string | undefined>();
   
   // AI Agent state
   const [aiAgentOpen, setAIAgentOpen] = useState(false);
@@ -127,12 +128,14 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session && isOwner);
+      setUserId(session?.user?.id);
     };
     
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session && isOwner);
+      setUserId(session?.user?.id);
     });
 
     return () => subscription.unsubscribe();
@@ -263,6 +266,7 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
             if ((window as any).__openAIAssistant) (window as any).__openAIAssistant();
           }, 500);
         }}
+        userId={userId}
       />
 
       {/* AI Agent Sheet (Only for Contact screen mostly, but kept here for completeness) */}
