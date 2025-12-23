@@ -17,6 +17,7 @@
         'next-themes@0.4.6': 'next-themes',
         'lucide-react@0.487.0': 'lucide-react',
         'input-otp@1.4.2': 'input-otp',
+        // Asset aliases - maintain Figma Make compatibility for existing imports
         'figma:asset/d0400c167c2b5599f72e19a01b70f51fb477fb65.png': path.resolve(__dirname, './src/assets/d0400c167c2b5599f72e19a01b70f51fb477fb65.png'),
         'figma:asset/8e2d5bcb44df5cb0b3eb50296d53dd2bead6e45d.png': path.resolve(__dirname, './src/assets/8e2d5bcb44df5cb0b3eb50296d53dd2bead6e45d.png'),
         'figma:asset/513dd7bc494865ca5a45fb92277a8d681c3397ff.png': path.resolve(__dirname, './src/assets/513dd7bc494865ca5a45fb92277a8d681c3397ff.png'),
@@ -25,6 +26,7 @@
         'figma:asset/25d1a77020008b9e3f08babd1f67f01cdb8f89d6.png': path.resolve(__dirname, './src/assets/25d1a77020008b9e3f08babd1f67f01cdb8f89d6.png'),
         'figma:asset/1635d94ad705220ac6b8f6ff8c00a0762bd530f5.png': path.resolve(__dirname, './src/assets/1635d94ad705220ac6b8f6ff8c00a0762bd530f5.png'),
         'figma:asset/0a66fc9b99f063b4c5fc622d0ab5d7d243f6ed44.png': path.resolve(__dirname, './src/assets/0a66fc9b99f063b4c5fc622d0ab5d7d243f6ed44.png'),
+        '@assets': path.resolve(__dirname, './src/assets'),
         'embla-carousel-react@8.6.0': 'embla-carousel-react',
         'cmdk@1.1.1': 'cmdk',
         'class-variance-authority@0.7.1': 'class-variance-authority',

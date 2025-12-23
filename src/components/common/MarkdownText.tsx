@@ -24,9 +24,9 @@ export function MarkdownText({ children, className = '' }: MarkdownTextProps) {
   }
 
   return (
-    <ReactMarkdown
-      className={className}
-      components={{
+    <div className={className}>
+      <ReactMarkdown
+        components={{
         // Headings
         h1: ({ children }) => (
           <h1 className="text-xl font-semibold text-[#535146] mb-2 mt-3 first:mt-0">
@@ -114,8 +114,9 @@ export function MarkdownText({ children, className = '' }: MarkdownTextProps) {
         // Line break
         br: () => <br />,
       }}
-    >
-      {children}
-    </ReactMarkdown>
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 }
