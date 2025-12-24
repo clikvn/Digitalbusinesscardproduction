@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { HelmetProvider } from "react-helmet-async";
@@ -9,8 +9,24 @@ import { CMSLayout } from "./components/routes/CMSLayout";
 import { AuthScreen } from "./components/screens/AuthScreen";
 import { ensureDefaultUserExists } from "./utils/storage";
 import { Toaster } from "./components/ui/sonner";
+import { useChatWidget } from "./hooks/useChatWidget";
+import { parseProfileUrl } from "./utils/user-code";
 
 function AppContent() {
+  const location = useLocation();
+  
+  // Extract user code from current URL
+  const { userCode } = parseProfileUrl(location.pathname);
+  
+  // Initialize chat widget with user code as ownerId
+  useChatWidget({
+    serverUrl: 'https://agent-chat-widget-568865197474.europe-west1.run.app',
+    tenantId: 'business-card-only',
+    ownerId: userCode || undefined, // Pass user code as ownerId
+    sidebar: true,
+    defaultOpen: false,
+    enabled: true,
+  });
   // Calculate and set actual viewport height (accounting for mobile browser chrome)
   useEffect(() => {
     const setVH = () => {

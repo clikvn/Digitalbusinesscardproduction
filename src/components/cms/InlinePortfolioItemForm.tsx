@@ -6,7 +6,6 @@ import { Textarea } from "../ui/textarea";
 import { X, Check } from "lucide-react";
 import { PortfolioItem, PortfolioItemType as ItemType } from "../../types/business-card";
 import { ImageUploader } from "./ImageUploader";
-import { AIAssistant } from "./AIAssistant";
 
 interface InlinePortfolioItemFormProps {
   item: PortfolioItem;

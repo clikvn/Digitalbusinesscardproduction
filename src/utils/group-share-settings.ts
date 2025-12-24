@@ -26,7 +26,6 @@ export const ALL_SHAREABLE_FIELDS = [
   'contact.phone',
   'contact.email',
   'contact.address',
-  'contact.aiAgent',
   
   // Social Messaging
   'socialMessaging.zalo',
@@ -66,7 +65,6 @@ export const FIELD_LABELS: Record<string, string> = {
   'contact.phone': 'Phone Number',
   'contact.email': 'Email Address',
   'contact.address': 'Physical Address',
-  'contact.aiAgent': 'AI Agent Button',
   
   'socialMessaging.zalo': 'Zalo',
   'socialMessaging.messenger': 'Messenger',

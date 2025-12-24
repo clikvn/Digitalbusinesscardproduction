@@ -35,6 +35,9 @@ export function AIButton({ onClick }: { onClick?: () => void }) {
         trackClickEvent('aiAgent');
         if (onClick) {
           onClick();
+        } else if ((window as any).__openAIAssistant) {
+          // Trigger external AI script if available
+          (window as any).__openAIAssistant();
         } else {
           toast.info("AI Agent feature coming soon");
         }

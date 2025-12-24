@@ -61,11 +61,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DEPLOYMENT.md with comprehensive deployment guide
 - Environment variable support for Supabase credentials (VITE_SUPABASE_PROJECT_ID, VITE_SUPABASE_ANON_KEY)
 - Docker build and run scripts in package.json
+- External AI script integration support (window.__openAIAssistant hook)
+- Chat widget integration via `useChatWidget` React hook
+- Chat widget configured with hardcoded server URL and tenant ID (business-card-only)
 
 ### Changed
 - Updated supabase-client.ts to use environment variables (preferred) with fallback to info file for local development
 - Updated application name from 'figma-make-interior-designer' to 'digital-business-card-production'
 - Updated vite.config.ts to maintain Figma Make asset aliases for backward compatibility while adding @assets alias
+- AI Agent buttons now trigger external script via `window.__openAIAssistant()` instead of internal chat component
+
+### Removed
+- AI Assistant chat component (AIAssistant.tsx)
+- Conversation Threads component (ConversationThreads.tsx)
+- Conversation storage utility (conversation-storage.ts)
+- All AI chat UI and state management from PublicLayout, CMSLayout, CMSDashboard, BusinessCardStudio
+- AI chat integration from PortfolioItemEditor and InlinePortfolioItemForm
 
 ### Fixed
 - Fixed Supabase client initialization error: Replaced CommonJS `require()` with ES module `import` syntax in `supabase-client.ts` to work with Vite's ES module system

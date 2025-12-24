@@ -6,7 +6,6 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { ImageUploader } from "./ImageUploader";
-import { AIAssistant } from "./AIAssistant";
 import { PortfolioItem, PortfolioCategory } from "../../types/business-card";
 
 interface PortfolioItemEditorProps {
@@ -142,12 +141,6 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
         onChange={(value) => handleChange('images', value)}
         description="Upload one or more images for this portfolio item"
         aspectRatio="16/9"
-      />
-
-      <AIAssistant
-        fieldLabel="Description"
-        currentValue={currentItem.description}
-        onApply={(value) => handleChange('description', value)}
       />
 
       <div className="flex gap-2 pt-4 border-t">

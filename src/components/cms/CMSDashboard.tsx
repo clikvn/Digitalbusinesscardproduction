@@ -22,16 +22,6 @@ import { copyWithToast } from "../../utils/clipboard-utils";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { CMSNavigationBar } from "./CMSNavigationBar";
-import { AIAssistant } from "./AIAssistant";
-import { ConversationThread } from "./ConversationThreads";
-import { 
-  getAllThreads, 
-  createThread, 
-  deleteThread, 
-  getThreadsSummary, 
-  getCurrentThreadId,
-  setCurrentThreadId 
-} from "../../utils/conversation-storage";
 import { parseProfileUrl } from "../../utils/user-code";
 import { useBusinessCard } from "../../hooks/useBusinessCard";
 
@@ -64,13 +54,6 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
   const [activeTab, setActiveTab] = useState(activeSection || "home");
   const [activeField, setActiveField] = useState<ActiveField | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileAIOpen, setMobileAIOpen] = useState(false);
-  const [threadsOpen, setThreadsOpen] = useState(false);
-  const [threads, setThreads] = useState<ConversationThread[]>([]);
-  const [currentThreadId, setCurrentThreadIdState] = useState<string | null>(null);
-
-  // AI Tab state
-  const [aiActiveTab, setAIActiveTab] = useState<'ai' | 'products' | 'favourite'>('ai');
 
   // Sync query data to local state
   useEffect(() => {
@@ -81,56 +64,6 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
     }
   }, [queryData]);
 
-  // Load threads on mount
-  useEffect(() => {
-    loadThreads();
-    const savedThreadId = getCurrentThreadId();
-    setCurrentThreadIdState(savedThreadId);
-  }, []);
-
-  const loadThreads = () => {
-    const threadsSummary = getThreadsSummary();
-    setThreads(threadsSummary);
-  };
-
-  const handleNewThread = () => {
-    const newThread = createThread();
-    setCurrentThreadIdState(newThread.id);
-    loadThreads();
-    setThreadsOpen(false);
-    toast.success("New conversation started");
-  };
-
-  const handleSelectThread = (threadId: string) => {
-    setCurrentThreadIdState(threadId);
-    setCurrentThreadId(threadId);
-    setThreadsOpen(false);
-    toast.success("Conversation loaded");
-  };
-
-  const handleDeleteThread = (threadId: string) => {
-    deleteThread(threadId);
-    if (currentThreadId === threadId) {
-      setCurrentThreadIdState(null);
-    }
-    loadThreads();
-    toast.success("Conversation deleted");
-  };
-
-  const handleThreadUpdate = () => {
-    loadThreads();
-  };
-
-  const handleApplySuggestion = async (value: string) => {
-    // Copy to clipboard when applying suggestion in general chat
-    await copyWithToast(
-      value, 
-      toast, 
-      "Copied to clipboard! You can paste it into any field.",
-      "Unable to copy to clipboard. Please copy manually."
-    );
-  };
-
   // Update active tab when activeSection prop changes
   useEffect(() => {
     if (activeSection) {
@@ -138,11 +71,15 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
     }
   }, [activeSection]);
 
-  // Expose AI Agent opening function to parent
+  // Expose AI Agent opening function to parent (for external script integration)
   useEffect(() => {
     if (onOpenAIAssistant) {
-      // This effect allows parent to trigger opening the AI Agent
-      window.__openAIAssistant = () => setMobileAIOpen(true);
+      // This effect allows parent to trigger opening the AI Agent via external script
+      window.__openAIAssistant = () => {
+        if (onOpenAIAssistant) {
+          onOpenAIAssistant();
+        }
+      };
     }
     return () => {
       delete window.__openAIAssistant;
@@ -271,9 +208,9 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
 
   const handleFieldFocus = (field: ActiveField) => {
     setActiveField(field);
-    // Open mobile AI panel when field is focused with initial message
-    if (field.initialMessage) {
-      setMobileAIOpen(true);
+    // Trigger external AI script if available when field is focused
+    if (field.initialMessage && (window as any).__openAIAssistant) {
+      (window as any).__openAIAssistant();
     }
   };
 
@@ -299,7 +236,13 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               profileImage={data.personal.profileImage}
               profileName={data.personal.name}
               onMenuClick={onMenuClick || (() => setMobileMenuOpen(true))}
-              onAIClick={() => setMobileAIOpen(true)}
+              onAIClick={() => {
+                if (onOpenAIAssistant) {
+                  onOpenAIAssistant();
+                } else if ((window as any).__openAIAssistant) {
+                  (window as any).__openAIAssistant();
+                }
+              }}
               onNavigateToStudio={onNavigateToStudio}
               currentPage="section"
             />
@@ -465,7 +408,11 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
             </button>
             <button
               onClick={() => {
-                setMobileAIOpen(true);
+                if (onOpenAIAssistant) {
+                  onOpenAIAssistant();
+                } else if ((window as any).__openAIAssistant) {
+                  (window as any).__openAIAssistant();
+                }
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left text-[#71717a] hover:bg-[#f4f4f5]"
@@ -476,7 +423,11 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
             <Separator className="my-2" />
             <button
               onClick={() => {
-                setMobileAIOpen(true);
+                if (onOpenAIAssistant) {
+                  onOpenAIAssistant();
+                } else if ((window as any).__openAIAssistant) {
+                  (window as any).__openAIAssistant();
+                }
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#71717a] hover:bg-[#f4f4f5] transition-colors text-left"
@@ -508,237 +459,6 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
         </SheetContent>
       </Sheet>
 
-      {/* AI Agent App */}
-      <Sheet open={mobileAIOpen} onOpenChange={setMobileAIOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[390px] p-0 bg-[#f5f4ee] [&>button]:hidden">
-          <SheetTitle className="sr-only">AI Agent</SheetTitle>
-          <SheetDescription className="sr-only">
-            Get AI assistance for writing and improving your business card content
-          </SheetDescription>
-          <div className="flex flex-col h-full relative">
-            {/* Header */}
-            <div className="h-[46px] shrink-0 relative z-20 border-b border-[#ebebeb] bg-[#FAF9F5]">
-              <div className="flex h-[46px] items-center justify-between px-[12px]">
-                {/* Menu icon */}
-                <button onClick={() => setThreadsOpen(true)} className="shrink-0 size-[24px]" aria-label="Menu">
-                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
-                    <path d="M4 12H20" stroke="#3D3D3A" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                    <path d="M4 18H20" stroke="#3D3D3A" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                    <path d="M4 6H20" stroke="#3D3D3A" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                  </svg>
-                </button>
-                
-                {/* Tabs */}
-                <div className="flex-1 flex items-center justify-center gap-4">
-                  <button
-                    onClick={() => setAIActiveTab('ai')}
-                    className={`px-0 pb-[6px] border-b-[1.4px] transition-colors ${
-                      aiActiveTab === 'ai' 
-                        ? 'border-[#3D3D3A] text-[#3D3D3A]' 
-                        : 'border-transparent text-[#7A776C]'
-                    }`}
-                    style={{ 
-                      fontFamily: 'Arial', 
-                      fontSize: '16px', 
-                      lineHeight: '23px',
-                      fontWeight: 400,
-                    }}
-                  >
-                    AI Assistant
-                  </button>
-                  <button
-                    onClick={() => setAIActiveTab('products')}
-                    className={`px-0 pb-[6px] border-b-[1.4px] transition-colors ${
-                      aiActiveTab === 'products' 
-                        ? 'border-[#3D3D3A] text-[#3D3D3A]' 
-                        : 'border-transparent text-[#7A776C]'
-                    }`}
-                    style={{ 
-                      fontFamily: 'Arial', 
-                      fontSize: '16px', 
-                      lineHeight: '23px',
-                      fontWeight: 400,
-                    }}
-                  >
-                    Products
-                  </button>
-                  <button
-                    onClick={() => setAIActiveTab('favourite')}
-                    className={`px-0 pb-[6px] border-b-[1.4px] transition-colors ${
-                      aiActiveTab === 'favourite' 
-                        ? 'border-[#3D3D3A] text-[#3D3D3A]' 
-                        : 'border-transparent text-[#7A776C]'
-                    }`}
-                    style={{ 
-                      fontFamily: 'Arial', 
-                      fontSize: '16px', 
-                      lineHeight: '23px',
-                      fontWeight: 400,
-                    }}
-                  >
-                    Favourite
-                  </button>
-                </div>
-                
-                {/* Close button */}
-                <button 
-                  onClick={() => setMobileAIOpen(false)}
-                  className="shrink-0 size-[28px] rounded-[6px] flex items-center justify-center hover:bg-[#ebebeb]/30 transition-colors" 
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5 text-[#83827d]" strokeWidth={1.67} />
-                </button>
-              </div>
-            </div>
-
-            {/* Content */}
-            {activeField ? (
-              <AIAssistant
-                fieldLabel={activeField.label}
-                currentValue={activeField.value}
-                onApply={(value) => {
-                  activeField.onApply(value);
-                  setMobileAIOpen(false);
-                }}
-                initialMessage={activeField.initialMessage}
-                threadId={currentThreadId}
-                onThreadUpdate={handleThreadUpdate}
-                threads={threads}
-                currentThreadId={currentThreadId}
-                onSelectThread={handleSelectThread}
-                onNewThread={handleNewThread}
-                onDeleteThread={handleDeleteThread}
-                activeTab={aiActiveTab}
-                onTabChange={setAIActiveTab}
-              />
-            ) : (
-              <AIAssistant
-                fieldLabel="Business Card Content"
-                currentValue=""
-                onApply={handleApplySuggestion}
-                threadId={currentThreadId}
-                onThreadUpdate={handleThreadUpdate}
-                threads={threads}
-                currentThreadId={currentThreadId}
-                onSelectThread={handleSelectThread}
-                onNewThread={handleNewThread}
-                onDeleteThread={handleDeleteThread}
-                activeTab={aiActiveTab}
-                onTabChange={setAIActiveTab}
-              />
-            )}
-
-            {/* Threads Sidebar Overlay - Full Height */}
-            <div 
-              className={`absolute inset-0 w-full sm:w-[280px] bg-[#faf9f5] border-r border-[#dad9d4] z-30 transition-transform duration-300 ${
-                threadsOpen ? 'translate-x-0' : '-translate-x-full'
-              }`}
-            >
-              <div className="flex flex-col h-full">
-                {/* Header */}
-                <div className="flex h-[46px] items-center justify-between px-[12px] border-b border-[#dad9d4]">
-                  {/* New Chat Button */}
-                  <button
-                    onClick={() => {
-                      handleNewThread();
-                      setThreadsOpen(false);
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-[#ebebeb]/50 rounded-lg transition-colors"
-                    aria-label="New chat"
-                  >
-                    <div className="w-6 h-6 bg-[#c96442] rounded-full flex items-center justify-center">
-                      <Plus className="w-3.5 h-3.5 text-white" />
-                    </div>
-                    <span className="text-sm text-[#3d3d3a]">New chat</span>
-                  </button>
-                  
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setThreadsOpen(false)}
-                    className="shrink-0 size-[28px] rounded-[6px] flex items-center justify-center hover:bg-[#ebebeb]/30 transition-colors"
-                    aria-label="Close sidebar"
-                  >
-                    <X className="w-5 h-5 text-[#83827d]" strokeWidth={1.67} />
-                  </button>
-                </div>
-
-                {/* Navigation Menu */}
-                <div className="px-2 py-3 border-b border-[#dad9d4]">
-                  <div className="space-y-1">
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[#ebebeb]/50 text-[#3d3d3a] text-sm transition-colors">
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Chats</span>
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#ebebeb]/30 text-[#7a776c] text-sm transition-colors">
-                      <Sparkles className="w-4 h-4" />
-                      <span>Projects</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Recents Section */}
-                <div className="flex-1 overflow-y-auto">
-                  <div className="px-3 py-2">
-                    <h3 className="text-xs text-[#7a776c] px-2 mb-2">Recents</h3>
-                    {threads.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-32 text-center px-4">
-                        <MessageCircle className="w-8 h-8 text-[#83827d] mb-2 opacity-50" />
-                        <p className="text-xs text-[#83827d]">No conversations yet</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-0.5">
-                        {[...threads].sort((a, b) => b.timestamp - a.timestamp).map((thread) => (
-                          <div
-                            key={thread.id}
-                            className={`group relative rounded-lg px-3 py-2.5 cursor-pointer transition-colors ${
-                              currentThreadId === thread.id
-                                ? "bg-[#ebebeb]/70"
-                                : "hover:bg-[#ebebeb]/30"
-                            }`}
-                            onClick={() => {
-                              handleSelectThread(thread.id);
-                              setThreadsOpen(false);
-                            }}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex-1 min-w-0 flex items-center gap-2">
-                                <MessageCircle className="w-4 h-4 text-[#7a776c] flex-shrink-0" />
-                                <span className="text-sm text-[#3d3d3a] truncate">
-                                  {thread.title}
-                                </span>
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteThread(thread.id);
-                                }}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#ebebeb]/50 rounded flex-shrink-0"
-                                aria-label="Delete conversation"
-                              >
-                                <Trash2 className="w-3.5 h-3.5 text-[#7a776c]" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Conversation Threads Sheet - No longer needed, can be removed */}
-      <Sheet open={false} onOpenChange={() => {}}>
-        <SheetContent side="left" className="w-full sm:max-w-[350px] p-0 [&>button]:hidden">
-          <SheetTitle className="sr-only">Conversation Threads</SheetTitle>
-          <SheetDescription className="sr-only">
-            Manage your AI conversation threads
-          </SheetDescription>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }
