@@ -15,17 +15,21 @@ import { parseProfileUrl } from "./utils/user-code";
 function AppContent() {
   const location = useLocation();
   
-  // Extract user code from current URL
-  const { userCode } = parseProfileUrl(location.pathname);
+  // Extract user code and route info from current URL
+  const { userCode, isCMS } = parseProfileUrl(location.pathname);
+  
+  // Only enable chat widget on public owner pages (not CMS or auth routes)
+  const isPublicOwnerPage = !isCMS && !location.pathname.includes('/auth') && userCode;
   
   // Initialize chat widget with user code as ownerId
+  // Widget will automatically re-initialize when ownerId changes (navigating to different owner)
   useChatWidget({
     serverUrl: 'https://agent-chat-widget-568865197474.europe-west1.run.app',
     tenantId: 'business-card-only',
     ownerId: userCode || undefined, // Pass user code as ownerId
     sidebar: true,
     defaultOpen: false,
-    enabled: true,
+    enabled: isPublicOwnerPage, // Only enable on public owner pages
   });
   // Calculate and set actual viewport height (accounting for mobile browser chrome)
   useEffect(() => {

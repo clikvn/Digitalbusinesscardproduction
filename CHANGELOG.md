@@ -54,6 +54,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Updated default myClik background image to use `src/assets/myClik.png` instead of the previous Figma asset
+- Improved image loading in HomeBackgroundImage: Added image preloading and smooth fade-in transition to prevent progressive top-to-bottom loading effect
+- Added menu button to homepage: Menu button now appears after the Share button in HomeNavBar for quick access to navigation menu
+- Updated Menu button styling: Changed background from white to `bg-[#faf9f5]` and border to `border-[#e9e6dc]` to match the navigation sheet's background style
+- Enabled AI Agent button for guest users: The AI Agent button in the navigation menu now works for guests, allowing them to ask questions about the owner via the chat widget
+- Updated Edit Assistant button: Changed navigation from 'assistant' section to 'personal-ai' section to open the Personal AI page for logged-in users
+- Removed duplicate AI Agent button: Removed redundant AI Agent button from authenticated section since the main navigation already provides access for all users
+- Improved chat widget initialization: Chat widget now properly loads and initializes when visiting owner pages, automatically re-initializes when navigating between different owners, and is disabled on CMS/auth routes
+
+### Fixed
+- Fixed ugly progressive image loading in HomeBackgroundImage: Image now preloads completely before displaying with smooth fade-in animation
 
 ### Added
 - CHANGELOG.md file for tracking all changes

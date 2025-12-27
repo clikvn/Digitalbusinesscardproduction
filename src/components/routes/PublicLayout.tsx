@@ -7,6 +7,8 @@ import { NavigationMenu } from "../layout/NavigationMenu";
 import { ContactScreen } from "../screens/ContactScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { PortfolioScreen } from "../screens/PortfolioScreen";
+import { ProfileMenuIcon } from "../profile/ProfileIcons";
+import profileSvgPaths from "../../imports/svg-i5dwj49pkv";
 import { getUserCode, buildProfileUrl, buildCMSUrl } from "../../utils/user-code";
 import { trackPageView } from "../../utils/analytics";
 import { supabase } from "../../lib/supabase-client";
@@ -136,18 +138,37 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
   };
 
   return (
-    <div className="bg-[#faf9f5] w-full h-full relative" style={{ height: 'calc(var(--vh, 1vh) * 100)', overflow: screen === 'home' ? 'hidden' : 'auto' }}>
+    <div className="bg-[#faf9f5] w-full h-full relative" style={{ height: 'calc(var(--vh, 1vh) * 100)', overflow: screen === 'home' ? 'visible' : 'auto' }}>
       {/* Home Screen Specific Layout */}
       {screen === 'home' && (
         <div className="bg-[#c96442] w-full h-full relative">
           <HomeBackgroundImage />
-          <Gradient 
-            onNavigateToContact={() => navigateTo('contact')} 
+          <Gradient
+            onNavigateToContact={() => navigateTo('contact')}
             onNavigateToProfile={() => navigateTo('profile')}
             onNavigateToPortfolio={() => navigateTo('portfolio')}
           />
+          {/* Floating Menu Button Overlay */}
+          <div className="absolute inset-0 pointer-events-none z-20">
+            <div className="w-full h-full flex items-start justify-end p-6">
+              <div className="pointer-events-auto">
+                <div
+                  className="cursor-pointer transition-transform hover:scale-110 active:scale-95 bg-[#faf9f5] rounded-lg p-[8px] flex items-center justify-center shadow-lg border border-[#e9e6dc]"
+                  onClick={() => {
+                    console.log('Menu button clicked!');
+                    setIsMenuOpen(true);
+                  }}
+                  data-name="Menu Icon"
+                  aria-label="Open menu"
+                >
+                  <ProfileMenuIcon onClick={() => {}} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
+
 
       {/* Other Screens */}
       {screen === 'contact' && (

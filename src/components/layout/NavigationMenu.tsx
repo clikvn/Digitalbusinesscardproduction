@@ -125,7 +125,10 @@ export function NavigationMenu({
 
           <button
             onClick={() => {
-              if (onNavigateToCMS) {
+              if (onOpenAIAssistant) {
+                onOpenAIAssistant();
+                onClose();
+              } else if (onNavigateToCMS) {
                 handleNavigation(() => onNavigateToCMS('ai-chat'));
               }
             }}
@@ -303,29 +306,17 @@ export function NavigationMenu({
               <button
                 onClick={() => {
                   if (onNavigateToCMS) {
-                    handleNavigation(() => onNavigateToCMS('assistant'));
+                    handleNavigation(() => onNavigateToCMS('personal-ai'));
                   }
                 }}
                 className={`w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors ${
-                  cmsSection === 'assistant'
+                  cmsSection === 'personal-ai'
                     ? 'bg-zinc-100'
                     : 'hover:bg-zinc-50'
                 }`}
               >
-                <Sparkles className={`w-5 h-5 ${cmsSection === 'assistant' ? 'text-neutral-950' : 'text-zinc-500'}`} />
-                <span className={cmsSection === 'assistant' ? 'text-neutral-950' : 'text-zinc-500'}>Edit Assistant</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (onOpenAIAssistant) {
-                    handleNavigation(onOpenAIAssistant);
-                  }
-                }}
-                className="w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors hover:bg-zinc-50"
-              >
-                <Sparkles className="w-5 h-5 text-zinc-500" />
-                <span className="text-zinc-500">AI Agent</span>
+                <Sparkles className={`w-5 h-5 ${cmsSection === 'personal-ai' ? 'text-neutral-950' : 'text-zinc-500'}`} />
+                <span className={cmsSection === 'personal-ai' ? 'text-neutral-950' : 'text-zinc-500'}>Edit Assistant</span>
               </button>
             </>
           )}

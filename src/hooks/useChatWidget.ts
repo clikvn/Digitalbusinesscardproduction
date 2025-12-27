@@ -46,7 +46,16 @@ export function useChatWidget({
   const currentOwnerId = useRef<string | undefined>(ownerId);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      // If disabled, clean up any existing widget
+      if (window.ChatAgent && initialized.current) {
+        window.ChatAgent.destroy();
+        initialized.current = false;
+        currentOwnerId.current = undefined;
+        delete window.__openAIAssistant;
+      }
+      return;
+    }
 
     // Expose __openAIAssistant early so buttons can call it even before widget loads
     // It will wait for the widget to be ready
@@ -72,11 +81,13 @@ export function useChatWidget({
 
     const initializeWidget = async () => {
       // Check if we need to re-initialize (first time or ownerId changed)
-      const needsInit = !initialized.current || currentOwnerId.current !== ownerId;
+      const ownerIdChanged = currentOwnerId.current !== ownerId;
+      const needsInit = !initialized.current || ownerIdChanged;
       
       if (window.ChatAgentLoader && needsInit) {
         // If already initialized with different ownerId, destroy first
-        if (initialized.current && window.ChatAgent) {
+        if (initialized.current && window.ChatAgent && ownerIdChanged) {
+          console.log('[useChatWidget] Owner changed, destroying previous widget and re-initializing');
           window.ChatAgent.destroy();
           initialized.current = false;
         }
@@ -102,7 +113,7 @@ export function useChatWidget({
             }
           };
 
-          console.log('[useChatWidget] Chat widget initialized successfully');
+          console.log('[useChatWidget] Chat widget initialized successfully', { ownerId, serverUrl, tenantId });
         } catch (error) {
           console.error('[useChatWidget] Failed to initialize:', error);
         }
