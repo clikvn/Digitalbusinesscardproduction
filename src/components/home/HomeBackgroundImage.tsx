@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import imgImg from "figma:asset/420b26ed698402e60bcb7141f4b23bc3850beb9d.png";
+import imgImg from "../../assets/myClik.png";
 import { parseProfileImage } from "../../utils/profile-image-utils";
 import { calculateBackgroundImagePosition } from "../../utils/home-background-positioning";
 import { usePublicBusinessCard } from "../../hooks/usePublicBusinessCard";

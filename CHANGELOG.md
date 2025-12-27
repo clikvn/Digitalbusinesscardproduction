@@ -52,6 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated default myClik background image to use `src/assets/myClik.png` instead of the previous Figma asset
+
 ### Added
 - CHANGELOG.md file for tracking all changes
 - Dockerfile for Google Cloud Run deployment
