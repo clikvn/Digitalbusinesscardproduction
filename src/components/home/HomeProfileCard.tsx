@@ -100,19 +100,30 @@ export function HomeProfileCard({ onNavigateToContact, onNavigateToProfile, onNa
     // Only include fields that have values (empty strings mean field is hidden)
     const { personal, contact } = data;
     
-    // Build vCard content - only include visible fields (non-empty values)
+    // Parse name into parts for N property (required by vCard 3.0)
+    const nameParts = (personal.name || '').trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    // Build vCard content - vCard 3.0 standard format
+    // Using CRLF (\r\n) line endings for maximum compatibility
     const vCardLines = [
       'BEGIN:VCARD',
       'VERSION:3.0',
-      personal.name ? `FN:${personal.name}` : 'FN:Digital Business Card',
+      // N property is REQUIRED in vCard 3.0: N:Last;First;Middle;Prefix;Suffix
+      `N:${lastName};${firstName};;;`,
+      // FN (Formatted Name) is REQUIRED
+      `FN:${personal.name || 'Digital Business Card'}`,
     ];
     
     // Only add fields if they have values (respects share config filtering)
+    // Use TYPE parameters for better mobile app recognition
     if (contact.email) {
-      vCardLines.push(`EMAIL:${contact.email}`);
+      vCardLines.push(`EMAIL;TYPE=INTERNET:${contact.email}`);
     }
     if (contact.phone) {
-      vCardLines.push(`TEL:${contact.phone}`);
+      // TYPE=CELL for mobile, TYPE=WORK for office - default to CELL for personal cards
+      vCardLines.push(`TEL;TYPE=CELL:${contact.phone}`);
     }
     if (personal.title) {
       vCardLines.push(`TITLE:${personal.title}`);
@@ -121,14 +132,21 @@ export function HomeProfileCard({ onNavigateToContact, onNavigateToProfile, onNa
       vCardLines.push(`ORG:${personal.businessName}`);
     }
     if (personal.bio) {
-      vCardLines.push(`NOTE:${personal.bio}`);
+      // Escape special characters in NOTE field
+      const escapedBio = personal.bio.replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+      vCardLines.push(`NOTE:${escapedBio}`);
     }
     
-    // Always include URL
+    // Add profile URL
     vCardLines.push(`URL:${window.location.origin}${buildProfileUrl({ userCode: targetUserCode, group: groupCode as any })}`);
+    
+    // Add timestamp for when this card was generated
+    vCardLines.push(`REV:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
+    
     vCardLines.push('END:VCARD');
     
-    const vCard = vCardLines.join('\\n');
+    // Use CRLF line endings for vCard standard compliance
+    const vCard = vCardLines.join('\r\n');
     const fileName = `${personal.name || 'contact'}.vcf`;
 
     // Detect mobile devices

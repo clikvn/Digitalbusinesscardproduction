@@ -32,6 +32,7 @@ export function PortfolioItemDisplay({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
+  const [videoPlaybackError, setVideoPlaybackError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const totalDuration = 45; // Mock duration in seconds
   
@@ -143,10 +144,14 @@ export function PortfolioItemDisplay({
           playPromise
             .then(() => {
               setIsPlaying(true);
+              setVideoPlaybackError(false); // Reset error if play succeeds
             })
             .catch((error) => {
               console.error("Play was prevented:", error);
               setIsPlaying(false);
+              setVideoPlaybackError(true);
+              // If play fails, open video in new tab
+              window.open(videoUrl, '_blank', 'noopener,noreferrer');
             });
         }
       }
@@ -167,6 +172,14 @@ export function PortfolioItemDisplay({
     }
   };
 
+  const handleVideoClick = () => {
+    // If video playback failed, open video URL in new tab
+    if (type === 'video' && videoPlaybackError) {
+      trackClickEvent('portfolio.videoOpenInNewTab');
+      window.open(videoUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -177,9 +190,9 @@ export function PortfolioItemDisplay({
     <>
       <div className="content-stretch flex flex-col gap-[8px] items-start relative rounded-[24px] shrink-0 w-full" data-name="item">
         <div 
-          className={`overflow-clip relative rounded-[16px] shrink-0 w-full ${type === 'virtual-tour' ? 'cursor-pointer' : ''}`} 
+          className={`overflow-clip relative rounded-[16px] shrink-0 w-full ${type === 'virtual-tour' || (type === 'video' && videoPlaybackError) ? 'cursor-pointer' : ''}`} 
           data-name="IMG"
-          onClick={handleVirtualTourClick}
+          onClick={type === 'virtual-tour' ? handleVirtualTourClick : (type === 'video' && videoPlaybackError) ? handleVideoClick : undefined}
           onTouchStart={type === 'image' && images.length > 1 ? onTouchStart : undefined}
           onTouchMove={type === 'image' && images.length > 1 ? onTouchMove : undefined}
           onTouchEnd={type === 'image' && images.length > 1 ? onTouchEnd : undefined}
@@ -198,6 +211,28 @@ export function PortfolioItemDisplay({
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                     style={{ border: 'none' }}
+                    onError={() => {
+                      console.error('Video iframe error - cannot play embedded video');
+                      setVideoPlaybackError(true);
+                    }}
+                    onLoad={() => {
+                      // Check if iframe loaded successfully
+                      // Some browsers don't fire onError for iframes, so we'll also check after a delay
+                      setTimeout(() => {
+                        if (iframeRef.current) {
+                          try {
+                            // Try to access iframe content - if it fails, video might not be playable
+                            const iframe = iframeRef.current;
+                            if (!iframe.contentWindow) {
+                              setVideoPlaybackError(true);
+                            }
+                          } catch (e) {
+                            // Cross-origin restrictions - assume it's working if no error
+                            // We'll rely on user click to detect if it's not working
+                          }
+                        }
+                      }, 2000);
+                    }}
                   />
                 ) : (
                   // Direct video file (mp4, webm, etc.)
@@ -212,6 +247,11 @@ export function PortfolioItemDisplay({
                     onEnded={() => setIsPlaying(false)}
                     onError={(e) => {
                       console.error('Video playback error:', e);
+                      setVideoPlaybackError(true);
+                    }}
+                    onLoadedData={() => {
+                      // Reset error state if video loads successfully
+                      setVideoPlaybackError(false);
                     }}
                   />
                 )}

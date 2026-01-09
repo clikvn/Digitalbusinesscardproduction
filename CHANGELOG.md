@@ -24,6 +24,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Provides full-screen viewing experience without iframe constraints
   - Better compatibility with virtual tour platforms (Matterport, etc.)
   - Maintains analytics tracking for virtual tour opens
+- **Video Fallback to New Tab**: Video items that cannot play directly now open in a new browser tab when clicked
+  - Detects video playback errors (embedded or direct video files)
+  - Automatically opens video URL in new tab if playback fails
+  - Provides better user experience when videos are blocked or incompatible
+  - Works for both embedded videos (YouTube/Vimeo) and direct video files
+- **Default Public Share Config**: New user registration now sets Public group to include all fields by default except Contact Information
+  - Public group automatically selects all available fields (personal, social, profile, portfolio)
+  - Contact Information fields (phone, email, address) are excluded by default for privacy
+  - Users can still manually enable contact fields if desired
+  - Applies to all new user registrations going forward
+  - Migration script (045) available to update existing users' Public share config
+
+- **VCF/vCard Standard Compliance**: Improved contact card download format for better mobile compatibility
+  - Added required `N` (Name) property with proper structure (Last;First;;;)
+  - Added `TYPE` parameters for EMAIL (INTERNET) and TEL (CELL) for better mobile recognition
+  - Fixed line endings to use CRLF (`\r\n`) per vCard 3.0 specification
+  - Added `REV` timestamp for card generation tracking
+  - Escaped special characters in NOTE field (newlines, commas, semicolons)
+  - Fixed bug in HomeProfileCard using literal `\n` instead of actual newlines
 
 ### Changed
 - **Portfolio Category Item Styling**: Updated typography styles for portfolio category items
