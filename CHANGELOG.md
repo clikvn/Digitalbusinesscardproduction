@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Falls back to data URL approach for iOS devices
   - Provides clear feedback messages about where to find the downloaded file
   - Works seamlessly across iOS, Android, and desktop browsers
+- **Virtual Tour Opens in New Tab**: Virtual tour/showroom items now open in a new browser tab instead of iframe dialog
+  - Provides full-screen viewing experience without iframe constraints
+  - Better compatibility with virtual tour platforms (Matterport, etc.)
+  - Maintains analytics tracking for virtual tour opens
 
 ### Changed
 - **Portfolio Category Item Styling**: Updated typography styles for portfolio category items

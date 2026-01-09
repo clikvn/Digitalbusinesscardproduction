@@ -30,11 +30,9 @@ export function PortfolioItemDisplay({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isVirtualTourOpen, setIsVirtualTourOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const totalDuration = 45; // Mock duration in seconds
   
   // Track portfolio item view on mount
@@ -164,7 +162,8 @@ export function PortfolioItemDisplay({
     if (type === 'virtual-tour') {
       // Track virtual tour open
       trackClickEvent('portfolio.virtualTourOpen');
-      setIsVirtualTourOpen(true);
+      // Open virtual tour in a new browser tab/window for full view
+      window.open(virtualTourUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -465,29 +464,6 @@ export function PortfolioItemDisplay({
         </div>
       )}
       
-      {/* Virtual Tour Dialog */}
-      {type === 'virtual-tour' && (
-        <Dialog open={isVirtualTourOpen} onOpenChange={setIsVirtualTourOpen}>
-          <DialogContent className="max-w-[100vw] w-full p-0 bg-black border-0 [&>button[class*='ring-offset']]:hidden" style={{ height: 'calc(var(--vh, 1vh) * 100)' }} aria-describedby={undefined}>
-            <DialogTitle className="sr-only">360° Virtual Tour</DialogTitle>
-            <button
-              onClick={() => setIsVirtualTourOpen(false)}
-              className="absolute top-4 right-4 z-50 text-white hover:bg-white/20 rounded-full p-2 transition-all"
-            >
-              <X className="w-6 h-6" />
-            </button>
-            <div className="w-full h-full">
-              <iframe
-                ref={iframeRef}
-                src={virtualTourUrl}
-                className="w-full h-full border-0"
-                title="360° Virtual Tour"
-                allow="accelerometer; gyroscope; fullscreen"
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </>
   );
 }
