@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useBusinessCard } from '../../hooks/useBusinessCard';
 import { useSettings } from '../../hooks/useSettings';
 import { useParams } from 'react-router-dom';
+import { filterBusinessCardData } from '../../utils/filtered-data-loader';
+import qrCodeLogo from '../../assets/qr_code_logo.svg';
 
 interface ShareStep2Props {
   onBack: () => void;
@@ -20,7 +22,7 @@ interface ShareStep2Props {
 export function ShareStep2({ onBack, onMenu, selectedContact }: ShareStep2Props) {
   const { userCode } = useParams<{ userCode: string }>();
   const { data } = useBusinessCard(userCode);
-  const { customGroups: groups } = useSettings(userCode);
+  const { customGroups: groups, settings } = useSettings(userCode);
   
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
   const [showEmailSignatureDialog, setShowEmailSignatureDialog] = useState(false);
@@ -84,20 +86,20 @@ export function ShareStep2({ onBack, onMenu, selectedContact }: ShareStep2Props)
 
   // Email signature templates
   const getEmailSignature = (template: 'simple' | 'detailed' | 'compact') => {
-    const { personal, professional } = data;
+    const { personal, contact } = data;
     
     if (template === 'simple') {
       return `${personal.name || 'Your Name'}
-${professional?.position || ''}${professional?.company ? ` | ${professional.company}` : ''}
+${personal.title || ''}${personal.businessName ? ` | ${personal.businessName}` : ''}
 ${profileUrl}`;
     }
     
     if (template === 'detailed') {
       let signature = `${personal.name || 'Your Name'}\n`;
-      if (professional?.position) signature += `${professional.position}\n`;
-      if (professional?.company) signature += `${professional.company}\n`;
-      if (personal.email) signature += `📧 ${personal.email}\n`;
-      if (personal.phone) signature += `📱 ${personal.phone}\n`;
+      if (personal.title) signature += `${personal.title}\n`;
+      if (personal.businessName) signature += `${personal.businessName}\n`;
+      if (contact.email) signature += `📧 ${contact.email}\n`;
+      if (contact.phone) signature += `📱 ${contact.phone}\n`;
       signature += `🔗 ${profileUrl}`;
       return signature;
     }
@@ -222,36 +224,104 @@ ${profileUrl}`;
     }
   };
 
-  const handleAddToWallet = () => {
-    // Generate vCard for download
-    const { personal, professional, social } = data;
+  const handleAddToWallet = async () => {
+    // Filter data based on selected contact's group share config
+    const selectedGroupId = (selectedContact?.group || 'public') as any;
     
-    // Create vCard content
-    const vCard = [
+    // Filter data based on share config for the selected group
+    const filteredData = filterBusinessCardData(data, settings || {}, selectedGroupId);
+    
+    // Generate vCard for download - only include visible fields
+    const { personal, contact } = filteredData;
+    
+    // Build vCard content - only include visible fields (non-empty values)
+    const vCardLines = [
       'BEGIN:VCARD',
       'VERSION:3.0',
-      `FN:${personal.name || 'Digital Business Card'}`,
-      personal.email ? `EMAIL:${personal.email}` : '',
-      personal.phone ? `TEL:${personal.phone}` : '',
-      professional?.position ? `TITLE:${professional.position}` : '',
-      professional?.company ? `ORG:${professional.company}` : '',
-      personal.bio ? `NOTE:${personal.bio}` : '',
-      `URL:${profileUrl}`,
-      'END:VCARD'
-    ].filter(line => line && !line.endsWith(':')).join('\n');
+      personal.name ? `FN:${personal.name}` : 'FN:Digital Business Card',
+    ];
+    
+    // Only add fields if they have values (respects share config filtering)
+    if (contact.email) {
+      vCardLines.push(`EMAIL:${contact.email}`);
+    }
+    if (contact.phone) {
+      vCardLines.push(`TEL:${contact.phone}`);
+    }
+    if (personal.title) {
+      vCardLines.push(`TITLE:${personal.title}`);
+    }
+    if (personal.businessName) {
+      vCardLines.push(`ORG:${personal.businessName}`);
+    }
+    if (personal.bio) {
+      vCardLines.push(`NOTE:${personal.bio}`);
+    }
+    
+    // Always include URL
+    vCardLines.push(`URL:${profileUrl}`);
+    vCardLines.push('END:VCARD');
+    
+    const vCard = vCardLines.join('\n');
+    const fileName = `${personal.name || 'contact'}.vcf`;
 
-    // Create and download vCard file
+    // Detect mobile devices
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // For mobile devices, try Web Share API first (iOS 13+)
+    if (isMobile && navigator.share) {
+      try {
+        const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+        const file = new File([blob], fileName, { type: 'text/vcard' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Contact: ${personal.name || 'Digital Business Card'}`,
+            text: `Save ${personal.name || 'this contact'}`,
+          });
+          toast.success('Contact shared! Open it to save to contacts.');
+          return;
+        }
+      } catch (error: any) {
+        // User cancelled or share failed, fall through to download
+        if (error.name !== 'AbortError') {
+          console.log('Web Share API failed, using fallback:', error);
+        }
+      }
+    }
+
+    // Fallback: Download method (works on desktop and some mobile browsers)
     const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${personal.name || 'contact'}.vcf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    link.download = fileName;
     
-    toast.success('Contact card downloaded');
+    // For iOS, use data URL approach
+    if (isIOS) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        const newLink = document.createElement('a');
+        newLink.href = dataUrl;
+        newLink.download = fileName;
+        document.body.appendChild(newLink);
+        newLink.click();
+        document.body.removeChild(newLink);
+        URL.revokeObjectURL(url);
+        toast.success('Contact saved! Check your Downloads folder or Files app.');
+      };
+      reader.readAsDataURL(blob);
+    } else {
+      // Standard download for Android and desktop
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('Contact card downloaded');
+    }
   };
 
   return (
@@ -264,15 +334,13 @@ ${profileUrl}`;
             <div className="flex flex-col items-center w-full gap-3">
               <div className="relative size-[200px]">
                 <canvas ref={qrCanvasRef} className="absolute inset-0 rounded-2xl" />
-                {data.personal.profileImage && (
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[50px] rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                    <ImageWithFallback
-                      src={data.personal.profileImage}
-                      alt={data.personal.name}
-                      className="size-full object-cover"
-                    />
-                  </div>
-                )}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[50px] rounded-full border-4 border-white shadow-lg overflow-hidden bg-white flex items-center justify-center">
+                  <img 
+                    src={qrCodeLogo} 
+                    alt="QR Code Logo" 
+                    className="size-full object-contain p-1"
+                  />
+                </div>
               </div>
               <p className="text-sm text-[#83827d] text-center">
                 {groupInfo 

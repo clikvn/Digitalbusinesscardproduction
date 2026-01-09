@@ -35,7 +35,7 @@ export function PortfolioListing() {
 
   return (
     <div className="box-border content-stretch flex flex-col gap-[16px] items-start px-[24px] py-0 relative w-full">
-      <div className="h-[56px] overflow-x-auto overflow-y-clip relative shrink-0 w-full" data-name="nav-menu-slider">
+      <div className="h-[56px] overflow-hidden relative shrink-0 w-full" data-name="nav-menu-slider">
         <PortfolioSlider 
           categories={data.portfolioCategories}
           selectedCategoryId={selectedCategoryId}

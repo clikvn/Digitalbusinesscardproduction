@@ -3,9 +3,10 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
-import { GripVertical, Edit, Copy, Trash2, Image, Video, Globe } from "lucide-react";
+import { GripVertical, Edit, Copy, Trash2, Image, Video, Globe, Play, Hand } from "lucide-react";
 import { PortfolioItem } from "../../types/business-card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { parseVideoUrl, type VideoInfo } from "../../lib/videoUtils";
 
 interface SortablePortfolioItemProps {
   item: PortfolioItem;
@@ -45,6 +46,9 @@ export function SortablePortfolioItem({ item, onEdit, onDelete, onDuplicate }: S
   };
 
   const getThumbnail = () => {
+    // Placeholder image for items without images
+    const placeholderImage = "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080";
+    
     if (item.type === 'images' && item.images && item.images.length > 0) {
       return (
         <div className="relative">
@@ -62,7 +66,64 @@ export function SortablePortfolioItem({ item, onEdit, onDelete, onDuplicate }: S
       );
     }
     
-    // For video and virtual tour, show icon placeholder
+    // For virtual tour, use placeholder image with hand icon overlay to differentiate from video
+    if (item.type === 'virtual-tour') {
+      return (
+        <div className="relative">
+          <img
+            src={item.images && item.images.length > 0 ? item.images[0] : placeholderImage}
+            alt={item.title}
+            className="w-16 h-16 object-cover rounded"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded">
+            <div className="bg-white/90 rounded-full p-1.5 flex items-center justify-center">
+              <Hand className="w-3 h-3 text-[#535146]" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // For video, use iframe for embedded videos (YouTube/Vimeo) or thumbnail with play button for direct videos
+    if (item.type === 'video') {
+      const videoUrl = item.videoUrl || "";
+      const videoInfo: VideoInfo = parseVideoUrl(videoUrl);
+      const isEmbeddedVideo = videoInfo.type === 'youtube' || videoInfo.type === 'vimeo';
+      
+      if (isEmbeddedVideo && videoInfo.embedUrl) {
+        // Use iframe for embedded videos (YouTube/Vimeo) - same as public portfolio page
+        return (
+          <div className="relative w-16 h-16 rounded overflow-hidden">
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={videoInfo.embedUrl}
+              title={item.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{ border: 'none' }}
+            />
+          </div>
+        );
+      }
+      
+      // For direct video files, use thumbnail image with play button overlay
+      return (
+        <div className="relative">
+          <img
+            src={item.images && item.images.length > 0 ? item.images[0] : placeholderImage}
+            alt={item.title}
+            className="w-16 h-16 object-cover rounded"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded">
+            <div className="bg-white/90 rounded-full p-1.5 flex items-center justify-center">
+              <Play className="w-3 h-3 text-[#535146] fill-[#535146]" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Fallback: show icon placeholder
     return (
       <div className="w-16 h-16 flex items-center justify-center bg-[#f4f4f5] rounded">
         {getTypeIcon()}

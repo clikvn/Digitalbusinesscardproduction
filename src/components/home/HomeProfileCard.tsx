@@ -91,39 +91,103 @@ export function HomeProfileCard({ onNavigateToContact, onNavigateToProfile, onNa
     onNavigateToContact();
   };
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     // Track analytics
     trackClickEvent('home.saveContact');
     
     // Generate vCard for download
-    const { personal } = data;
+    // Note: data is already filtered by usePublicBusinessCard based on share config
+    // Only include fields that have values (empty strings mean field is hidden)
+    const { personal, contact } = data;
     
-    // Create vCard content
-    const vCard = [
+    // Build vCard content - only include visible fields (non-empty values)
+    const vCardLines = [
       'BEGIN:VCARD',
       'VERSION:3.0',
-      `FN:${personal.name || 'Digital Business Card'}`,
-      data.contact.email ? `EMAIL:${data.contact.email}` : '',
-      data.contact.phone ? `TEL:${data.contact.phone}` : '',
-      personal.title ? `TITLE:${personal.title}` : '',
-      personal.businessName ? `ORG:${personal.businessName}` : '',
-      personal.bio ? `NOTE:${personal.bio}` : '',
-      `URL:${window.location.origin}${buildProfileUrl({ userCode: targetUserCode, group: groupCode as any })}`,
-      'END:VCARD'
-    ].filter(line => line && !line.endsWith(':')).join('\\n');
+      personal.name ? `FN:${personal.name}` : 'FN:Digital Business Card',
+    ];
+    
+    // Only add fields if they have values (respects share config filtering)
+    if (contact.email) {
+      vCardLines.push(`EMAIL:${contact.email}`);
+    }
+    if (contact.phone) {
+      vCardLines.push(`TEL:${contact.phone}`);
+    }
+    if (personal.title) {
+      vCardLines.push(`TITLE:${personal.title}`);
+    }
+    if (personal.businessName) {
+      vCardLines.push(`ORG:${personal.businessName}`);
+    }
+    if (personal.bio) {
+      vCardLines.push(`NOTE:${personal.bio}`);
+    }
+    
+    // Always include URL
+    vCardLines.push(`URL:${window.location.origin}${buildProfileUrl({ userCode: targetUserCode, group: groupCode as any })}`);
+    vCardLines.push('END:VCARD');
+    
+    const vCard = vCardLines.join('\\n');
+    const fileName = `${personal.name || 'contact'}.vcf`;
 
-    // Create and download vCard file
+    // Detect mobile devices
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // For mobile devices, try Web Share API first (iOS 13+)
+    if (isMobile && navigator.share) {
+      try {
+        const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+        const file = new File([blob], fileName, { type: 'text/vcard' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Contact: ${personal.name || 'Digital Business Card'}`,
+            text: `Save ${personal.name || 'this contact'}`,
+          });
+          toast.success('Contact shared! Open it to save to contacts.');
+          return;
+        }
+      } catch (error: any) {
+        // User cancelled or share failed, fall through to download
+        if (error.name !== 'AbortError') {
+          console.log('Web Share API failed, using fallback:', error);
+        }
+      }
+    }
+
+    // Fallback: Download method (works on desktop and some mobile browsers)
     const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${personal.name || 'contact'}.vcf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    link.download = fileName;
     
-    toast.success('Contact card downloaded');
+    // For iOS, use data URL approach
+    if (isIOS) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        const newLink = document.createElement('a');
+        newLink.href = dataUrl;
+        newLink.download = fileName;
+        document.body.appendChild(newLink);
+        newLink.click();
+        document.body.removeChild(newLink);
+        URL.revokeObjectURL(url);
+        toast.success('Contact saved! Check your Downloads folder or Files app.');
+      };
+      reader.readAsDataURL(blob);
+    } else {
+      // Standard download for Android and desktop
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('Contact card downloaded');
+    }
   };
 
   const handleShareClick = async () => {

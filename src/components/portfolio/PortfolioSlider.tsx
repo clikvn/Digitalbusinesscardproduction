@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { PortfolioCategory } from "../../types/business-card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function PortfolioSlider({ 
   categories, 
@@ -10,6 +11,46 @@ export function PortfolioSlider({
   selectedCategoryId: string | null; 
   onSelectCategory: (id: string) => void;
 }) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollButtons = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    updateScrollButtons();
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateScrollButtons);
+      window.addEventListener('resize', updateScrollButtons);
+      return () => {
+        container.removeEventListener('scroll', updateScrollButtons);
+        window.removeEventListener('resize', updateScrollButtons);
+      };
+    }
+  }, [categories]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 200;
+      const currentScroll = scrollContainerRef.current.scrollLeft;
+      const targetScroll = direction === 'left'
+        ? currentScroll - scrollAmount
+        : currentScroll + scrollAmount;
+      
+      scrollContainerRef.current.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   if (categories.length === 0) {
     return (
       <div className="absolute content-stretch flex gap-[8px] inset-0 items-center justify-center" data-name="slider">
@@ -19,15 +60,45 @@ export function PortfolioSlider({
   }
 
   return (
-    <div className="absolute content-stretch flex gap-[8px] inset-0 items-center" data-name="slider">
-      {categories.map((category) => (
-        <PortfolioCategoryItem 
-          key={category.id}
-          name={category.name}
-          isActive={selectedCategoryId === category.id}
-          onClick={() => onSelectCategory(category.id)}
-        />
-      ))}
+    <div className="absolute inset-0 flex items-center gap-2" data-name="slider">
+      {/* Left Arrow */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          className="shrink-0 w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white border border-zinc-200 rounded-full shadow-sm transition-colors z-10"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="w-5 h-5 text-[#535146]" />
+        </button>
+      )}
+      
+      {/* Scrollable Container */}
+      <div
+        ref={scrollContainerRef}
+        onScroll={updateScrollButtons}
+        className="flex-1 flex gap-[8px] items-center overflow-x-auto scrollbar-hide"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {categories.map((category) => (
+          <PortfolioCategoryItem 
+            key={category.id}
+            name={category.name}
+            isActive={selectedCategoryId === category.id}
+            onClick={() => onSelectCategory(category.id)}
+          />
+        ))}
+      </div>
+
+      {/* Right Arrow */}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          className="shrink-0 w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white border border-zinc-200 rounded-full shadow-sm transition-colors z-10"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="w-5 h-5 text-[#535146]" />
+        </button>
+      )}
     </div>
   );
 }
@@ -36,12 +107,12 @@ function PortfolioCategoryItem({ name, isActive, onClick }: { name: string; isAc
   return (
     <button 
       onClick={onClick}
-      className="basis-0 content-stretch flex flex-col grow h-full items-center justify-center min-h-px min-w-px relative shrink-0" 
+      className="flex flex-col h-full items-center justify-center min-w-fit relative shrink-0" 
       data-name="category"
     >
-      <div className="basis-0 box-border content-stretch flex gap-[8px] grow items-center justify-center min-h-px min-w-px overflow-clip relative rounded-[12px] shrink-0 px-[12px] py-[8px]" data-name="Button-Text">
-        <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[18px] text-center text-nowrap">
-          <p className="leading-[28px] whitespace-pre">{name}</p>
+      <div className="box-border flex gap-[8px] items-center justify-center overflow-clip relative rounded-[12px] shrink-0 px-[12px] py-[8px] whitespace-nowrap" data-name="Button-Text">
+        <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[16px] text-center">
+          <p className="leading-[24px]">{name}</p>
         </div>
       </div>
       {isActive ? <PortfolioActive /> : <PortfolioActiveInactive />}

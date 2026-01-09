@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **QR Code Logo**: QR code center logo now uses the logo from `qr_code_logo.svg` instead of profile image
+  - Logo is always displayed in the center of the QR code
+  - Maintains the same styling (white circular background with border and shadow)
+- **VCF Save Feature Respects Share Config**: VCF file generation now respects share group visibility settings
+  - Only visible fields (based on share config) are included in the downloaded VCF file
+  - Hidden fields are excluded from the contact card
+  - Applies to both public profile save and CMS share step save features
+- **Mobile VCF Download Support**: Improved VCF file download experience on mobile devices
+  - Uses Web Share API on mobile devices (iOS 13+, Android) for better compatibility
+  - Falls back to data URL approach for iOS devices
+  - Provides clear feedback messages about where to find the downloaded file
+  - Works seamlessly across iOS, Android, and desktop browsers
+
+### Changed
+- **Portfolio Category Item Styling**: Updated typography styles for portfolio category items
+  - Reduced line-height from `28px` to `24px` (changed `leading-[28px]` to `leading-[24px]`)
+  - Reduced font-size from `18px` to `16px` (changed `text-[18px]` to `text-[16px]`)
+  - Reduced font-weight from `600` to `400` (changed `font-semibold` to `font-normal`)
+- **Virtual Tour and Video Item Thumbnails**: Virtual Tour and Video items in studio/portfolio page now use thumbnail images instead of icons
+  - Virtual Tour items now display thumbnail image with hand icon overlay to differentiate from video items
+  - Video items now display iframe preview player for embedded videos (YouTube/Vimeo) - same as public portfolio page
+  - Direct video files show thumbnail image with play button overlay
+  - Matches the behavior of portfolio type items on the public portfolio page
+
 ### Fixed
 - **Logo Auto-Save Issue**: Fixed logo being deleted when navigating to "My Business" page
   - Logo is now only saved when explicitly uploaded via the upload button
