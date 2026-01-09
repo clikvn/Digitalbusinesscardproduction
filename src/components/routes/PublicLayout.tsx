@@ -176,10 +176,7 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
           onBack={() => navigateTo('home')} 
           onMenuClick={() => setIsMenuOpen(true)} 
           onAIClick={() => {
-            // Trigger external AI script if available
-            if ((window as any).__openAIAssistant) {
-              (window as any).__openAIAssistant();
-            }
+            toast.info("This feature will coming soon!");
           }} 
         />
       )}
@@ -217,13 +214,7 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
         }}
         onNavigateToCMS={navigateToCMS}
         onOpenAIAssistant={() => {
-          // Trigger external AI script if available
-          if ((window as any).__openAIAssistant) {
-            (window as any).__openAIAssistant();
-          } else {
-            // Fallback: navigate to CMS
-            navigateToCMS();
-          }
+          toast.info("This feature will coming soon!");
         }}
         userId={userId}
       />

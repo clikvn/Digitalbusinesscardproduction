@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Promotion Code Validation**: Fixed promotion code validation error handling to properly check both `success` and `valid` response fields, and improved error messages to be more specific (code not found, expired, inactive, already used, etc.)
+- **Promotion Code UI**: Added "Enter" button with arrow icon beside the promotion code input field for better UX and clearer call-to-action
+- **Business Plan Upgrade**: Page now automatically reloads after successfully applying a business promotion code to show the "My Business" section in the Studio Page
+
 ### Changed
 - **QR Code Logo**: QR code center logo now uses the logo from `qr_code_logo.svg` instead of profile image
   - Logo is always displayed in the center of the QR code
@@ -35,6 +40,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Users can still manually enable contact fields if desired
   - Applies to all new user registrations going forward
   - Migration script (045) available to update existing users' Public share config
+
+- **Upgrade Plan Dialog with Promotion Codes**: Made plan badge clickable to open upgrade promotion dialog
+  - Clicking the plan badge in NavigationMenu opens an upgrade dialog
+  - Shows all available plans (Free, Premium, Business) with features and pricing
+  - Highlights current plan and popular plan
+  - **Promotion Code Input**: Replaced special offer section with promotion code input field
+  - Users can enter promotion codes to upgrade to Business Plan
+  - Real-time validation and application of promotion codes
+  - **Promotions Database**: Created `promotions` table in Supabase
+    - Stores promotion codes with plan name, expiration date, and usage limits
+    - Tracks code usage per user to prevent duplicate applications
+    - Includes RPC functions: `validate_promotion_code` and `apply_promotion_code`
+  - Automatic plan upgrade when valid code is applied
+  - Ready for payment/subscription system integration
+
+- **Change Password Feature**: Added "Change Password" option in side menu bar
+  - New menu item in NavigationMenu for authenticated users
+  - ChangePasswordDialog component with password validation
+  - Verifies current password before allowing change
+  - Requires minimum 6 characters for new password
+  - Includes show/hide password toggle for all fields
+  - Uses Supabase auth.updateUser API for secure password updates
 
 - **Analytics Fix for New Users**: Fixed blank page error when new users visit analytics page
   - Changed `.single()` to `.maybeSingle()` for `v_realtime_user_stats` query to handle empty results

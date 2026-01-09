@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BusinessCardStudio } from "../cms/BusinessCardStudio";
 import { CMSDashboard } from "../cms/CMSDashboard";
-import { FileUploadPage } from "../cms/FileUploadPage";
 import { NavigationMenu } from "../layout/NavigationMenu";
 import { useBusinessCard } from "../../hooks/useBusinessCard";
 import { getUserCode, buildCMSUrl, buildProfileUrl } from "../../utils/user-code";
@@ -75,9 +74,7 @@ export function CMSLayout() {
   };
 
   const handleOpenAIAssistant = () => {
-    if ((window as any).__openAIAssistant) {
-      (window as any).__openAIAssistant();
-    }
+    toast.info("This feature will coming soon!");
   };
 
   if (!isAuthorized) {
@@ -117,30 +114,13 @@ export function CMSLayout() {
     );
   }
 
-  // Handle personal-ai section (file upload page)
+  // Handle personal-ai section - show coming soon and redirect to studio
   if (section === 'personal-ai') {
-    return (
-      <div className="w-full h-full bg-[#faf9f5]" style={{ minHeight: '100vh' }}>
-        <FileUploadPage />
-        <NavigationMenu
-          isOpen={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
-          onNavigateHome={handleNavigateHome}
-          onNavigateContact={() => navigate(buildProfileUrl({ userCode, screen: 'contact' }))}
-          onNavigateProfile={() => navigate(buildProfileUrl({ userCode, screen: 'profile' }))}
-          onNavigatePortfolio={() => navigate(buildProfileUrl({ userCode, screen: 'portfolio' }))}
-          onNavigateToMyProfile={() => navigate(buildCMSUrl(userCode))}
-          currentScreen="home"
-          isAuthenticated={true}
-          onLogin={() => navigate(buildCMSUrl(userCode))}
-          onLogout={handleLogout}
-          onNavigateToCMS={handleNavigateToCMS}
-          cmsSection={section}
-          onOpenAIAssistant={handleOpenAIAssistant}
-          userId={userId}
-        />
-      </div>
-    );
+    useEffect(() => {
+      toast.info("This feature will coming soon!");
+      navigate(buildCMSUrl(userCode));
+    }, [navigate, userCode]);
+    return null;
   }
 
   // Otherwise show the specific CMS Dashboard section

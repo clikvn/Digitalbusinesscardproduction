@@ -242,11 +242,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               profileName={data.personal.name}
               onMenuClick={onMenuClick || (() => setMobileMenuOpen(true))}
               onAIClick={() => {
-                if (onOpenAIAssistant) {
-                  onOpenAIAssistant();
-                } else if ((window as any).__openAIAssistant) {
-                  (window as any).__openAIAssistant();
-                }
+                toast.info("This feature will coming soon!");
               }}
               onNavigateToStudio={onNavigateToStudio}
               currentPage="section"
@@ -434,11 +430,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
             </button>
             <button
               onClick={() => {
-                if (onOpenAIAssistant) {
-                  onOpenAIAssistant();
-                } else if ((window as any).__openAIAssistant) {
-                  (window as any).__openAIAssistant();
-                }
+                toast.info("This feature will coming soon!");
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left text-[#71717a] hover:bg-[#f4f4f5]"
@@ -449,11 +441,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
             <Separator className="my-2" />
             <button
               onClick={() => {
-                if (onOpenAIAssistant) {
-                  onOpenAIAssistant();
-                } else if ((window as any).__openAIAssistant) {
-                  (window as any).__openAIAssistant();
-                }
+                toast.info("This feature will coming soon!");
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#71717a] hover:bg-[#f4f4f5] transition-colors text-left"

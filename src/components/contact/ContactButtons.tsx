@@ -33,14 +33,7 @@ export function AIButton({ onClick }: { onClick?: () => void }) {
     <button 
       onClick={() => {
         trackClickEvent('aiAgent');
-        if (onClick) {
-          onClick();
-        } else if ((window as any).__openAIAssistant) {
-          // Trigger external AI script if available
-          (window as any).__openAIAssistant();
-        } else {
-          toast.info("AI Agent feature coming soon");
-        }
+        toast.info("This feature will coming soon!");
       }}
       className="bg-[#c96442] h-[40px] relative rounded-[8px] shrink-0 w-full cursor-pointer transition-all hover:bg-[#b85838] active:scale-[0.98]" 
       data-name="button"

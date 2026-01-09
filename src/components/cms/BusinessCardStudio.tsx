@@ -133,8 +133,8 @@ export function BusinessCardStudio({ onNavigateToSection, onNavigateHome, onMenu
                     className="border-[#e4e4e7] shadow-sm hover:border-[#c96442]/30 transition-all cursor-pointer group hover:shadow-md active:scale-[0.98] h-full"
                     onClick={() => {
                       if (card.id === 'ai-assistant') {
-                        // Navigate to file upload page
-                        onNavigateToSection('personal-ai');
+                        // Show coming soon message
+                        toast.info("This feature will coming soon!");
                       } else {
                         onNavigateToSection(card.id);
                       }

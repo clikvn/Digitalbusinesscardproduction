@@ -1,8 +1,11 @@
-import React from "react";
-import { Home, Mail, User, Briefcase, Sparkles, LogOut, LogIn, CreditCard, Share2, BarChart3 } from "lucide-react";
+import React, { useState } from "react";
+import { Home, Mail, User, Briefcase, Sparkles, LogOut, LogIn, CreditCard, Share2, BarChart3, Key } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "../ui/sheet";
 import { useUserPlan } from "../../hooks/useUserPlan";
 import { Badge } from "../ui/badge";
+import { ChangePasswordDialog } from "../cms/ChangePasswordDialog";
+import { UpgradePlanDialog } from "../cms/UpgradePlanDialog";
+import { toast } from "sonner@2.0.3";
 
 export function NavigationMenu({ 
   isOpen, 
@@ -38,6 +41,8 @@ export function NavigationMenu({
   userId?: string;
 }) {
   const { data: userPlan } = useUserPlan(userId);
+  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
+  const [showUpgradePlanDialog, setShowUpgradePlanDialog] = useState(false);
   
   const handleNavigation = (navigateFn: () => void) => {
     navigateFn();
@@ -66,11 +71,15 @@ export function NavigationMenu({
         
         {/* Plan Badge - positioned at top left, same row as X button */}
         {isAuthenticated && userPlan && (
-          <div className="absolute top-4 left-4">
+          <button
+            onClick={() => setShowUpgradePlanDialog(true)}
+            className="absolute top-4 left-4 cursor-pointer hover:opacity-80 transition-opacity"
+            aria-label="View upgrade options"
+          >
             <Badge variant={getPlanBadgeVariant(userPlan.plan_name)} className="text-xs">
               {userPlan.display_name}
             </Badge>
-          </div>
+          </button>
         )}
         
         <div className="flex flex-col px-4 mt-12 gap-1 overflow-y-auto flex-1 pb-6">
@@ -125,21 +134,13 @@ export function NavigationMenu({
 
           <button
             onClick={() => {
-              if (onOpenAIAssistant) {
-                onOpenAIAssistant();
-                onClose();
-              } else if (onNavigateToCMS) {
-                handleNavigation(() => onNavigateToCMS('ai-chat'));
-              }
+              toast.info("This feature will coming soon!");
+              onClose();
             }}
-            className={`w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors ${
-              cmsSection === 'ai-chat'
-                ? 'bg-zinc-100' 
-                : 'hover:bg-zinc-50'
-            }`}
+            className="w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors hover:bg-zinc-50"
           >
-            <Sparkles className={`w-5 h-5 ${cmsSection === 'ai-chat' ? 'text-neutral-950' : 'text-zinc-500'}`} />
-            <span className={cmsSection === 'ai-chat' ? 'text-neutral-950' : 'text-zinc-500'}>AI Agent</span>
+            <Sparkles className="w-5 h-5 text-zinc-500" />
+            <span className="text-zinc-500">AI Agent</span>
           </button>
 
           {/* Separator */}
@@ -147,18 +148,31 @@ export function NavigationMenu({
 
           {/* Bottom Section - CMS/Admin */}
           {isAuthenticated ? (
-            <button
-              onClick={() => {
-                if (onLogout) {
-                  onLogout();
+            <>
+              <button
+                onClick={() => {
+                  setShowChangePasswordDialog(true);
                   onClose();
-                }
-              }}
-              className="w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors hover:bg-zinc-50"
-            >
-              <LogOut className="w-5 h-5 text-zinc-500" />
-              <span className="text-zinc-500">Logout</span>
-            </button>
+                }}
+                className="w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors hover:bg-zinc-50"
+              >
+                <Key className="w-5 h-5 text-zinc-500" />
+                <span className="text-zinc-500">Change Password</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (onLogout) {
+                    onLogout();
+                    onClose();
+                  }
+                }}
+                className="w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors hover:bg-zinc-50"
+              >
+                <LogOut className="w-5 h-5 text-zinc-500" />
+                <span className="text-zinc-500">Logout</span>
+              </button>
+            </>
           ) : (
             <button
               onClick={() => {
@@ -305,23 +319,31 @@ export function NavigationMenu({
 
               <button
                 onClick={() => {
-                  if (onNavigateToCMS) {
-                    handleNavigation(() => onNavigateToCMS('personal-ai'));
-                  }
+                  toast.info("This feature will coming soon!");
+                  onClose();
                 }}
-                className={`w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors ${
-                  cmsSection === 'personal-ai'
-                    ? 'bg-zinc-100'
-                    : 'hover:bg-zinc-50'
-                }`}
+                className="w-full flex items-center gap-3 h-12 pl-4 rounded-lg transition-colors hover:bg-zinc-50"
               >
-                <Sparkles className={`w-5 h-5 ${cmsSection === 'personal-ai' ? 'text-neutral-950' : 'text-zinc-500'}`} />
-                <span className={cmsSection === 'personal-ai' ? 'text-neutral-950' : 'text-zinc-500'}>Edit Assistant</span>
+                <Sparkles className="w-5 h-5 text-zinc-500" />
+                <span className="text-zinc-500">Edit Assistant</span>
               </button>
             </>
           )}
         </div>
       </SheetContent>
+      
+      {/* Change Password Dialog */}
+      <ChangePasswordDialog 
+        open={showChangePasswordDialog} 
+        onOpenChange={setShowChangePasswordDialog} 
+      />
+      
+      {/* Upgrade Plan Dialog */}
+      <UpgradePlanDialog
+        open={showUpgradePlanDialog}
+        onOpenChange={setShowUpgradePlanDialog}
+        currentPlan={userPlan?.plan_name}
+      />
     </Sheet>
   );
 }
