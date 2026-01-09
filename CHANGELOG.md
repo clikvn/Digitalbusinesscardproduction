@@ -8,12 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Business Section Cache Issue**: Fixed cache issue where free plan users could see the Business Section in Studio page
+  - Reduced staleTime for business owner/employee queries from 5 minutes to 10 seconds
+  - Added `refetchOnMount: 'always'` to ensure fresh data on component mount
+  - Added `refetchOnWindowFocus: true` to refetch when window regains focus
+  - This prevents stale cache from showing Business section to users who don't have business plan
 - **Promotion Code Validation**: Fixed promotion code validation error handling to properly check both `success` and `valid` response fields, and improved error messages to be more specific (code not found, expired, inactive, already used, etc.)
 - **Promotion Code UI**: Added "Enter" button with arrow icon beside the promotion code input field for better UX and clearer call-to-action
 - **Business Plan Upgrade**: Page now automatically reloads after successfully applying a business promotion code to show the "My Business" section in the Studio Page
 
 ### Changed
 - **Premium Plan Badge**: Removed "Most Popular" tag from Premium plan in upgrade dialog
+- **My Business Page Avatar Size**: Updated default employee avatar size from 40x40px to 80x80px on the My Business page
 - **QR Code Logo**: QR code center logo now uses the logo from `qr_code_logo.svg` instead of profile image
   - Logo is always displayed in the center of the QR code
   - Maintains the same styling (white circular background with border and shadow)

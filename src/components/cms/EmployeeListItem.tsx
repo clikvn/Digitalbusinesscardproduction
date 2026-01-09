@@ -62,7 +62,7 @@ export function EmployeeListItem({
         onClick={onEdit}
         className="flex gap-[16px] items-center flex-1 text-left min-w-0"
       >
-        <div className="relative rounded-[100px] shrink-0 size-[40px]">
+        <div className="relative rounded-[100px] shrink-0 size-[80px]">
           <div className={`absolute inset-0 ${!employee.is_active ? 'opacity-50 grayscale-[0.5]' : ''}`}>
             {employee.avatar_url ? (
               <img
@@ -72,7 +72,7 @@ export function EmployeeListItem({
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 text-zinc-400 rounded-[100px]">
-                <Users className="size-6" />
+                <Users className="size-8" />
               </div>
             )}
           </div>

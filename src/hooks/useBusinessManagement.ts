@@ -10,17 +10,24 @@ export function useBusinessManagement() {
   const queryClient = useQueryClient();
 
   // Check if current user is business owner
+  // Reduced staleTime to prevent cache issues when plan changes
+  // This ensures free plan users don't see Business section due to stale cache
   const isBusinessOwnerQuery = useQuery({
     queryKey: ['is-business-owner'],
     queryFn: api.business.isBusinessOwner,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 1000, // 10 seconds - short enough to catch plan changes quickly
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: 'always', // Always refetch on component mount to ensure fresh data
   });
 
   // Check if current user is employee
+  // Reduced staleTime to prevent cache issues when plan changes
   const isEmployeeQuery = useQuery({
     queryKey: ['is-employee'],
     queryFn: api.business.isEmployee,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 1000, // 10 seconds - short enough to catch plan changes quickly
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: 'always', // Always refetch on component mount to ensure fresh data
   });
 
   // Get employees (for business owner)
