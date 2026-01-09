@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Crown, Check, Sparkles, Loader2, ArrowRight } from 'lucide-react';
+import { Crown, Check, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { supabase } from '../../lib/supabase-client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -252,8 +252,8 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
                 <Button
                   onClick={handleApplyPromotion}
                   disabled={isApplyingPromotion || !promotionCode.trim()}
-                  className="bg-amber-600 hover:bg-amber-700 text-white px-4"
-                  title="Press Enter or click to apply"
+                  title="Press Enter or click to submit"
+                  type="button"
                 >
                   {isApplyingPromotion ? (
                     <>
@@ -262,8 +262,7 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
                     </>
                   ) : (
                     <>
-                      <span className="mr-2">Enter</span>
-                      <ArrowRight className="h-4 w-4" />
+                      <span>Submit</span>
                     </>
                   )}
                 </Button>
