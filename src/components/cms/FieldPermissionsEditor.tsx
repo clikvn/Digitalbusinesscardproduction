@@ -131,99 +131,101 @@ export function FieldPermissionsEditor({
   const restrictedCount = Object.keys(permissions).length;
 
   return (
-    <div className="space-y-6">
-      {/* Summary */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-blue-900">
-            Company Information Permissions
-          </p>
-          <p className="text-sm text-blue-700">
-            Configure permissions for company-related fields only. Employee personal information 
-            (avatar, social media, bio, contact details, profile, portfolio) is always controlled 
-            by the employee and cannot be restricted.
-          </p>
-          {restrictedCount > 0 && (
-            <p className="text-sm text-blue-600 mt-2">
-              <span className="font-medium">
-                {restrictedCount} field{restrictedCount !== 1 ? 's' : ''} restricted
-              </span>
+    <div className="flex flex-col gap-3 sm:gap-4 overflow-hidden" style={{ maxHeight: 'calc(100dvh - 8rem)' }}>
+      {/* Scrollable Content Area */}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-3 sm:space-y-4 pr-1">
+        {/* Summary */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-blue-900">
+              Company Information Permissions
             </p>
-          )}
+            <p className="text-xs sm:text-sm text-blue-700">
+              Configure permissions for company-related fields only. Employee personal information 
+              (avatar, social media, bio, contact details, profile, portfolio) is always controlled 
+              by the employee and cannot be restricted.
+            </p>
+            {restrictedCount > 0 && (
+              <p className="text-xs sm:text-sm text-blue-600">
+                <span className="font-medium">
+                  {restrictedCount} field{restrictedCount !== 1 ? 's' : ''} restricted
+                </span>
+              </p>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Apply to All Options */}
-      {(filteredEmployees.length > 1 || allEmployees.length > 1) && (
+        {/* Apply to All Options */}
+        {(filteredEmployees.length > 1 || allEmployees.length > 1) && (
+          <div className="space-y-2">
+            {/* Apply to Filtered Employees */}
+            {filteredEmployees.length > 1 && (
+              <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="apply-to-filtered"
+                    checked={applyToFiltered}
+                    onCheckedChange={(checked) => handleApplyToFilteredChange(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1 space-y-0.5">
+                    <Label 
+                      htmlFor="apply-to-filtered" 
+                      className="text-xs sm:text-sm font-medium text-zinc-900 cursor-pointer flex items-center gap-2"
+                    >
+                      <Users className="h-3 w-3 sm:h-4 sm:w-4 text-zinc-500" />
+                      Apply to all employees in current filter
+                    </Label>
+                    <p className="text-xs text-zinc-600">
+                      This will apply the same permissions to all {filteredEmployees.length} employee{filteredEmployees.length !== 1 ? 's' : ''} 
+                      {' '}currently shown in the list (after filters).
+                    </p>
+                    {applyToFiltered && (
+                      <p className="text-xs font-medium text-blue-700">
+                        ⚠️ {affectedCount} employee{affectedCount !== 1 ? 's' : ''} will be affected
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Apply to All Business Employees */}
+            {allEmployees.length > 1 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="apply-to-all-business"
+                    checked={applyToAllBusiness}
+                    onCheckedChange={(checked) => handleApplyToAllBusinessChange(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1 space-y-0.5">
+                    <Label 
+                      htmlFor="apply-to-all-business" 
+                      className="text-xs sm:text-sm font-medium text-amber-900 cursor-pointer flex items-center gap-2"
+                    >
+                      <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
+                      Apply to all employees in business
+                    </Label>
+                    <p className="text-xs text-amber-700">
+                      This will apply the same permissions to all {allEmployees.length} employee{allEmployees.length !== 1 ? 's' : ''} 
+                      {' '}in your business, regardless of current filters.
+                    </p>
+                    {applyToAllBusiness && (
+                      <p className="text-xs font-medium text-amber-800">
+                        ⚠️ {affectedCount} employee{affectedCount !== 1 ? 's' : ''} will be affected
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Field Groups */}
         <div className="space-y-3">
-          {/* Apply to Filtered Employees */}
-          {filteredEmployees.length > 1 && (
-            <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id="apply-to-filtered"
-                  checked={applyToFiltered}
-                  onCheckedChange={(checked) => handleApplyToFilteredChange(checked === true)}
-                  className="mt-0.5"
-                />
-                <div className="flex-1 space-y-1">
-                  <Label 
-                    htmlFor="apply-to-filtered" 
-                    className="text-sm font-medium text-zinc-900 cursor-pointer flex items-center gap-2"
-                  >
-                    <Users className="h-4 w-4 text-zinc-500" />
-                    Apply to all employees in current filter
-                  </Label>
-                  <p className="text-xs text-zinc-600">
-                    This will apply the same permissions to all {filteredEmployees.length} employee{filteredEmployees.length !== 1 ? 's' : ''} 
-                    {' '}currently shown in the list (after filters).
-                  </p>
-                  {applyToFiltered && (
-                    <p className="text-xs font-medium text-blue-700 mt-1">
-                      ⚠️ {affectedCount} employee{affectedCount !== 1 ? 's' : ''} will be affected
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Apply to All Business Employees */}
-          {allEmployees.length > 1 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id="apply-to-all-business"
-                  checked={applyToAllBusiness}
-                  onCheckedChange={(checked) => handleApplyToAllBusinessChange(checked === true)}
-                  className="mt-0.5"
-                />
-                <div className="flex-1 space-y-1">
-                  <Label 
-                    htmlFor="apply-to-all-business" 
-                    className="text-sm font-medium text-amber-900 cursor-pointer flex items-center gap-2"
-                  >
-                    <Building2 className="h-4 w-4 text-amber-600" />
-                    Apply to all employees in business
-                  </Label>
-                  <p className="text-xs text-amber-700">
-                    This will apply the same permissions to all {allEmployees.length} employee{allEmployees.length !== 1 ? 's' : ''} 
-                    {' '}in your business, regardless of current filters.
-                  </p>
-                  {applyToAllBusiness && (
-                    <p className="text-xs font-medium text-amber-800 mt-1 font-semibold">
-                      ⚠️ {affectedCount} employee{affectedCount !== 1 ? 's' : ''} will be affected
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Field Groups */}
-      <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
         {FIELD_GROUPS.map((group) => (
           <div key={group.id} className="space-y-3">
             {/* Group Header */}
@@ -275,58 +277,72 @@ export function FieldPermissionsEditor({
             </div>
           </div>
         ))}
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex items-center gap-2 pt-2 border-t border-zinc-200">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPermissions({})}
-          disabled={restrictedCount === 0}
-        >
-          Allow All
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const allReadonly: Record<string, FieldPermissionLevel> = {};
-            FIELD_GROUPS.forEach(group => {
-              group.fields.forEach(field => {
-                allReadonly[field.path] = 'readonly';
+      {/* Footer - Fixed at bottom */}
+      <div className="flex-shrink-0 space-y-2 pt-2 border-t border-zinc-200">
+        {/* Quick Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPermissions({})}
+            disabled={restrictedCount === 0}
+            className="text-xs sm:text-sm"
+          >
+            Allow All
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const allReadonly: Record<string, FieldPermissionLevel> = {};
+              FIELD_GROUPS.forEach(group => {
+                group.fields.forEach(field => {
+                  allReadonly[field.path] = 'readonly';
+                });
               });
-            });
-            setPermissions(allReadonly);
-          }}
-        >
-          Set All Read Only
-        </Button>
-      </div>
+              setPermissions(allReadonly);
+            }}
+            className="text-xs sm:text-sm"
+          >
+            Set All Read Only
+          </Button>
+        </div>
 
-      {/* Actions */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSaving}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              {(applyToAllBusiness || applyToFiltered) ? `Saving for ${affectedCount} employees...` : 'Saving...'}
-            </>
-          ) : (
-            (applyToAllBusiness || applyToFiltered) ? `Save for ${affectedCount} Employees` : 'Save Permissions'
-          )}
-        </Button>
+        {/* Actions */}
+        <div className="flex justify-end gap-2 sm:gap-3 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSaving}
+            size="sm"
+            className="sm:size-default"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            size="sm"
+            className="sm:size-default"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? `Saving for ${affectedCount} employees...` : 'Saving...'}</span>
+                <span className="sm:hidden">Saving...</span>
+              </>
+            ) : (
+              <>
+                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? `Save for ${affectedCount} Employees` : 'Save Permissions'}</span>
+                <span className="sm:hidden">Save</span>
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

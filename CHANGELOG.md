@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Edit Permissions Dialog Mobile Responsiveness**: Fixed height issues on iPhone SE and iPhone 12
+  - Dialog uses `100dvh` (dynamic viewport height) for proper mobile fit
+  - Restructured component with single scrollable content area and fixed footer
+  - Reduced padding, spacing, and text sizes on mobile screens
+  - Footer buttons are always visible at bottom with proper sizing
+  - Summary, options, and field groups all scroll together within available space
 - **Complete Logout and Cache Clearing**: Fixed issue where users had to logout twice to see login menu
   - Now clears ALL React Query cache on logout to prevent auto-login from cached data
   - Clears all Supabase session storage from both localStorage and sessionStorage

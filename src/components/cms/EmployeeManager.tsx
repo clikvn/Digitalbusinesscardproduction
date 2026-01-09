@@ -787,10 +787,10 @@ export function EmployeeManager() {
 
       {/* Field Permissions Dialog */}
       <Dialog open={showPermissionsEditor} onOpenChange={setShowPermissionsEditor}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Edit Field Permissions - {selectedEmployee?.employee_name || selectedEmployee?.user_email}
+        <DialogContent className="sm:max-w-[600px] max-h-[calc(100dvh-2rem)] sm:max-h-[80vh] overflow-hidden flex flex-col p-4 sm:p-6">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="text-base sm:text-lg pr-6">
+              Edit Permissions{selectedEmployee?.employee_name ? ` - ${selectedEmployee.employee_name}` : ''}
             </DialogTitle>
           </DialogHeader>
           {selectedEmployee && (
