@@ -7,6 +7,7 @@ import { NavigationMenu } from "../layout/NavigationMenu";
 import { useBusinessCard } from "../../hooks/useBusinessCard";
 import { getUserCode, buildCMSUrl, buildProfileUrl } from "../../utils/user-code";
 import { supabase } from "../../lib/supabase-client";
+import { toast } from "sonner@2.0.3";
 
 export function CMSLayout() {
   const { userCode, section } = useParams<{ userCode: string; section?: string }>();
@@ -18,7 +19,7 @@ export function CMSLayout() {
   // Use the hook to fetch data
   const { data } = useBusinessCard(userCode);
 
-  // Ensure user is authenticated
+  // Ensure user is authenticated and employee account is active
   useEffect(() => {
     if (!userCode) {
       navigate('/');
@@ -31,7 +32,27 @@ export function CMSLayout() {
         // Redirect to auth if not logged in
         // We pass userCode to preserve context
         navigate(`/${userCode}/auth`);
+        return;
+      }
+
+      const userId = session.user.id;
+
+      // Check if user is an employee and if account is active
+      const { data: employeeStatus, error: statusError } = await supabase
+        .rpc('check_employee_status', { p_user_id: userId });
+
+      if (statusError) {
+        console.error('Error checking employee status:', statusError);
+        // Continue if check fails (fail open for edge cases)
+        setIsAuthorized(true);
+        setUserId(userId);
+      } else if (employeeStatus && employeeStatus.is_active === false) {
+        // Employee account is deactivated - sign them out and redirect
+        await supabase.auth.signOut();
+        toast.error(employeeStatus.message || 'Your account has been deactivated by your business owner. Please contact them for more information.');
+        navigate(`/${userCode}/auth`);
       } else {
+        // User is authenticated and active (or not an employee)
         setIsAuthorized(true);
         setUserId(session.user.id);
       }

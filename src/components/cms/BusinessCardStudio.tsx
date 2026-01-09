@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Home, Mail, FileText, Briefcase, Sparkles, ArrowRight, Share2 } from "lucide-react";
+import { Home, Mail, FileText, Briefcase, Sparkles, ArrowRight, Share2, Users } from "lucide-react";
 import { BarChart3 } from "lucide-react";
 import { CMSNavigationBar } from "./CMSNavigationBar";
 import { toast } from "sonner@2.0.3";
+import { useBusinessManagement } from "../../hooks/useBusinessManagement";
 
 interface BusinessCardStudioProps {
   onNavigateToSection: (section: string) => void;
@@ -15,8 +16,18 @@ interface BusinessCardStudioProps {
 }
 
 export function BusinessCardStudio({ onNavigateToSection, onNavigateHome, onMenuClick, onAIClick, profileImage, profileName }: BusinessCardStudioProps) {
+  const { isBusinessOwner } = useBusinessManagement();
 
   const cards = [
+    // My Business card for business owners - at the top
+    ...(isBusinessOwner ? [{
+      id: "employees",
+      title: "My Business",
+      description: "Manage your team's digital business cards and permissions",
+      icon: Users,
+      color: "bg-gradient-to-br from-indigo-500/10 to-indigo-500/5",
+      iconColor: "text-indigo-600",
+    }] : []),
     {
       id: "home",
       title: "Home",

@@ -69,6 +69,7 @@ export function businessCardToDb(data: BusinessCardData, userId: string, userCod
     
     avatar_url: avatarUrl,
     background_image_url: backgroundImageUrl,
+    logo_url: (data as any).logo_url || null,
     
     linkedin_url: linkedinUrl,
     twitter_url: twitterUrl,
@@ -113,6 +114,7 @@ export function businessCardToDb(data: BusinessCardData, userId: string, userCod
       customLabels: data.customLabels,
       profileImage: data.personal.profileImage, // Store original for backward compat
       aiAgentVisible: data.aiAgentVisible,
+      brandLogo: (data as any).brandLogo || undefined, // Brand logo for business owners
     },
     
     created_at: new Date().toISOString(),
@@ -201,6 +203,7 @@ export function dbToBusinessCard(db: DbBusinessCard): BusinessCardData {
     groupShareSettings: customFields.groupShareSettings,
     customLabels: customFields.customLabels,
     aiAgentVisible: customFields.aiAgentVisible,
+    logo_url: db.logo_url || undefined, // Brand logo from database column
   };
 }
 

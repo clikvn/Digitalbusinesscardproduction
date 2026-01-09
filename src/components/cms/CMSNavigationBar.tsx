@@ -13,6 +13,7 @@ interface CMSNavigationBarProps {
   // If currentPage is "overview", we show "Business Card Studio" as current page
   // Otherwise we show breadcrumbs with Business Card Studio > [Section]
   currentPage: "overview" | "section";
+  isBusinessOwner?: boolean;
 }
 
 const getPageLabel = (tab: string) => {
@@ -24,6 +25,7 @@ const getPageLabel = (tab: string) => {
     case "share": return "Share Contact";
     case "shareconfig": return "Share Configuration";
     case "analytics": return "Analytics";
+    case "employees": return "My Business";
     default: return tab;
   }
 };
@@ -37,6 +39,7 @@ export function CMSNavigationBar({
   onAIClick,
   onNavigateToStudio,
   currentPage,
+  isBusinessOwner = false,
 }: CMSNavigationBarProps) {
   return (
     <div className="flex h-[46px] items-center justify-between px-4 md:px-8">
@@ -100,6 +103,16 @@ export function CMSNavigationBar({
       {/* Center - desktop nav (only show when in section pages and tabs available) */}
       {currentPage === "section" && onTabChange && (
         <nav className="hidden md:flex items-center gap-8">
+          {isBusinessOwner && (
+            <button
+              onClick={() => onTabChange("employees")}
+              className={`text-sm font-medium transition-colors hover:text-[#0a0a0a] ${
+                activeTab === "employees" ? "text-[#0a0a0a]" : "text-[#71717a]"
+              }`}
+            >
+              My Business
+            </button>
+          )}
           <button
             onClick={() => onTabChange("home")}
             className={`text-sm font-medium transition-colors hover:text-[#0a0a0a] ${

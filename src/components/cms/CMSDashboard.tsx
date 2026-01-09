@@ -10,9 +10,11 @@ import { ShareManager } from "./ShareManager";
 import { UserCodeSettings } from "./UserCodeSettings";
 import { ShareConfiguration } from "./ShareConfiguration";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
+import { EmployeeManager } from "./EmployeeManager";
 import { BusinessCardData } from "../../types/business-card";
 import { exportData, importData } from "../../utils/storage";
 import { Home, Mail, FileText, Briefcase, Sparkles, ArrowRight, ChevronLeft, Menu, X, Plus, Copy, ThumbsUp, ThumbsDown, Paperclip, Camera, MessageCircle, Trash2, Share2, LogOut, Loader2, Users } from "lucide-react";
+import { useBusinessManagement } from "../../hooks/useBusinessManagement";
 import { BarChart3 } from "lucide-react";
 import { toast } from "sonner@2.0.3";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
@@ -47,6 +49,9 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
   
   // Use hook for data access
   const { data: queryData, update, isLoading } = useBusinessCard(userCode || undefined);
+  
+  // Check if user is business owner
+  const { isBusinessOwner } = useBusinessManagement();
   
   // Local state for form handling
   const [data, setData] = useState<BusinessCardData | null>(null);
@@ -245,6 +250,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               }}
               onNavigateToStudio={onNavigateToStudio}
               currentPage="section"
+              isBusinessOwner={isBusinessOwner}
             />
           </header>
           <div className="px-4 py-6 sm:px-8 sm:py-8">
@@ -306,6 +312,12 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               <TabsContent value="analytics" className="mt-0 space-y-6">
                 <AnalyticsDashboard />
               </TabsContent>
+
+              {isBusinessOwner && (
+                <TabsContent value="employees" className="mt-0 space-y-6">
+                  <EmployeeManager />
+                </TabsContent>
+              )}
             </Tabs>
           </div>
         </main>
@@ -322,6 +334,20 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <SheetDescription className="sr-only">Navigate between different sections of the dashboard</SheetDescription>
           <div className="flex flex-col p-4 pt-12 space-y-2">
+            {isBusinessOwner && (
+              <button
+                onClick={() => {
+                  setActiveTab("employees");
+                  setMobileMenuOpen(false);
+                }}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                  activeTab === "employees" ? "bg-[#f4f4f5] text-[#0a0a0a]" : "text-[#71717a] hover:bg-[#f4f4f5]"
+                }`}
+              >
+                <Users className="w-5 h-5" />
+                <span>My Business</span>
+              </button>
+            )}
             <button
               onClick={() => {
                 setActiveTab("home");

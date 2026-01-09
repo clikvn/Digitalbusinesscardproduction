@@ -402,6 +402,50 @@
 
 ---
 
+## Business Management
+
+### business_management
+**Purpose:** Links business owners to employees with field-level permissions
+
+**Columns:**
+- `id` (UUID, PK)
+- `business_owner_user_id` (UUID, NOT NULL, FK → auth.users) - User with 'business' plan
+- `employee_user_id` (UUID, NOT NULL, UNIQUE, FK → auth.users) - User with 'employee' plan
+- `employee_code` (TEXT) - Optional employee identifier
+- `role` (TEXT) - Employee role/title
+- `department` (TEXT) - Employee department
+- `is_active` (BOOLEAN, NOT NULL) - Default: true
+- `field_permissions` (JSONB) - Default: `{}` - Field-level edit permissions
+- `created_at` (TIMESTAMPTZ, NOT NULL)
+- `updated_at` (TIMESTAMPTZ, NOT NULL)
+
+**field_permissions structure:**
+```json
+{
+  "personal.businessName": "readonly",
+  "contact.email": "editable",
+  "portfolio": "hidden"
+}
+```
+
+**Permission levels:**
+- `editable` - Employee can edit this field
+- `readonly` - Employee can view but not edit (business owner controls)
+- `hidden` - Employee cannot see this field in editor
+
+**Constraints:**
+- `business_management_employee_unique` - One business per employee
+- `business_management_no_self_reference` - Owner cannot be their own employee
+
+---
+
+### Plan Types (Extended)
+**New plan values added to plans table:**
+- `business` - Business Plan (enables employee management)
+- `employee` - Employee Plan (assigned to managed employees)
+
+---
+
 ## Security (RLS)
 
 **Row Level Security:**
@@ -409,7 +453,9 @@
 - Users can only access their own data (WHERE user_id = auth.uid())
 - Public read access for shared business cards
 - Analytics tables filtered by user_code ownership
+- Business owners can read/update employee business cards
+- Employees can read their own business_management record
 
 ---
 
-_Last Updated: Dec 9, 2024_
+_Last Updated: Jan 9, 2026_

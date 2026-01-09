@@ -7,7 +7,7 @@ import { Textarea } from "../../ui/textarea";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import { Skeleton } from "../../ui/skeleton";
-import { Upload, Edit2, Trash2, Sparkles, UtensilsCrossed, Building2, Home, Trees, Coffee, Briefcase, Film, Smile, Users, BookOpen, ChevronLeft, Baby, Palette, Presentation, Library, Armchair, Building, MapPin, Sofa, Flower2, ShoppingBag, Footprints, Store, Lightbulb, School, Image as ImageIcon, Camera } from "lucide-react";
+import { Upload, Edit2, Trash2, Sparkles, UtensilsCrossed, Building2, Home, Trees, Coffee, Briefcase, Film, Smile, Users, BookOpen, ChevronLeft, Baby, Palette, Presentation, Library, Armchair, Building, MapPin, Sofa, Flower2, ShoppingBag, Footprints, Store, Lightbulb, School, Image as ImageIcon, Camera, Lock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
 import { FullScreenImagePositioner } from "../FullScreenImagePositioner";
 import { AvatarImagePositioner } from "../AvatarImagePositioner";
@@ -17,6 +17,7 @@ import { api } from "../../../lib/api";
 import { getUserCode } from "../../../utils/user-code";
 import { toast } from "sonner@2.0.3";
 import { supabase } from "../../../lib/supabase-client";
+import { useAllFieldPermissions } from "../../../hooks/useBusinessManagement";
 import imgImg from "figma:asset/420b26ed698402e60bcb7141f4b23bc3850beb9d.png";
 
 interface HomeFormProps {
@@ -30,6 +31,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
     defaultValues: data,
     values: data,
   });
+  
+  // Check field permissions for employees
+  const { isReadonly } = useAllFieldPermissions();
 
   const [showPositioner, setShowPositioner] = useState(false);
   const [showAvatarPositioner, setShowAvatarPositioner] = useState(false);
@@ -510,43 +514,77 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                 <FormField
                   control={form.control}
                   name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Professional Title *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleChange('title', e.target.value);
-                          }}
-                          placeholder="e.g., Interior Designer"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const readonly = isReadonly('personal.title');
+                    return (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          Professional Title *
+                          {readonly && (
+                            <Lock className="h-3.5 w-3.5 text-muted-foreground" title="This field is read-only" />
+                          )}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            onChange={(e) => {
+                              if (!readonly) {
+                                field.onChange(e);
+                                handleChange('title', e.target.value);
+                              }
+                            }}
+                            placeholder="e.g., Interior Designer"
+                            disabled={readonly}
+                            className={readonly ? 'bg-muted cursor-not-allowed' : ''}
+                          />
+                        </FormControl>
+                        {readonly && (
+                          <p className="text-xs text-muted-foreground">
+                            This field is controlled by your business owner
+                          </p>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
                   control={form.control}
                   name="businessName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleChange('businessName', e.target.value);
-                          }}
-                          placeholder="e.g., Design Solutions"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const readonly = isReadonly('personal.businessName');
+                    return (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          Business Name
+                          {readonly && (
+                            <Lock className="h-3.5 w-3.5 text-muted-foreground" title="This field is read-only" />
+                          )}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            onChange={(e) => {
+                              if (!readonly) {
+                                field.onChange(e);
+                                handleChange('businessName', e.target.value);
+                              }
+                            }}
+                            placeholder="e.g., Design Solutions"
+                            disabled={readonly}
+                            className={readonly ? 'bg-muted cursor-not-allowed' : ''}
+                          />
+                        </FormControl>
+                        {readonly && (
+                          <p className="text-xs text-muted-foreground">
+                            This field is controlled by your business owner
+                          </p>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField

@@ -5,6 +5,83 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Logo Auto-Save Issue**: Fixed logo being deleted when navigating to "My Business" page
+  - Logo is now only saved when explicitly uploaded via the upload button
+  - Auto-save mechanism now preserves existing `logo_url` from database instead of overwriting it with null
+  - Applied fix to both `api.card.save` and `api.business.updateEmployeeCard` functions
+  - Prevents logo deletion when redirecting quickly or when auto-save triggers during navigation
+
+### Changed
+- **Default Employee Permissions**: New employees now default to "Read Only" for both Company Name and Professional Title
+  - When creating a new employee, both fields are automatically set to readonly
+  - Business owners can still change permissions after creation if needed
+- **Removed Hidden Permission Option**: Removed "Hidden" permission option from field permissions system
+  - Field permissions now only support "Editable" and "Read Only" options
+  - All fields are always visible to employees (cannot be hidden)
+  - Simplified permission logic in hooks and UI components
+
+### Changed
+- **Navigation Menu Updates**: 
+  - Renamed "Employees" navigation item to "My Business" across all navigation menus
+  - Moved "My Business" to the top of navigation menus (appears first for business owners)
+  - Updated in desktop navigation bar, mobile menu, and Business Card Studio overview page
+- **My Business Page Layout**: 
+  - Moved business name title to the very top of the My Business page
+  - Removed building icon from business name display
+  - Added Brand Logo upload feature at the top of the page
+  - Logo displays above business name when uploaded
+  - Logo can be changed by clicking on it (hover to reveal upload button)
+  - Logo is stored in business card custom_fields and persists across sessions
+- **Database Schema Update**:
+  - Added `logo_url` column to `business_cards` table (migration 043)
+  - Logo is now stored as a dedicated column similar to `avatar_url` and `background_image_url`
+  - Updated TypeScript types, transformers, and API to support the new `logo_url` field
+  - EmployeeManager now uses `logo_url` column instead of `custom_fields.brandLogo`
+- **My Business Page Layout Update**:
+  - Reorganized logo and business info into a two-column container
+  - Left section: Brand logo (with upload functionality)
+  - Right section: Business name (title), address, and bio
+  - Container has white background, border, and shadow for visual separation
+  - Improved spacing and typography for better readability
+
+### Added
+- **Business Owner Business Name Integration**: 
+  - Business owner's business name is now displayed in the Employees page header
+  - When creating a new employee, their business card is automatically populated with:
+    - Business name from business owner's business card
+    - Professional title from the employee's "Role/Title" field in the form
+  - Ensures consistency across all employee business cards
+- **Auto-Repopulation of Readonly Fields**: 
+  - When business owner sets Company Name to "Read Only", it's automatically repopulated with business owner's current business name
+  - When Professional Title is set to "Read Only", it's automatically repopulated with the employee's role from business_management table
+  - Ensures that when fields are restricted, they contain the correct company information
+  - Works for both single employee and bulk permission updates
+- **Bulk Permission Updates**: Added options to apply field permissions to multiple employees
+  - Checkbox option to "Apply to all employees in current filter" - applies to filtered employees only
+  - Checkbox option to "Apply to all employees in business" - applies to all employees regardless of filters
+  - Options are mutually exclusive (selecting one deselects the other)
+  - Shows count of affected employees when bulk update is enabled
+  - Updates permissions for all target employees simultaneously
+  - Toast notification shows number of employees updated
+  - Visual distinction: filtered option uses zinc styling, business-wide option uses amber styling for emphasis
+  - Automatically refreshes employee list after permissions are updated to reflect changes in the database
+- **Field Permission Enforcement**: Readonly fields are now disabled for employees
+  - Company Name (`personal.businessName`) and Professional Title (`personal.title`) fields are disabled when set to readonly
+  - Disabled fields show a lock icon and "This field is controlled by your business owner" message
+  - Fields use muted background and cursor-not-allowed styling when readonly
+  - Prevents employees from editing restricted fields in their business card forms
+
+### Changed
+- **Field Permissions System**: Restricted field permissions to company-related fields only
+  - Business owners can now only control permissions for: Company Name (`personal.businessName`) and Professional Title (`personal.title`)
+  - Employee personal information (avatar, social media, bio, contact details, profile, portfolio) is always controlled by the employee and cannot be restricted
+  - Updated `FieldPermissionsEditor` to only display company fields
+  - Updated permission hooks (`useFieldPermission`, `useAllFieldPermissions`) to always allow editing of non-company fields
+  - Added API validation to filter out non-company fields when updating permissions
+
 ## [1.0.0] - 2024-12-09
 
 ### Added
@@ -52,7 +129,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Business Card Initialization**: Fixed `initialize_user_data` function to populate `name` and `email` fields from signup form when creating business card. Previously these fields were left empty during user registration.
+- **Employee Account Deactivation**: Added login validation to prevent deactivated employees from accessing the system. Deactivated employees are automatically signed out and shown a message to contact their business owner.
+- **Employee Plan Assignment**: Fixed employee account creation to properly set plan to 'employee' instead of 'free'. Created `set_employee_plan` RPC function to ensure business owners can set employee plans correctly.
+
+### Added
+- **Employee Status Check on Login**: Implemented `check_employee_status` RPC function to validate if employee accounts are active during login and route protection. Deactivated employees cannot log in or access protected routes.
+
+### Added
+- Business Account Management feature
+  - New `business_management` table for linking business owners to employees
+  - New plan types: `business` (Business Plan) and `employee` (Employee Plan)
+  - Field-level permissions (editable/readonly/hidden) for employee accounts
+  - `api.business` namespace with full CRUD operations for employee management
+  - `useBusinessManagement` React hook for business management functionality
+  - `useFieldPermission` hook for checking field editability
+  - `EmployeeManager` component for business owners to manage their team
+  - `AddEmployeeForm` component for creating new employee accounts
+  - `EmployeeCard` component for displaying employee information
+  - `FieldPermissionsEditor` component for configuring field-level permissions
+  - RLS policies for business owners to read/update employee business cards
+  - Helper RPC functions: `is_business_owner`, `is_employee`, `get_business_employees`, `get_employee_business_owner`, `get_employee_field_permissions`, `can_employee_edit_field`
+
 ### Changed
+- **Employee Manager UI Overhaul**: Redesigned employee list UI to match ShareStep1/ShareContact styling:
+  - Added search bar for filtering employees by name, email, role, department, or code
+  - Added horizontal scrollable status filter cards (All/Active/Inactive) with counts
+  - New `EmployeeListItem` component with clean row-based layout (avatar with status dot, name, subtitle)
+  - Employee details (email, role, department) now shown in dropdown menu
+  - "Add New" card integrated into filter section for quick access
+  - Improved visual consistency across the CMS dashboard
+- **Employee Manager Filter Updates**: 
+  - Changed "All Employees" filter label to "All" for consistency
+  - Standardized all filter button widths to `w-[100px]` to match Share Contact page styling
+  - Removed "New Agent" card from filter section
+  - Removed dedicated "Add Employee" button (using header link instead for consistency)
+- **Employee Manager Click Behavior**: 
+  - Changed employee click behavior to open edit form instead of permissions editor
+  - Created new `EditEmployeeForm` component for editing employee information (name, email, role, department, employee code)
+  - Permissions editor now accessible via dropdown menu "Edit Permissions" option
+  - Clicking on employee now opens edit dialog to update employee details
+- **Fixed Employee Card Update**: 
+  - Fixed `updateEmployeeCard` API function to bypass ownership check for business owners
+  - Business owners can now update employee business cards directly via RLS policies
+  - Function now gets employee user_id from business_cards table and updates using employee's user_id
+  - Fixed EditEmployeeForm to properly structure BusinessCardData with `personal.name` and `contact.email` instead of top-level fields
+  - Improved error handling to show actual errors when business card update fails
+- **Employee Page UI Consistency**: 
+  - Updated Employee Manager page to match Share Contact screen styling exactly
+  - Changed header font from `font-['Inter',sans-serif]` to `font-['Inter:Medium',sans-serif]` and removed text size
+  - Updated search bar height from `h-[48px]` to `h-[44px]` to match Share Contact
+  - Changed search input font to `font-['Inter:Medium',sans-serif]` and height to `h-[39px]`
+  - Updated filter card fonts to `font-['Inter:Semi_Bold',sans-serif]` for consistency
+  - Changed employee avatar from `size-[44px] rounded-[8px]` to `size-[40px] rounded-[100px]` to match contact avatars
+  - Updated employee name font to `font-['Inter:Medium',sans-serif]` and removed semibold
+  - Changed subtitle font to `font-['Inter:Regular',sans-serif]` with `leading-[24px]` instead of `leading-[20px]`
+  - Removed `mb-1` from filter card icon row and `text-lg` from count to match Share Contact
+  - Updated container padding to match Share Contact (`px-[0px]`)
+- **Employee Avatar Support**: 
+  - Added `avatar_url` field to `get_business_employees` RPC function to fetch employee avatars from business_cards table
+  - Updated `EmployeeWithDetails` TypeScript type to include `avatar_url` field
+  - Employee avatars now display from each employee's business card profile image
+- **Multi-Select Department Filter**: 
+  - Added multi-select department filter dropdown to search bar filter button
+  - Filter button shows a popover with checkboxes for all unique departments
+  - Multiple departments can be selected simultaneously
+  - Selected departments display as tags/badges below the search bar
+  - Each tag has a remove button to individually remove department filters
+  - Filter button highlights when departments are selected
+  - Clear button clears both search query and all department filters
+  - "Clear all" option in filter popover to remove all department selections
 - Updated default myClik background image to use `src/assets/myClik.png` instead of the previous Figma asset
 - Improved image loading in HomeBackgroundImage: Added image preloading and smooth fade-in transition to prevent progressive top-to-bottom loading effect
 - Added menu button to homepage: Menu button now appears after the Share button in HomeNavBar for quick access to navigation menu

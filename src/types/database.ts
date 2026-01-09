@@ -19,6 +19,7 @@ export interface DbBusinessCard {
   // Images
   avatar_url: string | null;
   background_image_url: string | null;
+  logo_url: string | null;
   
   // Social Links
   linkedin_url: string | null;
@@ -127,4 +128,48 @@ export interface DbUserShareSettings {
   visible_fields: string[];      // Array of field paths
   created_at: string;
   updated_at: string;
+}
+
+// ============================================
+// Business Management Types
+// ============================================
+
+export type FieldPermissionLevel = 'editable' | 'readonly' | 'hidden';
+
+export interface DbBusinessManagement {
+  id: string;
+  business_owner_user_id: string;
+  employee_user_id: string;
+  employee_code: string | null;
+  role: string | null;
+  department: string | null;
+  is_active: boolean;
+  field_permissions: Record<string, FieldPermissionLevel>;
+  created_at: string;
+  updated_at: string;
+}
+
+// Extended type with joined data from RPC function
+export interface EmployeeWithDetails {
+  id: string;
+  employee_user_id: string;
+  employee_code: string | null;
+  role: string | null;
+  department: string | null;
+  is_active: boolean;
+  user_email: string;
+  user_code: string;
+  employee_name: string | null;
+  avatar_url: string | null;
+  field_permissions: Record<string, FieldPermissionLevel>;
+  created_at: string;
+}
+
+export interface BusinessOwnerInfo {
+  business_owner_user_id: string;
+  business_owner_email: string;
+  business_owner_user_code: string;
+  business_owner_name: string | null;
+  is_active: boolean;
+  field_permissions: Record<string, FieldPermissionLevel>;
 }

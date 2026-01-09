@@ -50,6 +50,20 @@ export function AuthScreen() {
           throw new Error('User code not found');
         }
 
+        // Check if user is an employee and if account is active
+        const { data: employeeStatus, error: statusError } = await supabase
+          .rpc('check_employee_status', { p_user_id: userId });
+
+        if (statusError) {
+          console.error('Error checking employee status:', statusError);
+          // Continue with login if check fails (fail open for edge cases)
+        } else if (employeeStatus && employeeStatus.is_active === false) {
+          // Employee account is deactivated - sign them out and show message
+          await supabase.auth.signOut();
+          toast.error(employeeStatus.message || 'Your account has been deactivated by your business owner. Please contact them for more information.');
+          throw new Error('Account deactivated');
+        }
+
         // Store user code in localStorage for quick access
         const userCode = ownershipData.user_code;
         localStorage.setItem('user_code', userCode);
@@ -94,6 +108,9 @@ export function AuthScreen() {
          setIsLogin(true);
       } else if (error.message?.includes("User code not found")) {
          toast.error("Profile not found. Please contact support.");
+      } else if (error.message?.includes("Account deactivated")) {
+         // Error message already shown in toast above
+         // Don't show another error
       } else {
          toast.error(error.message || 'Authentication failed');
       }

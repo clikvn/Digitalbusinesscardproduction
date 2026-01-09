@@ -6,6 +6,8 @@ import { Input } from "../../ui/input";
 import { Textarea } from "../../ui/textarea";
 import { ImageUploader } from "../ImageUploader";
 import { BusinessCardData } from "../../../types/business-card";
+import { useAllFieldPermissions } from "../../../hooks/useBusinessManagement";
+import { Lock } from "lucide-react";
 
 interface PersonalInfoFormProps {
   data: BusinessCardData['personal'];
@@ -18,6 +20,9 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
     defaultValues: data,
     values: data,
   });
+  
+  // Check field permissions for employees
+  const { isReadonly } = useAllFieldPermissions();
 
   const handleChange = (field: keyof BusinessCardData['personal'], value: string) => {
     onChange({
@@ -66,30 +71,50 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
           <FormField
             control={form.control}
             name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Professional Title *</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      handleChange('title', e.target.value);
-                    }}
-                    onFocus={() => {
-                      onFieldFocus?.({
-                        label: 'Professional Title',
-                        value: data.title,
-                        onApply: (value) => handleChange('title', value)
-                      });
-                    }}
-                    placeholder="e.g., Interior Designer"
-                  />
-                </FormControl>
-                <FormDescription>Your job title or profession</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const readonly = isReadonly('personal.title');
+              return (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Professional Title *
+                    {readonly && (
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground" title="This field is read-only" />
+                    )}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        if (!readonly) {
+                          field.onChange(e);
+                          handleChange('title', e.target.value);
+                        }
+                      }}
+                      onFocus={() => {
+                        if (!readonly) {
+                          onFieldFocus?.({
+                            label: 'Professional Title',
+                            value: data.title,
+                            onApply: (value) => handleChange('title', value)
+                          });
+                        }
+                      }}
+                      placeholder="e.g., Interior Designer"
+                      disabled={readonly}
+                      className={readonly ? 'bg-muted cursor-not-allowed' : ''}
+                    />
+                  </FormControl>
+                  {readonly ? (
+                    <FormDescription className="text-muted-foreground">
+                      This field is controlled by your business owner
+                    </FormDescription>
+                  ) : (
+                    <FormDescription>Your job title or profession</FormDescription>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField

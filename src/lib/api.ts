@@ -10,7 +10,10 @@ import {
   DbAnalyticsEvent,
   DbUserCodeOwnership,
   DbUserShareGroup,
-  DbUserShareSettings
+  DbUserShareSettings,
+  EmployeeWithDetails,
+  BusinessOwnerInfo,
+  FieldPermissionLevel
 } from '../types/database';
 import { 
   businessCardToDb, 
@@ -180,8 +183,27 @@ export const api = {
       // This allows auto-save to work seamlessly while user is typing
       // Client can add optional validation in the UI if needed
 
+      // ✅ CRITICAL FIX: Preserve existing logo_url if not explicitly provided
+      // Logo should only be updated when explicitly uploaded, not during auto-save
+      let preservedLogoUrl: string | null = null;
+      const dataLogoUrl = (data as any).logo_url;
+      if (dataLogoUrl === undefined || dataLogoUrl === null) {
+        // Fetch existing logo_url from database to preserve it
+        const { data: existingCard } = await supabase
+          .from('business_cards')
+          .select('logo_url')
+          .eq('user_code', userCode)
+          .maybeSingle();
+        preservedLogoUrl = existingCard?.logo_url || null;
+      }
+
       // Transform to database format
       const dbCard = businessCardToDb(data, user.id, userCode);
+
+      // Use preserved logo_url if data doesn't have one
+      const logoUrlToSave = dataLogoUrl !== undefined && dataLogoUrl !== null 
+        ? dbCard.logo_url 
+        : preservedLogoUrl;
 
       // Upsert business card
       const { error: cardError } = await supabase
@@ -198,6 +220,7 @@ export const api = {
           website_url: dbCard.website_url,
           avatar_url: dbCard.avatar_url,
           background_image_url: dbCard.background_image_url,
+          logo_url: logoUrlToSave,
           linkedin_url: dbCard.linkedin_url,
           twitter_url: dbCard.twitter_url,
           instagram_url: dbCard.instagram_url,
@@ -1184,5 +1207,424 @@ export const api = {
         // Don't throw - usage logging failure shouldn't block the feature
       }
     }
+  },
+
+  // ============================================
+  // BUSINESS MANAGEMENT API
+  // ============================================
+
+  business: {
+    /**
+     * Check if current user is a business owner
+     */
+    isBusinessOwner: async (): Promise<boolean> => {
+      const { data, error } = await supabase.rpc('is_business_owner');
+      if (error) {
+        console.error('Error checking business owner status:', error);
+        return false;
+      }
+      return data ?? false;
+    },
+
+    /**
+     * Check if current user is an employee
+     */
+    isEmployee: async (): Promise<boolean> => {
+      const { data, error } = await supabase.rpc('is_employee');
+      if (error) {
+        console.error('Error checking employee status:', error);
+        return false;
+      }
+      return data ?? false;
+    },
+
+    /**
+     * Get all employees for the current business owner
+     */
+    getEmployees: async (): Promise<EmployeeWithDetails[]> => {
+      const { data, error } = await supabase.rpc('get_business_employees');
+      if (error) {
+        console.error('Error fetching employees:', error);
+        throw error;
+      }
+      return data ?? [];
+    },
+
+    /**
+     * Get business owner info for current employee
+     */
+    getBusinessOwner: async (): Promise<BusinessOwnerInfo | null> => {
+      const { data, error } = await supabase.rpc('get_employee_business_owner');
+      if (error) {
+        console.error('Error fetching business owner:', error);
+        throw error;
+      }
+      return data?.[0] ?? null;
+    },
+
+    /**
+     * Create employee account (for business owner)
+     * Flow: Save business owner session -> Create employee -> Restore business owner session -> Link employee
+     */
+    createEmployee: async (params: {
+      email: string;
+      password: string;
+      name: string;
+      employeeCode?: string;
+      role?: string;
+      department?: string;
+      fieldPermissions?: Record<string, FieldPermissionLevel>;
+    }): Promise<{ userCode: string; employeeUserId: string }> => {
+      // 1. Save business owner's session BEFORE signup (signup will change auth context)
+      const { data: { session: businessOwnerSession } } = await supabase.auth.getSession();
+      if (!businessOwnerSession) throw new Error('Not authenticated as business owner');
+      
+      const businessOwnerUserId = businessOwnerSession.user.id;
+      console.log('[createEmployee] Business owner ID:', businessOwnerUserId);
+      
+      // 2. Create employee account via signup
+      // Note: This changes the auth context to the new employee!
+      const signupResponse = await api.auth.signup(
+        params.email, 
+        params.password, 
+        params.name
+      );
+      
+      const employeeUserId = signupResponse.user.id;
+      const employeeUserCode = signupResponse.userCode;
+      console.log('[createEmployee] Employee created:', employeeUserId, employeeUserCode);
+      
+      // 3. Restore business owner's session
+      console.log('[createEmployee] Restoring business owner session...');
+      const { error: restoreError } = await supabase.auth.setSession({
+        access_token: businessOwnerSession.access_token,
+        refresh_token: businessOwnerSession.refresh_token,
+      });
+      
+      if (restoreError) {
+        console.error('Error restoring business owner session:', restoreError);
+        throw new Error('Failed to restore business owner session');
+      }
+      
+      console.log('[createEmployee] Business owner session restored');
+      
+      // 4. Get business owner's business card data to populate employee's card
+      let businessOwnerBusinessName = '';
+      try {
+        const businessOwnerUserCode = await supabase
+          .from('user_code_ownership')
+          .select('user_code')
+          .eq('user_id', businessOwnerUserId)
+          .maybeSingle();
+        
+        if (businessOwnerUserCode.data?.user_code) {
+          const businessOwnerCard = await api.card.get(businessOwnerUserCode.data.user_code);
+          if (businessOwnerCard) {
+            businessOwnerBusinessName = businessOwnerCard.personal.businessName || '';
+          }
+        }
+      } catch (error) {
+        console.warn('[createEmployee] Could not load business owner card data:', error);
+        // Continue anyway - not critical
+      }
+      
+      // 5. Now as business owner, insert into business_management (RLS will pass)
+      // Set default permissions to 'readonly' for Company Name and Professional Title
+      const defaultPermissions: Record<string, FieldPermissionLevel> = {
+        'personal.businessName': 'readonly',
+        'personal.title': 'readonly',
+        ...(params.fieldPermissions || {}),
+      };
+      
+      const { error: bmError } = await supabase
+        .from('business_management')
+        .insert({
+          business_owner_user_id: businessOwnerUserId,
+          employee_user_id: employeeUserId,
+          employee_code: params.employeeCode || null,
+          role: params.role || null,
+          department: params.department || null,
+          field_permissions: defaultPermissions,
+        });
+      
+      if (bmError) {
+        console.error('Error creating business management record:', bmError);
+        throw bmError;
+      }
+      
+      console.log('[createEmployee] Business management record created');
+      
+      // 6. Set employee's plan to 'employee' using RPC function (bypasses RLS)
+      const { data: planResult, error: planError } = await supabase
+        .rpc('set_employee_plan', {
+          p_employee_user_id: employeeUserId,
+          p_business_owner_user_id: businessOwnerUserId,
+        });
+      
+      if (planError) {
+        console.error('Error setting employee plan:', planError);
+        // Don't throw - employee is created, plan update is secondary
+        // But log it for debugging
+      } else {
+        console.log('[createEmployee] Employee plan set to "employee"');
+      }
+      
+      // 7. Update employee's business card with business owner's business name and employee's role as title
+      if (businessOwnerBusinessName || params.role) {
+        try {
+          // Get current employee card
+          const employeeCard = await api.card.get(employeeUserCode);
+          if (employeeCard) {
+            // Update with business owner's business name and employee's role (from business_management) as title
+            const updatedCard = {
+              ...employeeCard,
+              personal: {
+                ...employeeCard.personal,
+                businessName: businessOwnerBusinessName || employeeCard.personal.businessName,
+                title: params.role || employeeCard.personal.title, // Use role from business_management, not business owner's title
+              },
+            };
+            
+            // Update employee card (as business owner, we can update it)
+            await api.business.updateEmployeeCard(employeeUserCode, updatedCard);
+            console.log('[createEmployee] Employee business card updated with business name and role as title');
+          }
+        } catch (error) {
+          console.warn('[createEmployee] Could not update employee business card:', error);
+          // Don't throw - card update is secondary, employee is already created
+        }
+      }
+      
+      return { 
+        userCode: employeeUserCode, 
+        employeeUserId 
+      };
+    },
+
+    /**
+     * Update employee details
+     */
+    updateEmployee: async (
+      employeeUserId: string,
+      updates: {
+        employeeCode?: string;
+        role?: string;
+        department?: string;
+        isActive?: boolean;
+        fieldPermissions?: Record<string, FieldPermissionLevel>;
+      }
+    ): Promise<void> => {
+      const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+      
+      if (updates.employeeCode !== undefined) updateData.employee_code = updates.employeeCode;
+      if (updates.role !== undefined) updateData.role = updates.role;
+      if (updates.department !== undefined) updateData.department = updates.department;
+      if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
+      if (updates.fieldPermissions !== undefined) updateData.field_permissions = updates.fieldPermissions;
+      
+      const { error } = await supabase
+        .from('business_management')
+        .update(updateData)
+        .eq('employee_user_id', employeeUserId);
+      
+      if (error) {
+        console.error('Error updating employee:', error);
+        throw error;
+      }
+    },
+
+    /**
+     * Activate/Deactivate employee
+     */
+    setEmployeeActive: async (employeeUserId: string, isActive: boolean): Promise<void> => {
+      const { error } = await supabase
+        .from('business_management')
+        .update({ is_active: isActive, updated_at: new Date().toISOString() })
+        .eq('employee_user_id', employeeUserId);
+      
+      if (error) {
+        console.error('Error updating employee status:', error);
+        throw error;
+      }
+    },
+
+    /**
+     * Update field permissions for an employee
+     * Note: Only company fields (personal.businessName, personal.title) can be restricted.
+     * All other fields are always editable by employees.
+     */
+    updateFieldPermissions: async (
+      employeeUserId: string,
+      fieldPermissions: Record<string, FieldPermissionLevel>
+    ): Promise<void> => {
+      // Only allow permissions for company fields
+      const COMPANY_FIELDS = ['personal.businessName', 'personal.title'];
+      const filteredPermissions: Record<string, FieldPermissionLevel> = {};
+      
+      for (const [fieldPath, permission] of Object.entries(fieldPermissions)) {
+        if (COMPANY_FIELDS.includes(fieldPath)) {
+          filteredPermissions[fieldPath] = permission;
+        }
+      }
+      
+      // Ensure we're updating the database with the filtered permissions
+      // If filteredPermissions is empty (all fields editable), set to empty object
+      const { error, data } = await supabase
+        .from('business_management')
+        .update({ 
+          field_permissions: filteredPermissions, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('employee_user_id', employeeUserId)
+        .select();
+      
+      if (error) {
+        console.error('Error updating field permissions:', error);
+        throw error;
+      }
+      
+      // Log successful update for debugging
+      console.log(`[updateFieldPermissions] Updated permissions for employee ${employeeUserId}:`, filteredPermissions);
+    },
+
+    /**
+     * Get field permissions for current employee
+     */
+    getMyFieldPermissions: async (): Promise<Record<string, FieldPermissionLevel>> => {
+      const { data, error } = await supabase.rpc('get_employee_field_permissions');
+      if (error) {
+        console.error('Error fetching field permissions:', error);
+        return {};
+      }
+      return data ?? {};
+    },
+
+    /**
+     * Check if current employee can edit a specific field
+     */
+    canEditField: async (fieldPath: string): Promise<boolean> => {
+      const { data, error } = await supabase.rpc('can_employee_edit_field', {
+        p_field_path: fieldPath
+      });
+      if (error) {
+        console.error('Error checking field permission:', error);
+        return true; // Default to allowing
+      }
+      return data ?? true;
+    },
+
+    /**
+     * Get employee's business card (for business owner to edit)
+     */
+    getEmployeeCard: async (employeeUserCode: string): Promise<BusinessCardData | null> => {
+      return api.card.get(employeeUserCode);
+    },
+
+    /**
+     * Update employee's business card (for business owner)
+     * Bypasses ownership check - relies on RLS policies to ensure only business owners can update
+     */
+    updateEmployeeCard: async (employeeUserCode: string, data: BusinessCardData): Promise<void> => {
+      // Get employee's user_id from business_cards table (we can read this via RLS policy)
+      const { data: cardData, error: cardReadError } = await supabase
+        .from('business_cards')
+        .select('user_id, logo_url')
+        .eq('user_code', employeeUserCode)
+        .maybeSingle();
+      
+      if (cardReadError) {
+        console.error('Error fetching employee card:', cardReadError);
+        throw new Error(`Failed to find employee card: ${cardReadError.message}`);
+      }
+      
+      if (!cardData) {
+        throw new Error(`Employee card with user code ${employeeUserCode} not found`);
+      }
+      
+      const employeeUserId = cardData.user_id;
+      
+      // ✅ CRITICAL FIX: Preserve existing logo_url if not explicitly provided
+      // Logo should only be updated when explicitly uploaded, not during auto-save
+      let preservedLogoUrl: string | null = null;
+      const dataLogoUrl = (data as any).logo_url;
+      if (dataLogoUrl === undefined || dataLogoUrl === null) {
+        preservedLogoUrl = cardData.logo_url || null;
+      }
+      
+      // Transform to database format using employee's user_id
+      const dbCard = businessCardToDb(data, employeeUserId, employeeUserCode);
+      
+      // Use preserved logo_url if data doesn't have one
+      const logoUrlToSave = dataLogoUrl !== undefined && dataLogoUrl !== null 
+        ? dbCard.logo_url 
+        : preservedLogoUrl;
+      
+      // Update business card directly (RLS will enforce business owner permissions)
+      const { error: cardError } = await supabase
+        .from('business_cards')
+        .update({
+          name: dbCard.name,
+          title: dbCard.title,
+          company_name: dbCard.company_name,
+          bio: dbCard.bio,
+          email: dbCard.email,
+          phone: dbCard.phone,
+          website_url: dbCard.website_url,
+          avatar_url: dbCard.avatar_url,
+          background_image_url: dbCard.background_image_url,
+          logo_url: logoUrlToSave,
+          linkedin_url: dbCard.linkedin_url,
+          twitter_url: dbCard.twitter_url,
+          instagram_url: dbCard.instagram_url,
+          facebook_url: dbCard.facebook_url,
+          portfolio_images: dbCard.portfolio_images,
+          custom_fields: dbCard.custom_fields,
+        })
+        .eq('user_code', employeeUserCode);
+      
+      if (cardError) {
+        console.error('Error updating employee business card:', cardError);
+        throw new Error(`Failed to update employee card: ${cardError.message}`);
+      }
+      
+      // Update share settings
+      const dbSettings = shareSettingsToDb(data, employeeUserId, employeeUserCode);
+      const { error: settingsError } = await supabase
+        .from('share_settings')
+        .update({
+          hide_email: dbSettings.hide_email,
+          hide_phone: dbSettings.hide_phone,
+          hide_social: dbSettings.hide_social,
+          hide_portfolio: dbSettings.hide_portfolio,
+          custom_settings: dbSettings.custom_settings,
+        })
+        .eq('user_code', employeeUserCode);
+      
+      if (settingsError) {
+        console.error('Error updating employee share settings:', settingsError);
+        // Don't throw - share settings update failure shouldn't block card update
+      }
+    },
+
+    /**
+     * Remove employee from business (does not delete user account)
+     */
+    removeEmployee: async (employeeUserId: string): Promise<void> => {
+      const { error } = await supabase
+        .from('business_management')
+        .delete()
+        .eq('employee_user_id', employeeUserId);
+      
+      if (error) {
+        console.error('Error removing employee:', error);
+        throw error;
+      }
+      
+      // Reset employee's plan to 'free'
+      await supabase
+        .from('user_plan')
+        .update({ plan_name: 'free' })
+        .eq('user_id', employeeUserId);
+    },
   },
 };
