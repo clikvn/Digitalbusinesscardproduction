@@ -43,6 +43,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `REV` timestamp for card generation tracking
   - Escaped special characters in NOTE field (newlines, commas, semicolons)
   - Fixed bug in HomeProfileCard using literal `\n` instead of actual newlines
+  - **Mobile Contact Import**: Fixed Save button to properly trigger native contact import on mobile devices
+    - Removed `download` attribute on mobile to allow browser native handling
+    - Uses Web Share API when available for best user experience
+    - Falls back to blob URL without download attribute to trigger contact import dialog
+    - Users can now directly add contacts from the Save button on mobile phones
 
 ### Changed
 - **Portfolio Category Item Styling**: Updated typography styles for portfolio category items

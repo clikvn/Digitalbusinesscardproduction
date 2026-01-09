@@ -286,54 +286,79 @@ ${profileUrl}`;
     // Detect mobile devices
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
 
-    // For mobile devices, try Web Share API first (iOS 13+)
-    if (isMobile && navigator.share) {
-      try {
-        const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
-        const file = new File([blob], fileName, { type: 'text/vcard' });
-        
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: `Contact: ${personal.name || 'Digital Business Card'}`,
-            text: `Save ${personal.name || 'this contact'}`,
-          });
-          toast.success('Contact shared! Open it to save to contacts.');
-          return;
-        }
-      } catch (error: any) {
-        // User cancelled or share failed, fall through to download
-        if (error.name !== 'AbortError') {
-          console.log('Web Share API failed, using fallback:', error);
+    // For mobile devices, use data URL to trigger contact import
+    if (isMobile) {
+      // Create data URL with proper vCard MIME type
+      // This should trigger the native contact import on mobile browsers
+      const encodedVCard = encodeURIComponent(vCard);
+      const dataUrl = `data:text/vcard;charset=utf-8,${encodedVCard}`;
+      
+      // Try Web Share API first (best user experience)
+      if (navigator.share) {
+        try {
+          const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+          const file = new File([blob], fileName, { type: 'text/vcard' });
+          
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `Contact: ${personal.name || 'Digital Business Card'}`,
+              text: `Save ${personal.name || 'this contact'}`,
+            });
+            toast.success('Contact shared! Select "Add to Contacts" to save.');
+            return;
+          }
+        } catch (error: any) {
+          // User cancelled - don't show error
+          if (error.name === 'AbortError') {
+            return;
+          }
+          console.log('Web Share API failed, using data URL fallback:', error);
         }
       }
-    }
-
-    // Fallback: Download method (works on desktop and some mobile browsers)
-    const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    
-    // For iOS, use data URL approach
-    if (isIOS) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        const newLink = document.createElement('a');
-        newLink.href = dataUrl;
-        newLink.download = fileName;
-        document.body.appendChild(newLink);
-        newLink.click();
-        document.body.removeChild(newLink);
-        URL.revokeObjectURL(url);
-        toast.success('Contact saved! Check your Downloads folder or Files app.');
-      };
-      reader.readAsDataURL(blob);
+      
+      // Fallback: Use blob URL without download attribute to trigger native contact import
+      // On mobile, removing the download attribute allows the browser to handle .vcf files natively
+      try {
+        const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Create a link WITHOUT download attribute - this allows mobile browsers to handle it natively
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        // DO NOT set download attribute on mobile - let browser handle it natively
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        
+        // Click the link to trigger the contact import dialog
+        link.click();
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+        }, 100);
+        
+        toast.success('Opening contact card... Select "Add to Contacts" to save.');
+      } catch (error) {
+        console.error('Failed to open contact card:', error);
+        // Last resort: try data URL
+        try {
+          window.location.href = dataUrl;
+          toast.success('Opening contact card...');
+        } catch (fallbackError) {
+          toast.error('Failed to open contact card. Please try again.');
+        }
+      }
     } else {
-      // Standard download for Android and desktop
+      // Desktop: Standard download
+      const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
