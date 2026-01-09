@@ -454,18 +454,18 @@ export function EmployeeManager() {
             {/* First Row: Logo, Title, and Address */}
             <div className="w-full flex flex-row items-center gap-6">
               {/* Logo */}
-              <div className="flex-shrink-0 w-[150px] max-w-[150px]">
-                <div className="relative group w-full">
+              <div className="flex-shrink-0">
+                <div className="relative group">
                   {brandLogo ? (
                     <button
                       onClick={handleLogoClick}
-                      className="relative w-full cursor-pointer group"
+                      className="relative cursor-pointer group"
                       title="Click to change logo"
                     >
                       <img
                         src={brandLogo}
                         alt="Brand Logo"
-                        className="h-16 w-full max-w-[150px] object-contain transition-opacity group-hover:opacity-80"
+                        className="h-16 max-w-[150px] object-contain transition-opacity group-hover:opacity-80"
                         style={{ maxWidth: '150px', width: 'auto', height: '64px' }}
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded">
@@ -476,14 +476,14 @@ export function EmployeeManager() {
                     <button
                       onClick={handleLogoClick}
                       disabled={isUploadingLogo}
-                      className="flex flex-col items-center justify-center gap-2 h-16 w-full max-w-[150px] border-2 border-dashed border-zinc-300 rounded-lg hover:border-primary hover:bg-zinc-50 transition-colors disabled:opacity-50 cursor-pointer"
+                      className="flex flex-col items-center justify-center gap-2 size-[80px] border-2 border-dashed border-zinc-300 rounded-lg hover:border-primary hover:bg-zinc-50 transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {isUploadingLogo ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+                        <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
                       ) : (
                         <>
-                          <ImageIcon className="h-4 w-4 text-zinc-400" />
-                          <span className="text-xs text-zinc-500">Upload</span>
+                          <ImageIcon className="h-5 w-5 text-zinc-400" />
+                          <span className="text-xs text-zinc-500">Upload Logo</span>
                         </>
                       )}
                     </button>

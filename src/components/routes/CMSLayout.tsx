@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { BusinessCardStudio } from "../cms/BusinessCardStudio";
 import { CMSDashboard } from "../cms/CMSDashboard";
 import { NavigationMenu } from "../layout/NavigationMenu";
 import { useBusinessCard } from "../../hooks/useBusinessCard";
 import { getUserCode, buildCMSUrl, buildProfileUrl } from "../../utils/user-code";
+import { clearSupabaseSessionStorage } from "../../utils/logout-utils";
 import { supabase } from "../../lib/supabase-client";
 import { toast } from "sonner@2.0.3";
 
 export function CMSLayout() {
   const { userCode, section } = useParams<{ userCode: string; section?: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [userId, setUserId] = useState<string | undefined>();
@@ -47,7 +50,11 @@ export function CMSLayout() {
         setUserId(userId);
       } else if (employeeStatus && employeeStatus.is_active === false) {
         // Employee account is deactivated - sign them out and redirect
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch (error) {
+          console.warn('SignOut error (non-critical):', error);
+        }
         toast.error(employeeStatus.message || 'Your account has been deactivated by your business owner. Please contact them for more information.');
         navigate(`/${userCode}/auth`);
       } else {
@@ -65,7 +72,19 @@ export function CMSLayout() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // Clear ALL React Query cache to prevent auto-login from cached data
+    queryClient.clear();
+    
+    // Clear all Supabase session storage (localStorage and sessionStorage)
+    clearSupabaseSessionStorage();
+    
+    // Sign out from Supabase
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.warn('SignOut error (non-critical):', error);
+    }
+    
     navigate(`/${userCode || getUserCode()}`);
   };
 

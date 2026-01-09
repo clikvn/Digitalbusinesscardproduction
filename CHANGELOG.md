@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Complete Logout and Cache Clearing**: Fixed issue where users had to logout twice to see login menu
+  - Now clears ALL React Query cache on logout to prevent auto-login from cached data
+  - Clears all Supabase session storage from both localStorage and sessionStorage
+  - Created `logout-utils.ts` utility function for consistent logout behavior
+  - Ensures complete session removal - no auto-login after logout
+  - Applied to all logout locations (PublicLayout, CMSLayout)
+- **Logout 403 Error**: Fixed 403 Forbidden error when logging out
+  - Changed `signOut()` to `signOut({ scope: 'local' })` to clear session locally without requiring server permission
+  - Added error handling to gracefully handle any signOut failures
+  - Local scope signOut clears the session without making a server request that might fail
+  - Applied fix to all logout locations (PublicLayout, CMSLayout, AuthScreen)
+- **Navigation Menu After Logout**: Fixed issue where navigation menu still showed authenticated features (Business Card Studio, Edit sections, etc.) after user logged out
+  - Immediately updates `isAuthenticated` state to `false` and clears `userId` when logout is called
+  - Removes all user-related queries from cache (user-plan, is-business-owner, is-employee, business-employees, etc.)
+  - Closes menu immediately on logout to force re-render with updated state
+  - Updated NavigationMenu to only fetch user plan when user is authenticated
+  - Added useEffect to clear user plan cache when authentication status changes to false
+  - Ensures guest users only see public navigation options (Home, Contact, Profile, Portfolio, Login)
 - **Business Section Cache Issue**: Fixed cache issue where free plan users could see the Business Section in Studio page
   - Reduced staleTime for business owner/employee queries from 5 minutes to 10 seconds
   - Added `refetchOnMount: 'always'` to ensure fresh data on component mount
@@ -19,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Premium Plan Badge**: Removed "Most Popular" tag from Premium plan in upgrade dialog
-- **My Business Page Avatar Size**: Updated default employee avatar size from 40x40px to 80x80px on the My Business page
+- **Business Logo Upload Container**: Updated the logo upload placeholder to 80x80px on the My Business page when no logo is uploaded
 - **QR Code Logo**: QR code center logo now uses the logo from `qr_code_logo.svg` instead of profile image
   - Logo is always displayed in the center of the QR code
   - Maintains the same styling (white circular background with border and shadow)

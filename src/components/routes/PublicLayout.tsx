@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner@2.0.3";
+import { useQueryClient } from "@tanstack/react-query";
 import { HomeBackgroundImage } from "../home/HomeBackgroundImage";
 import { Gradient } from "../home/Gradient";
 import { NavigationMenu } from "../layout/NavigationMenu";
@@ -11,6 +12,7 @@ import { ProfileMenuIcon } from "../profile/ProfileIcons";
 import profileSvgPaths from "../../imports/svg-i5dwj49pkv";
 import { getUserCode, buildProfileUrl, buildCMSUrl } from "../../utils/user-code";
 import { trackPageView } from "../../utils/analytics";
+import { clearSupabaseSessionStorage } from "../../utils/logout-utils";
 import { supabase } from "../../lib/supabase-client";
 
 export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile' | 'portfolio' }) {
@@ -20,6 +22,7 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
     contactCode?: string;
   }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | undefined>();
@@ -208,9 +211,36 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
         isAuthenticated={isAuthenticated}
         onLogin={() => navigate(buildCMSUrl(getUserCode()))}
         onLogout={async () => {
-          await supabase.auth.signOut();
+          // Close menu immediately to force re-render
+          setIsMenuOpen(false);
+          
+          // Immediately update state to prevent showing authenticated features
+          setIsAuthenticated(false);
+          setUserId(undefined);
+          
+          // Clear ALL React Query cache to prevent auto-login from cached data
+          queryClient.clear();
+          
+          // Clear all Supabase session storage (localStorage and sessionStorage)
+          clearSupabaseSessionStorage();
+          
+          // Sign out from Supabase (use local scope to avoid 403 errors)
+          // This will also clear the session from Supabase's internal storage
+          try {
+            await supabase.auth.signOut({ scope: 'local' });
+          } catch (error) {
+            // If signOut fails, we've already cleared all storage, so continue
+            console.warn('SignOut error (non-critical):', error);
+          }
+          
+          // Force a session check to ensure state is updated
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            setIsAuthenticated(false);
+            setUserId(undefined);
+          }
+          
           toast.success("Logged out successfully");
-          // Stay on page, just update state (handled by onAuthStateChange)
         }}
         onNavigateToCMS={navigateToCMS}
         onOpenAIAssistant={() => {

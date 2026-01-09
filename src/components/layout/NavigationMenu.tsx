@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Home, Mail, User, Briefcase, Sparkles, LogOut, LogIn, CreditCard, Share2, BarChart3, Key } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "../ui/sheet";
 import { useUserPlan } from "../../hooks/useUserPlan";
+import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "../ui/badge";
 import { ChangePasswordDialog } from "../cms/ChangePasswordDialog";
 import { UpgradePlanDialog } from "../cms/UpgradePlanDialog";
@@ -40,9 +41,24 @@ export function NavigationMenu({
   onOpenAIAssistant?: () => void;
   userId?: string;
 }) {
-  const { data: userPlan } = useUserPlan(userId);
+  const queryClient = useQueryClient();
+  
+  // Only fetch user plan if authenticated and userId is provided
+  // This prevents showing cached plan data after logout
+  const { data: userPlanData } = useUserPlan(isAuthenticated ? userId : undefined);
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
   const [showUpgradePlanDialog, setShowUpgradePlanDialog] = useState(false);
+  
+  // Explicitly set userPlan to undefined when not authenticated to prevent showing cached data
+  const userPlan = isAuthenticated ? userPlanData : undefined;
+  
+  // Clear user plan cache when authentication status changes to false
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Clear all user plan queries when not authenticated
+      queryClient.removeQueries({ queryKey: ['user-plan'] });
+    }
+  }, [isAuthenticated, queryClient]);
   
   const handleNavigation = (navigateFn: () => void) => {
     navigateFn();

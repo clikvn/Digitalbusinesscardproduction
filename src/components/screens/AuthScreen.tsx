@@ -59,7 +59,11 @@ export function AuthScreen() {
           // Continue with login if check fails (fail open for edge cases)
         } else if (employeeStatus && employeeStatus.is_active === false) {
           // Employee account is deactivated - sign them out and show message
-          await supabase.auth.signOut();
+          try {
+            await supabase.auth.signOut({ scope: 'local' });
+          } catch (error) {
+            console.warn('SignOut error (non-critical):', error);
+          }
           toast.error(employeeStatus.message || 'Your account has been deactivated by your business owner. Please contact them for more information.');
           throw new Error('Account deactivated');
         }
