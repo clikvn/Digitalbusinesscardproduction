@@ -351,6 +351,15 @@ function transformRealtimeDataToDashboard(
   customGroups: any[]
 ): AnalyticsDashboard {
   const { user, groups, daily, clickTargets, pageStats, rawClicks, rawPageViews } = realtimeData;
+  
+  // Ensure all data structures exist with defaults
+  const safeUser = user || { total_sessions: 0, total_page_views: 0, total_clicks: 0, unique_visitors: 0 };
+  const safeGroups = groups || [];
+  const safeDaily = daily || [];
+  const safeClickTargets = clickTargets || [];
+  const safePageStats = pageStats || [];
+  const safeRawClicks = rawClicks || [];
+  const safeRawPageViews = rawPageViews || [];
 
   // Get date range for filtering
   const dateRange = getDateRange(filters);
@@ -366,7 +375,7 @@ function transformRealtimeDataToDashboard(
   }
 
   // Filter daily stats by date range AND group
-  const filteredDaily = (daily || []).filter((d: any) => {
+  const filteredDaily = safeDaily.filter((d: any) => {
     const dateMatch = d.date >= startDateISO && d.date <= endDateISO;
     const groupMatch = !filterShareCode || d.share_code === filterShareCode;
     return dateMatch && groupMatch;
@@ -374,12 +383,12 @@ function transformRealtimeDataToDashboard(
 
   // Filter pageStats and clickTargets by group if specified
   const filteredPageStats = filterShareCode 
-    ? (pageStats || []).filter((p: any) => p.share_code === filterShareCode)
-    : (pageStats || []);
+    ? safePageStats.filter((p: any) => p.share_code === filterShareCode)
+    : safePageStats;
   
   const filteredClickTargets = filterShareCode
-    ? (clickTargets || []).filter((ct: any) => ct.share_code === filterShareCode)
-    : (clickTargets || []);
+    ? safeClickTargets.filter((ct: any) => ct.share_code === filterShareCode)
+    : safeClickTargets;
 
   // When contact filter is applied, recalculate overall metrics from filtered data
   // because the views (v_realtime_daily_stats, etc.) don't filter by contact
@@ -404,10 +413,10 @@ function transformRealtimeDataToDashboard(
     
     // Sessions - count unique session_ids from raw data (already filtered by contact in API)
     const uniqueSessionIds = new Set<string>();
-    (rawPageViews || []).forEach((view: any) => {
+    safeRawPageViews.forEach((view: any) => {
       if (view.session_id) uniqueSessionIds.add(view.session_id);
     });
-    (rawClicks || []).forEach((click: any) => {
+    safeRawClicks.forEach((click: any) => {
       if (click.session_id) uniqueSessionIds.add(click.session_id);
     });
     totalSessions = uniqueSessionIds.size;
@@ -430,12 +439,12 @@ function transformRealtimeDataToDashboard(
     // When group filter is applied, calculate from the specific group's data
     if (filterShareCode) {
       // Find the specific group's unique visitor count
-      const groupData = groups.find((g: any) => g.share_code === filterShareCode);
+      const groupData = safeGroups.find((g: any) => g.share_code === filterShareCode);
       uniquePeople = groupData?.unique_visitors || 0;
       console.log('[Analytics] Unique people for group:', filterShareCode, '=', uniquePeople);
     } else {
       // Use overall count
-      uniquePeople = user.unique_visitors || 0;
+      uniquePeople = safeUser.unique_visitors || 0;
     }
   }
 
@@ -488,7 +497,7 @@ function transformRealtimeDataToDashboard(
   };
 
   // Group breakdown
-  const groupBreakdown = groups.map((g: any) => {
+  const groupBreakdown = safeGroups.map((g: any) => {
     const group = customGroups.find(cg => cg.shareCode === g.share_code);
     return {
       shareCode: g.share_code,

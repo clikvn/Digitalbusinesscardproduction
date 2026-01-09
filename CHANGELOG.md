@@ -36,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Applies to all new user registrations going forward
   - Migration script (045) available to update existing users' Public share config
 
+- **Analytics Fix for New Users**: Fixed blank page error when new users visit analytics page
+  - Changed `.single()` to `.maybeSingle()` for `v_realtime_user_stats` query to handle empty results
+  - Added null safety checks in `transformRealtimeDataToDashboard` function
+  - Added default values for all analytics data structures when no data exists
+  - New users will now see empty analytics dashboard instead of error page
+
 - **VCF/vCard Standard Compliance**: Improved contact card download format for better mobile compatibility
   - Added required `N` (Name) property with proper structure (Last;First;;;)
   - Added `TYPE` parameters for EMAIL (INTERNET) and TEL (CELL) for better mobile recognition

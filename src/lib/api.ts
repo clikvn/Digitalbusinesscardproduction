@@ -774,7 +774,7 @@ export const api = {
           .from('v_realtime_user_stats')
           .select('*')
           .eq('user_code', userCode)
-          .single(),
+          .maybeSingle(), // Use maybeSingle() instead of single() to handle empty results for new users
         
         supabase
           .from('v_realtime_group_stats')
@@ -821,8 +821,8 @@ export const api = {
         })()
       ]);
 
-      // Check for errors
-      if (userStats.error) throw userStats.error;
+      // Check for errors (but allow null data for new users)
+      if (userStats.error && userStats.error.code !== 'PGRST116') throw userStats.error; // PGRST116 = no rows found
       if (groupStats.error) throw groupStats.error;
       if (dailyStats.error) throw dailyStats.error;
       if (clickTargets.error) throw clickTargets.error;
@@ -868,7 +868,12 @@ export const api = {
         .sort((a, b) => b.total_views - a.total_views);
 
       return {
-        user: userStats.data || { total_sessions: 0, total_page_views: 0, total_clicks: 0 },
+        user: userStats.data || { 
+          total_sessions: 0, 
+          total_page_views: 0, 
+          total_clicks: 0,
+          unique_visitors: 0 
+        },
         groups: groupStats.data || [],
         daily: dailyStats.data || [],
         clickTargets: aggregatedClickTargets,
