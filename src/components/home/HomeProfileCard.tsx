@@ -152,72 +152,33 @@ export function HomeProfileCard({ onNavigateToContact, onNavigateToProfile, onNa
     // Detect mobile devices
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isAndroid = /Android/i.test(navigator.userAgent);
 
-    // For mobile devices, use data URL to trigger contact import
+    // For mobile devices, directly trigger contact import (no share dialog)
     if (isMobile) {
-      // Create data URL with proper vCard MIME type
-      // This should trigger the native contact import on mobile browsers
-      const encodedVCard = encodeURIComponent(vCard);
-      const dataUrl = `data:text/vcard;charset=utf-8,${encodedVCard}`;
+      // Create blob with vCard content
+      const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
       
-      // Try Web Share API first (best user experience)
-      if (navigator.share) {
-        try {
-          const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
-          const file = new File([blob], fileName, { type: 'text/vcard' });
-          
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: `Contact: ${personal.name || 'Digital Business Card'}`,
-              text: `Save ${personal.name || 'this contact'}`,
-            });
-            toast.success('Contact shared! Select "Add to Contacts" to save.');
-            return;
-          }
-        } catch (error: any) {
-          // User cancelled - don't show error
-          if (error.name === 'AbortError') {
-            return;
-          }
-          console.log('Web Share API failed, using data URL fallback:', error);
-        }
-      }
+      // Create a temporary anchor element and click it
+      // This approach works better on mobile browsers to trigger contact import
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      // Important: Do NOT set download attribute - let browser handle vCard natively
+      link.style.position = 'fixed';
+      link.style.top = '-9999px';
+      link.style.left = '-9999px';
+      document.body.appendChild(link);
       
-      // Fallback: Use blob URL without download attribute to trigger native contact import
-      // On mobile, removing the download attribute allows the browser to handle .vcf files natively
-      try {
-        const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Create a link WITHOUT download attribute - this allows mobile browsers to handle it natively
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        // DO NOT set download attribute on mobile - let browser handle it natively
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        
-        // Click the link to trigger the contact import dialog
-        link.click();
-        
-        // Clean up
-        setTimeout(() => {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(blobUrl);
-        }, 100);
-        
-        toast.success('Opening contact card... Select "Add to Contacts" to save.');
-      } catch (error) {
-        console.error('Failed to open contact card:', error);
-        // Last resort: try data URL
-        try {
-          window.location.href = dataUrl;
-          toast.success('Opening contact card...');
-        } catch (fallbackError) {
-          toast.error('Failed to open contact card. Please try again.');
-        }
-      }
+      // Click the link to trigger the contact import
+      link.click();
+      
+      // Clean up after a delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+      
+      toast.success('Opening contact card... Select "Add to Contacts" to save.');
     } else {
       // Desktop: Standard download
       const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
