@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Business Plan Upgrade**: Page now automatically reloads after successfully applying a business promotion code to show the "My Business" section in the Studio Page
 
 ### Changed
+- **Premium Plan Badge**: Removed "Most Popular" tag from Premium plan in upgrade dialog
 - **QR Code Logo**: QR code center logo now uses the logo from `qr_code_logo.svg` instead of profile image
   - Logo is always displayed in the center of the QR code
   - Maintains the same styling (white circular background with border and shadow)

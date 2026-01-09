@@ -122,7 +122,6 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
         'Custom domain support',
       ],
       current: currentPlan === 'premium',
-      popular: true,
     },
     {
       name: 'Business',
@@ -160,18 +159,9 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
               className={`relative border-2 rounded-lg p-4 transition-all ${
                 plan.current
                   ? 'border-primary bg-primary/5'
-                  : plan.popular
-                  ? 'border-amber-500 bg-amber-50/50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-amber-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                    Most Popular
-                  </span>
-                </div>
-              )}
 
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -198,7 +188,6 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
                       // For now, show a message
                       alert(`Upgrade to ${plan.name} plan - Payment integration coming soon!`);
                     }}
-                    className={plan.popular ? 'bg-amber-500 hover:bg-amber-600' : ''}
                   >
                     {isFreePlan && plan.name === 'Premium' ? 'Upgrade Now' : 'Select Plan'}
                   </Button>
