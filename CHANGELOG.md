@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Forgot Password / Password Reset**: Implemented password recovery functionality
+  - "Forgot password?" link on login screen
+  - Password reset email sent via Resend SMTP
+  - New `PasswordResetScreen` component handles reset token exchange
+  - Added `/auth/reset-password` route for password reset flow
+  - Users can reset password via email link without deleting account
+  - Password reset redirects to login with success message
+  - API functions: `api.auth.forgotPassword()` and `api.auth.resetPassword()`
+- **Email Confirmation for New Registrations**: Implemented email confirmation flow for new user signups
+  - Users receive a confirmation email after registration with a verification link
+  - New `AuthCallbackScreen` component handles email confirmation token exchange
+  - Added `/auth/callback` route to process email confirmation redirects
+  - Signup flow now detects when email confirmation is required and shows "Check Your Email" UI
+  - After email verification, users are redirected to login page with success message
+  - User data initialization happens after email confirmation (not during initial signup)
+  - Existing users are not affected - only applies to new registrations
+  - **Supabase Dashboard Configuration Required**:
+    - Enable "Confirm email" in Authentication > Settings
+    - Add `https://www.clik.id/auth/callback` to Authentication > URL Configuration > Redirect URLs
+    - Add `http://localhost:3000/auth/callback` for local development
+
 ### Fixed
 - **Edit Permissions Dialog Mobile Responsiveness**: Fixed height issues on iPhone SE and iPhone 12
   - Dialog uses `100dvh` (dynamic viewport height) for proper mobile fit

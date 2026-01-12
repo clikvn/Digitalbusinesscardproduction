@@ -7,6 +7,8 @@ import { queryClient } from "./lib/query-client";
 import { PublicLayout } from "./components/routes/PublicLayout";
 import { CMSLayout } from "./components/routes/CMSLayout";
 import { AuthScreen } from "./components/screens/AuthScreen";
+import { AuthCallbackScreen } from "./components/screens/AuthCallbackScreen";
+import { PasswordResetScreen } from "./components/screens/PasswordResetScreen";
 import { ensureDefaultUserExists } from "./utils/storage";
 import { Toaster } from "./components/ui/sonner";
 import { useChatWidget } from "./hooks/useChatWidget";
@@ -79,6 +81,8 @@ function AppContent() {
       
       {/* Auth */}
       <Route path="/auth" element={<AuthScreen />} />
+      <Route path="/auth/callback" element={<AuthCallbackScreen />} />
+      <Route path="/auth/reset-password" element={<PasswordResetScreen />} />
       <Route path="/:userCode/auth" element={<AuthScreen />} />
       
       {/* CMS Routes */}

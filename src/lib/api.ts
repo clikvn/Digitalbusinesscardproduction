@@ -1032,6 +1032,10 @@ export const api = {
     signup: async (email: string, password: string, name: string) => {
       console.log('[signup] Starting signup process...');
       
+      // Build redirect URL for email confirmation
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      console.log('[signup] Email confirmation redirect URL:', redirectUrl);
+      
       // Create user with Supabase auth
       const { data: signupData, error: signupError } = await supabase.auth.signUp({
         email,
@@ -1040,10 +1044,19 @@ export const api = {
           data: {
             name,
           },
+          emailRedirectTo: redirectUrl,
         },
       });
 
-      console.log('[signup] signUp response:', { data: signupData, error: signupError });
+      console.log('[signup] signUp response:', { 
+        data: signupData, 
+        error: signupError,
+        user: signupData?.user,
+        session: signupData?.session,
+        identities: signupData?.user?.identities,
+        email: signupData?.user?.email,
+        emailConfirmed: signupData?.user?.email_confirmed_at
+      });
 
       if (signupError) {
         console.error('[signup] Signup error:', signupError);
@@ -1057,6 +1070,24 @@ export const api = {
 
       const userId = signupData.user.id;
       console.log('[signup] User created successfully:', userId);
+      console.log('[signup] User email confirmed?', signupData.user.email_confirmed_at ? 'YES' : 'NO');
+      console.log('[signup] User identities:', signupData.user.identities);
+
+      // Check if email confirmation is required
+      // When email confirmation is enabled, identities array is empty until confirmed
+      const needsEmailConfirmation = !signupData.user.identities || signupData.user.identities.length === 0;
+      
+      if (needsEmailConfirmation) {
+        console.log('[signup] Email confirmation required. User must verify email before proceeding.');
+        console.log('[signup] Confirmation email should have been sent to:', signupData.user.email);
+        console.log('[signup] Check Supabase Dashboard > Authentication > Logs for email delivery status');
+        return { 
+          user: signupData.user, 
+          userCode: null,
+          needsEmailConfirmation: true 
+        };
+      }
+
       console.log('[signup] Calling initialize_user_data...');
 
       // Initialize user data via RPC function (no trigger)
@@ -1074,8 +1105,61 @@ export const api = {
 
       return { 
         user: signupData.user, 
-        userCode: initData.user_code 
+        userCode: initData.user_code,
+        needsEmailConfirmation: false 
       };
+    },
+
+    /**
+     * Send password reset email
+     */
+    forgotPassword: async (email: string) => {
+      console.log('[forgotPassword] Sending password reset email to:', email);
+      
+      const redirectUrl = `${window.location.origin}/auth/reset-password`;
+      console.log('[forgotPassword] Redirect URL:', redirectUrl);
+      
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        console.error('[forgotPassword] Error:', error);
+        console.error('[forgotPassword] Error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        });
+        
+        // Provide more helpful error messages
+        if (error.message?.includes('redirect') || error.message?.includes('URL')) {
+          throw new Error('Password reset URL not configured. Please contact support.');
+        }
+        
+        throw error;
+      }
+
+      console.log('[forgotPassword] Password reset email sent successfully');
+      return { success: true };
+    },
+
+    /**
+     * Reset password with token from email
+     */
+    resetPassword: async (newPassword: string) => {
+      console.log('[resetPassword] Resetting password...');
+      
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        console.error('[resetPassword] Error:', error);
+        throw error;
+      }
+
+      console.log('[resetPassword] Password reset successfully');
+      return { success: true };
     },
   },
 

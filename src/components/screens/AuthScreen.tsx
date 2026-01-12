@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase-client';
 import { api } from '../../lib/api';
 import { toast } from 'sonner@2.0.3';
@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { MailCheck, ArrowLeft } from 'lucide-react@0.487.0';
 
 export function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,8 +15,32 @@ export function AuthScreen() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showConfirmationPending, setShowConfirmationPending] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const navigate = useNavigate();
   const { userCode } = useParams<{ userCode: string }>();
+  const [searchParams] = useSearchParams();
+
+  // Check for email confirmation success
+  useEffect(() => {
+    const confirmed = searchParams.get('confirmed');
+    if (confirmed === 'true') {
+      toast.success('Email verified successfully! You can now sign in.');
+      // Clean up the URL
+      navigate('/auth', { replace: true });
+    }
+    
+    // Check for password reset success
+    const reset = searchParams.get('reset');
+    if (reset === 'success') {
+      toast.success('Password reset successfully! You can now sign in with your new password.');
+      // Clean up the URL
+      navigate('/auth', { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,17 +105,24 @@ export function AuthScreen() {
         
       } else {
         // ============================================
-        // SIGNUP FLOW - Already correct
+        // SIGNUP FLOW - With Email Confirmation
         // ============================================
-        // Signup flow (Client-side with database trigger):
-        // 1. api.auth.signup creates user and waits for trigger
-        // 2. Database trigger automatically creates user code and business card
-        // 3. Returns the generated user code
-        // 4. Navigate to studio
+        // Signup flow:
+        // 1. api.auth.signup creates user with emailRedirectTo
+        // 2. If email confirmation is required, show "check your email" message
+        // 3. If no confirmation needed, initialize user data and navigate to studio
         
         const signupResponse = await api.auth.signup(cleanEmail, cleanPassword, cleanName);
         
-        // Store the generated user code from signup
+        // Check if email confirmation is required
+        if (signupResponse.needsEmailConfirmation) {
+          console.log('[AuthScreen] Email confirmation required');
+          setPendingEmail(cleanEmail);
+          setShowConfirmationPending(true);
+          return; // Exit early - user needs to confirm email
+        }
+        
+        // No confirmation needed - proceed to studio
         if (signupResponse.userCode) {
           localStorage.setItem('user_code', signupResponse.userCode);
         }
@@ -122,6 +154,162 @@ export function AuthScreen() {
       setLoading(false);
     }
   };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordLoading(true);
+    
+    const cleanEmail = email.trim();
+    
+    if (!cleanEmail) {
+      toast.error('Please enter your email address');
+      setForgotPasswordLoading(false);
+      return;
+    }
+
+    try {
+      await api.auth.forgotPassword(cleanEmail);
+      toast.success('Password reset email sent! Check your inbox.');
+      setShowForgotPassword(false);
+      setEmail('');
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+      if (error.message?.includes('not found') || error.message?.includes('does not exist')) {
+        // Don't reveal if email exists or not for security
+        toast.success('If an account exists with this email, a password reset link has been sent.');
+        setShowForgotPassword(false);
+        setEmail('');
+      } else {
+        toast.error(error.message || 'Failed to send password reset email');
+      }
+    } finally {
+      setForgotPasswordLoading(false);
+    }
+  };
+
+  // Show forgot password screen
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#e9e6dc] p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <CardTitle>Reset Password</CardTitle>
+            </div>
+            <CardDescription>
+              Enter your email address and we'll send you a link to reset your password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">Email</Label>
+                <Input 
+                  id="forgot-email" 
+                  type="email" 
+                  placeholder="jane@example.com" 
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)} 
+                  required 
+                  autoFocus
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={forgotPasswordLoading}>
+                {forgotPasswordLoading ? 'Sending...' : 'Send Reset Link'}
+              </Button>
+              
+              <div className="text-center text-sm text-muted-foreground">
+                <button 
+                  type="button"
+                  onClick={() => setShowForgotPassword(false)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show confirmation pending screen
+  if (showConfirmationPending) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#e9e6dc] p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <MailCheck className="h-12 w-12 text-primary" />
+            </div>
+            <CardTitle>Check Your Email</CardTitle>
+            <CardDescription className="text-base">
+              We've sent a confirmation link to <strong>{pendingEmail || email}</strong>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Click the link in your email to verify your account and complete registration.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Didn't receive the email? Check your spam folder.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={async () => {
+                if (!pendingEmail) return;
+                setResendingEmail(true);
+                try {
+                  const { error } = await supabase.auth.resend({
+                    type: 'signup',
+                    email: pendingEmail,
+                    options: {
+                      emailRedirectTo: `${window.location.origin}/auth/callback`,
+                    },
+                  });
+                  if (error) {
+                    toast.error(error.message || 'Failed to resend email');
+                  } else {
+                    toast.success('Confirmation email sent! Please check your inbox.');
+                  }
+                } catch (error: any) {
+                  toast.error(error.message || 'Failed to resend email');
+                } finally {
+                  setResendingEmail(false);
+                }
+              }}
+              disabled={resendingEmail}
+              className="w-full"
+            >
+              {resendingEmail ? 'Sending...' : 'Resend Confirmation Email'}
+            </Button>
+            <div className="pt-4 border-t">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowConfirmationPending(false);
+                  setIsLogin(true);
+                }}
+                className="text-primary hover:underline font-medium text-sm"
+              >
+                Already confirmed? Sign In
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#e9e6dc] p-4">
@@ -160,7 +348,18 @@ export function AuthScreen() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <Input 
                 id="password" 
                 type="password" 
