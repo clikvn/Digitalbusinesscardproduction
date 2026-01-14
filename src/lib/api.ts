@@ -1245,10 +1245,13 @@ export const api = {
     forgotPassword: async (email: string) => {
       console.log('[forgotPassword] Sending password reset email to:', email);
       
-      // Use absolute URL - Supabase requires exact match with whitelisted URLs
-      const redirectUrl = `${window.location.origin}/auth/reset-password`;
+      // Use explicit site URL when available so production always uses the correct domain
+      // (avoids sending reset emails with redirect_to pointing at the wrong host, e.g. clik.id vs www.clik.id)
+      const configuredSiteUrl = (import.meta as any)?.env?.VITE_APP_SITE_URL as string | undefined;
+      const baseUrl = (configuredSiteUrl || window.location.origin).replace(/\/+$/, '');
+      const redirectUrl = `${baseUrl}/auth/reset-password`;
       console.log('[forgotPassword] Redirect URL:', redirectUrl);
-      console.log('[forgotPassword] Current origin:', window.location.origin);
+      console.log('[forgotPassword] Base URL:', baseUrl);
       
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added early return in App.tsx redirect logic to prevent other redirects from interfering
   - Password reset links now properly redirect to `/auth/reset-password` page with tokens preserved
   - Users can now successfully reset their password when clicking email links
+  - Standardized reset email `redirect_to` by supporting `VITE_APP_SITE_URL` (prevents clik.id vs www.clik.id mismatches)
 - **Signup with Existing Email**: Fixed issue where users could register with an existing email and be redirected to verification page
   - Created RPC function `check_email_exists()` to check if email exists in auth.users BEFORE signup
   - Added pre-signup email check to prevent duplicate registrations (runs before Supabase signUp call)
