@@ -18,10 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Email Dialog Layout**: Reordered email dialog sections for better user flow
   - Moved "Send email using client app" section above "Send mail using website" section
   - Client app option now appears first, followed by webmail provider options
-- **Webmail Compose URLs**: Fixed email compose URLs for Gmail and Outlook to open compose windows directly
-  - Gmail: Changed to hash-based URL format (`#compose?to=`) to open compose window directly instead of inbox
-  - Outlook: Changed from deeplink format to path-based compose action to avoid redirecting to Microsoft marketing page
-  - Both providers now open compose windows with recipient email pre-filled when user clicks the provider button
+- **Webmail Compose URLs**: Updated to use official compose URL formats with pre-filled recipient email
+  - Gmail: Using `https://mail.google.com/mail/?view=cm&fs=1&to=EMAIL` format (view=cm for compose, fs=1 for fullscreen)
+  - Outlook: Using `https://outlook.live.com/mail/0/deeplink/compose?to=EMAIL` format (official deeplink compose)
+  - Both providers now open compose windows directly with recipient email pre-filled when user clicks the provider button
 
 ### Fixed
 - **Desktop Email Button Handling**: Improved email interaction on desktop devices with provider selection

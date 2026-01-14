@@ -188,17 +188,18 @@ export function PhoneButton({ phone }: { phone: string }) {
 
 /**
  * Get webmail compose URL for a specific provider
+ * Uses official compose URL formats with pre-filled recipient email
  */
 function getWebmailComposeUrl(provider: string, recipientEmail: string): string {
   const encodedEmail = encodeURIComponent(recipientEmail);
   
   switch (provider) {
     case 'gmail':
-      // Use hash-based URL format for direct compose window
-      return `https://mail.google.com/mail/u/0/#compose?to=${encodedEmail}`;
+      // Gmail compose with pre-filled recipient: view=cm (compose), fs=1 (fullscreen), to=EMAIL
+      return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodedEmail}`;
     case 'outlook':
-      // Use path-based compose action for Outlook.com (works for both personal and Office 365)
-      return `https://outlook.live.com/mail/0/?path=/mail/action/compose&to=${encodedEmail}`;
+      // Outlook.com compose with pre-filled recipient using deeplink format
+      return `https://outlook.live.com/mail/0/deeplink/compose?to=${encodedEmail}`;
     default:
       return `mailto:${recipientEmail}`;
   }
