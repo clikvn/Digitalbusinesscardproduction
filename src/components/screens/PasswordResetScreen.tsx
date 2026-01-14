@@ -36,14 +36,40 @@ export function PasswordResetScreen() {
         console.log('[PasswordReset] Processing password reset token...');
         console.log('[PasswordReset] Current URL:', window.location.href);
         console.log('[PasswordReset] Current pathname:', window.location.pathname);
+        console.log('[PasswordReset] Hash:', window.location.hash);
+        console.log('[PasswordReset] Search:', window.location.search);
+        
+        // Check for password reset tokens in multiple formats
+        const hash = window.location.hash;
+        const search = window.location.search;
+        const hasResetToken = 
+          hash.includes('access_token') || 
+          hash.includes('type=recovery') ||
+          hash.includes('recovery') ||
+          search.includes('code=') ||
+          search.includes('type=recovery') ||
+          (hash && (hash.includes('token') || hash.includes('recovery')));
         
         // If we're not on the reset-password page but have tokens, redirect to the correct page
-        if (window.location.pathname !== '/auth/reset-password' && 
-            (window.location.hash.includes('access_token') || window.location.search.includes('code'))) {
-          console.log('[PasswordReset] Redirecting to /auth/reset-password with tokens...');
-          const hash = window.location.hash;
-          const search = window.location.search;
+        if (window.location.pathname !== '/auth/reset-password' && hasResetToken) {
+          console.log('[PasswordReset] Detected reset tokens on wrong page, redirecting to /auth/reset-password');
           navigate(`/auth/reset-password${search}${hash}`, { replace: true });
+          return;
+        }
+        
+        // If we're on the reset-password page but don't have tokens, check if we should stay
+        if (window.location.pathname === '/auth/reset-password' && !hasResetToken) {
+          // Check if there's an existing session (user might have already set session)
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            console.log('[PasswordReset] Found existing session, showing reset form');
+            setStatus('ready');
+            return;
+          }
+          // No tokens and no session - show error
+          console.error('[PasswordReset] No reset tokens found on reset-password page');
+          setErrorMessage(t('error.pleaseRequestNewReset'));
+          setStatus('error');
           return;
         }
         
@@ -137,7 +163,7 @@ export function PasswordResetScreen() {
     };
 
     handleResetToken();
-  }, []);
+  }, [navigate, t]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();

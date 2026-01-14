@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Password Reset Email Redirect**: Fixed issue where password reset email links redirected to home page instead of password reset page
+  - Improved password reset token detection in App.tsx to catch all token formats (hash and query params)
+  - Added check to skip session clearing on password reset page (user needs session to reset password)
+  - Enhanced PasswordResetScreen to better handle tokens from email links
+  - Added early return in App.tsx redirect logic to prevent other redirects from interfering
+  - Password reset links now properly redirect to `/auth/reset-password` page with tokens preserved
+  - Users can now successfully reset their password when clicking email links
+- **Signup with Existing Email**: Fixed issue where users could register with an existing email and be redirected to verification page
+  - Created RPC function `check_email_exists()` to check if email exists in auth.users BEFORE signup
+  - Added pre-signup email check to prevent duplicate registrations (runs before Supabase signUp call)
+  - Added check for existing user in `user_code_ownership` table after signup as additional safety
+  - Check happens BEFORE signup attempt to prevent any processing of existing emails
+  - Improved error detection to catch all variations of "user already registered" errors from Supabase
+  - Added detection for error codes and status codes (422, 400) that indicate existing email
+  - Users attempting to sign up with existing email now see proper error message immediately
+  - Form automatically switches to login form when email already exists
+  - Form fields are cleared when showing "email already registered" error
+  - Prevents redirect to register success page when email already exists in database
+  - **Note**: Requires running migration `049_check_email_exists.sql` in Supabase Dashboard
 - **CRITICAL SECURITY FIX: Unauthorized Access Prevention**: Fixed critical security vulnerability where users could access other users' studio/CMS by manipulating URLs
   - Added user code ownership verification in `CMSLayout` before allowing access to studio/CMS features
   - System now checks if logged-in user actually owns the user code they're trying to access

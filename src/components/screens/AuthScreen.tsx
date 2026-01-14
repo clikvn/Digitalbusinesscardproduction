@@ -202,9 +202,14 @@ export function AuthScreen() {
         return;
       } else if (error.message?.includes("Invalid login credentials")) {
          toast.error(t('auth.invalidCredentials'));
-      } else if (error.message?.includes("User already registered")) {
+      } else if (error.message?.includes("User already registered") || 
+                 error.message?.toLowerCase().includes("already registered") ||
+                 error.message?.toLowerCase().includes("email already")) {
          toast.error(t('auth.emailAlreadyRegistered'));
          setIsLogin(true);
+         setEmail(''); // Clear email field
+         setPassword(''); // Clear password field
+         setName(''); // Clear name field
       } else if (error.message?.includes("User code not found")) {
          toast.error(t('auth.profileNotFound'));
       } else if (error.message?.includes("Account deactivated")) {

@@ -24,12 +24,27 @@ function AppContent() {
   useEffect(() => {
     const hash = window.location.hash;
     const search = window.location.search;
-    const hasResetToken = hash.includes('access_token') || hash.includes('type=recovery') || search.includes('code=');
+    const pathname = location.pathname;
+    
+    // Check for password reset tokens in multiple formats
+    // Supabase password reset links typically have: type=recovery in hash or code= in query
+    const hasResetToken = 
+      hash.includes('access_token') || 
+      hash.includes('type=recovery') || 
+      hash.includes('recovery') ||
+      search.includes('code=') ||
+      search.includes('type=recovery') ||
+      (hash && (hash.includes('token') || hash.includes('recovery')));
     
     // If we have reset tokens but we're not on the reset-password page, redirect there
-    if (hasResetToken && location.pathname !== '/auth/reset-password') {
-      console.log('[App] Detected password reset token on wrong page, redirecting to /auth/reset-password');
+    if (hasResetToken && pathname !== '/auth/reset-password') {
+      console.log('[App] Detected password reset token on wrong page:', pathname);
+      console.log('[App] Hash:', hash);
+      console.log('[App] Search:', search);
+      console.log('[App] Redirecting to /auth/reset-password');
+      // Use replace: true to prevent back button issues
       navigate(`/auth/reset-password${search}${hash}`, { replace: true });
+      return; // Exit early to prevent other redirects
     }
   }, [location.pathname, location.search, location.hash, navigate]);
   
@@ -91,7 +106,14 @@ function AppContent() {
   }, []);
 
   // Clear any unverified sessions on app start to prevent auto-login
+  // BUT: Skip this check if we're on password reset page (user needs session for password reset)
   useEffect(() => {
+    // Don't clear sessions if we're on password reset page - user needs session to reset password
+    if (location.pathname === '/auth/reset-password') {
+      console.log('[App] Skipping session clear - on password reset page');
+      return;
+    }
+
     const clearUnverifiedSessions = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -105,7 +127,7 @@ function AppContent() {
     };
 
     clearUnverifiedSessions();
-  }, []);
+  }, [location.pathname]);
 
   return (
     <Routes>

@@ -1070,6 +1070,19 @@ export const api = {
     signup: async (email: string, password: string, name: string) => {
       console.log('[signup] Starting signup process...');
       
+      // CRITICAL: Check if email already exists BEFORE attempting signup
+      const cleanEmail = email.trim().toLowerCase();
+      const { data: emailExists, error: emailCheckError } = await supabase
+        .rpc('check_email_exists', { p_email: cleanEmail });
+      
+      if (emailCheckError) {
+        console.warn('[signup] Error checking if email exists:', emailCheckError);
+        // Continue with signup if check fails (fail open)
+      } else if (emailExists === true) {
+        console.log('[signup] Email already exists in database:', cleanEmail);
+        throw new Error('User already registered');
+      }
+      
       // Build redirect URL for email confirmation
       const redirectUrl = `${window.location.origin}/auth/callback`;
       console.log('[signup] Email confirmation redirect URL:', redirectUrl);
@@ -1098,6 +1111,30 @@ export const api = {
 
       if (signupError) {
         console.error('[signup] Signup error:', signupError);
+        
+        // Check if this is an "email already registered" error
+        const errorMessage = signupError.message?.toLowerCase() || '';
+        const errorCode = signupError.code || '';
+        
+        // Check multiple patterns for "email already exists" errors
+        const isEmailAlreadyRegistered = 
+          errorMessage.includes('user already registered') ||
+          errorMessage.includes('email already registered') ||
+          errorMessage.includes('already registered') ||
+          errorMessage.includes('user already exists') ||
+          errorMessage.includes('email already exists') ||
+          errorMessage.includes('email address is already') ||
+          errorMessage.includes('duplicate key') ||
+          errorCode === 'user_already_registered' ||
+          errorCode === 'email_already_registered' ||
+          signupError.status === 422 ||
+          (signupError.status === 400 && errorMessage.includes('already'));
+        
+        if (isEmailAlreadyRegistered) {
+          console.log('[signup] Email already registered - throwing error to show message');
+          throw new Error('User already registered');
+        }
+        
         throw signupError;
       }
 
@@ -1107,6 +1144,45 @@ export const api = {
       }
 
       const userId = signupData.user.id;
+      const userEmail = signupData.user.email;
+      
+      // CRITICAL: Check if user already exists BEFORE checking email confirmation
+      // Check 1: If user already has user_code_ownership, they're an existing user
+      const { data: existingOwnership } = await supabase
+        .from('user_code_ownership')
+        .select('user_code')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      // Check 2: Also verify by checking if this email already has a user_code_ownership record
+      // This catches cases where Supabase might return a different user_id for the same email
+      // We need to check auth.users through a join or RPC, but as a fallback, check by user_id first
+      
+      // If user already has ownership record, they're an existing user - show error immediately
+      if (existingOwnership) {
+        console.log('[signup] User already exists with user code:', existingOwnership.user_code);
+        console.log('[signup] Email:', userEmail, 'User ID:', userId);
+        console.log('[signup] This is an existing user trying to sign up again - throwing error');
+        throw new Error('User already registered');
+      }
+      
+      // Additional safety check: If user has email_confirmed_at set, they're likely an existing user
+      // This is a secondary check in case the ownership check didn't catch it
+      if (signupData.user.email_confirmed_at) {
+        // User email is already confirmed - this means they're an existing user
+        // Double-check by trying to find their ownership record one more time
+        const { data: doubleCheck } = await supabase
+          .from('user_code_ownership')
+          .select('user_code')
+          .eq('user_id', userId)
+          .maybeSingle();
+        
+        if (doubleCheck) {
+          console.log('[signup] Double-check: User already exists with confirmed email');
+          throw new Error('User already registered');
+        }
+      }
+
       console.log('[signup] User created successfully:', userId);
       console.log('[signup] User email confirmed?', signupData.user.email_confirmed_at ? 'YES' : 'NO');
       console.log('[signup] User identities:', signupData.user.identities);
