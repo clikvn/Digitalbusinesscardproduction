@@ -9,6 +9,7 @@ import * as LucideIcons from 'lucide-react';
 import { useSettings } from '../../hooks/useSettings';
 import { useContacts } from '../../hooks/useContacts';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface ShareStep1Props {
   onAddContact: () => void;
@@ -18,6 +19,7 @@ interface ShareStep1Props {
 }
 
 export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onShareGroup }: ShareStep1Props) {
+  const { t } = useTranslation();
   const { userCode } = useParams<{ userCode: string }>();
   const { customGroups: groups } = useSettings(userCode);
   const { contacts } = useContacts(userCode);
@@ -93,14 +95,14 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
         <div className="box-border content-stretch flex flex-col gap-[16px] items-start px-[0px] w-full px-[0px] py-[16px]">
           <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-muted-foreground text-center w-full">
             <p className="leading-[20px]">
-              Select contact to share your digital card or{' '}
+              {t('shareManager.selectContactToShare')}{' '}
               <button 
                 onClick={onAddContact}
                 className="underline hover:text-foreground transition-colors"
               >
-                Add new contact
+                {t('shareManager.addNewContact')}
               </button>
-              {' '}to your list
+              {' '}{t('shareManager.toYourList')}
             </p>
           </div>
 
@@ -114,7 +116,7 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search"
+                  placeholder={t('shareManager.search')}
                   className="flex-1 bg-transparent outline-none font-['Inter:Medium',sans-serif] font-medium text-foreground placeholder:text-muted-foreground"
                 />
               </div>
@@ -213,7 +215,7 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
           <div className="content-stretch flex flex-col gap-[16px] items-center relative shrink-0 w-full">
             {filteredContacts.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
-                {searchQuery ? 'No contacts found matching your search' : 'No contacts in this group'}
+                {searchQuery ? t('shareManager.noContactsFound') : t('shareManager.noContactsInGroup')}
               </div>
             ) : (
               filteredContacts.map((contact) => (
@@ -247,7 +249,7 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
                   <button
                     onClick={() => onSelectContact(contact)}
                     className="overflow-clip relative shrink-0 size-[16px]"
-                    aria-label="Share contact"
+                    aria-label={t('shareManager.addContact')}
                   >
                     <ShareIcon />
                   </button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Home, Mail, FileText, Briefcase, Sparkles, ArrowRight, Share2, Users } from "lucide-react";
 import { BarChart3 } from "lucide-react";
@@ -16,78 +17,79 @@ interface BusinessCardStudioProps {
 }
 
 export function BusinessCardStudio({ onNavigateToSection, onNavigateHome, onMenuClick, onAIClick, profileImage, profileName }: BusinessCardStudioProps) {
+  const { t } = useTranslation();
   const { isBusinessOwner } = useBusinessManagement();
 
   const cards = [
     // My Business card for business owners - at the top
     ...(isBusinessOwner ? [{
       id: "employees",
-      title: "My Business",
-      description: "Manage your team's digital business cards and permissions",
+      title: t("studio.myBusiness"),
+      description: t("studio.myBusinessDescription"),
       icon: Users,
       color: "bg-gradient-to-br from-indigo-500/10 to-indigo-500/5",
       iconColor: "text-indigo-600",
     }] : []),
     {
       id: "home",
-      title: "Home",
-      description: "Customize your main profile card with name, title, and location",
+      title: t("common.home"),
+      description: t("studio.homeDescription"),
       icon: Home,
       color: "bg-gradient-to-br from-[#c96442]/10 to-[#c96442]/5",
       iconColor: "text-[#c96442]",
     },
     {
       id: "contact",
-      title: "Contact",
-      description: "Add your contact information and social media links",
+      title: t("common.contact"),
+      description: t("studio.contactDescription"),
       icon: Mail,
       color: "bg-gradient-to-br from-blue-500/10 to-blue-500/5",
       iconColor: "text-blue-600",
     },
     {
       id: "profile",
-      title: "Profile",
-      description: "Share your story, experience, and professional background",
+      title: t("common.profile"),
+      description: t("studio.profileDescription"),
       icon: FileText,
       color: "bg-gradient-to-br from-green-500/10 to-green-500/5",
       iconColor: "text-green-600",
     },
     {
       id: "portfolio",
-      title: "Portfolio",
-      description: "Showcase your work with images, videos, and project details",
+      title: t("common.portfolio"),
+      description: t("studio.portfolioDescription"),
       icon: Briefcase,
       color: "bg-gradient-to-br from-purple-500/10 to-purple-500/5",
       iconColor: "text-purple-600",
     },
     {
       id: "share",
-      title: "Share",
-      description: "Share your digital card with contacts via QR code, URL, or email",
+      title: t("navigation.share"),
+      description: t("studio.shareDescription"),
       icon: Share2,
       color: "bg-gradient-to-br from-orange-500/10 to-orange-500/5",
       iconColor: "text-orange-600",
     },
     {
       id: "shareconfig",
-      title: "Share Config",
-      description: "Control which fields are visible to each contact group",
+      title: t("navigation.shareConfig"),
+      description: t("studio.shareConfigDescription"),
       icon: Share2,
       color: "bg-gradient-to-br from-pink-500/10 to-pink-500/5",
       iconColor: "text-pink-600",
     },
     {
       id: "analytics",
-      title: "Analytics",
-      description: "Track engagement and views across all your shared links",
+      title: t("navigation.analytics"),
+      description: t("studio.analyticsDescription"),
       icon: BarChart3,
       color: "bg-gradient-to-br from-cyan-500/10 to-cyan-500/5",
       iconColor: "text-cyan-600",
     },
     {
       id: "ai-assistant",
-      title: "Personal AI",
-      description: "Get AI-powered help to craft compelling content for your card",
+      title: t("navigation.personalAI"),
+      description: t("studio.personalAIDescription"),
       icon: Sparkles,
       color: "bg-gradient-to-br from-amber-500/10 to-amber-500/5",
       iconColor: "text-amber-600",
@@ -134,7 +136,7 @@ export function BusinessCardStudio({ onNavigateToSection, onNavigateHome, onMenu
                     onClick={() => {
                       if (card.id === 'ai-assistant') {
                         // Show coming soon message
-                        toast.info("This feature will coming soon!");
+                        toast.info(t("messages.comingSoon"));
                       } else {
                         onNavigateToSection(card.id);
                       }

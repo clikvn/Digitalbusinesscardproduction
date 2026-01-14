@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner@2.0.3";
 import { useQueryClient } from "@tanstack/react-query";
 import { HomeBackgroundImage } from "../home/HomeBackgroundImage";
@@ -14,6 +15,8 @@ import { getUserCode, buildProfileUrl, buildCMSUrl } from "../../utils/user-code
 import { trackPageView } from "../../utils/analytics";
 import { clearSupabaseSessionStorage } from "../../utils/logout-utils";
 import { supabase } from "../../lib/supabase-client";
+import { usePublicBusinessCard } from "../../hooks/usePublicBusinessCard";
+import { AccountErrorPage } from "./AccountErrorPage";
 
 export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile' | 'portfolio' }) {
   const { userCode, groupCode, contactCode } = useParams<{ 
@@ -110,6 +113,9 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
   // Check if current user is the owner (for showing edit buttons)
   const isOwner = userCode === getUserCode();
 
+  // Fetch business card data to check for errors
+  const { error: businessCardError, isLoading: isLoadingBusinessCard } = usePublicBusinessCard(userCode || '', groupCode);
+
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
@@ -139,6 +145,36 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
   const navigateToCMS = (section?: string) => {
     navigate(buildCMSUrl(getUserCode(), section));
   };
+
+  const { t } = useTranslation();
+
+  // Determine error message (must be after all hooks)
+  const getErrorInfo = () => {
+    if (!businessCardError || !userCode) return null;
+    
+    const errorMessage = (businessCardError as any)?.message || '';
+    
+    if (errorMessage === 'USER_CODE_NOT_FOUND') {
+      return {
+        title: t("error.accountNotAvailable"),
+        message: t("error.accountNotFound")
+      };
+    } else if (errorMessage === 'EMPLOYEE_DEACTIVATED') {
+      return {
+        title: t("error.accountNotAvailable"),
+        message: t("error.accountDeactivated")
+      };
+    }
+    
+    return null;
+  };
+
+  const errorInfo = getErrorInfo();
+
+  // Show error page if there's an error (must be after all hooks)
+  if (errorInfo && !isLoadingBusinessCard) {
+    return <AccountErrorPage title={errorInfo.title} message={errorInfo.message} />;
+  }
 
   return (
     <div className="bg-[#faf9f5] w-full h-full relative" style={{ height: 'calc(var(--vh, 1vh) * 100)', overflow: screen === 'home' ? 'visible' : 'auto' }}>
@@ -179,7 +215,7 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
           onBack={() => navigateTo('home')} 
           onMenuClick={() => setIsMenuOpen(true)} 
           onAIClick={() => {
-            toast.info("This feature will coming soon!");
+            toast.info(t("messages.comingSoon"));
           }} 
         />
       )}
@@ -209,7 +245,7 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
         onNavigateToMyProfile={() => navigate(buildCMSUrl(getUserCode()))}
         currentScreen={screen}
         isAuthenticated={isAuthenticated}
-        onLogin={() => navigate(buildCMSUrl(getUserCode()))}
+        onLogin={() => navigate('/auth')}
         onLogout={async () => {
           // Close menu immediately to force re-render
           setIsMenuOpen(false);
@@ -240,11 +276,11 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
             setUserId(undefined);
           }
           
-          toast.success("Logged out successfully");
+          toast.success(t("auth.loggedOutSuccess"));
         }}
         onNavigateToCMS={navigateToCMS}
         onOpenAIAssistant={() => {
-          toast.info("This feature will coming soon!");
+          toast.info(t("messages.comingSoon"));
         }}
         userId={userId}
       />

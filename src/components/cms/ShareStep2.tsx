@@ -12,6 +12,7 @@ import { useSettings } from '../../hooks/useSettings';
 import { useParams } from 'react-router-dom';
 import { filterBusinessCardData } from '../../utils/filtered-data-loader';
 import qrCodeLogo from '../../assets/qr_code_logo.svg';
+import { useTranslation } from 'react-i18next';
 
 interface ShareStep2Props {
   onBack: () => void;
@@ -20,6 +21,7 @@ interface ShareStep2Props {
 }
 
 export function ShareStep2({ onBack, onMenu, selectedContact }: ShareStep2Props) {
+  const { t } = useTranslation();
   const { userCode } = useParams<{ userCode: string }>();
   const { data } = useBusinessCard(userCode);
   const { customGroups: groups, settings } = useSettings(userCode);
@@ -33,7 +35,7 @@ export function ShareStep2({ onBack, onMenu, selectedContact }: ShareStep2Props)
     return (
       <div className="bg-[#faf9f5] flex items-center justify-center size-full">
         <div className="text-center">
-          <p className="text-[#83827d]">Loading...</p>
+          <p className="text-[#83827d]">{t('shareStep2.loading')}</p>
         </div>
       </div>
     );
@@ -127,18 +129,18 @@ ${profileUrl}`;
   const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
-      toast.success('URL copied to clipboard');
+      toast.success(t('shareStep2.urlCopied'));
     } catch (error) {
-      toast.error('Failed to copy URL');
+      toast.error(t('shareStep2.failedToCopyURL'));
     }
   };
 
   const handleCopyEmbed = async () => {
     try {
       await navigator.clipboard.writeText(embedCode);
-      toast.success('Embed code copied to clipboard');
+      toast.success(t('shareStep2.embedCodeCopied'));
     } catch (error) {
-      toast.error('Failed to copy embed code');
+      toast.error(t('shareStep2.failedToCopyEmbed'));
     }
   };
 
@@ -146,10 +148,10 @@ ${profileUrl}`;
     try {
       const signature = getEmailSignature(selectedTemplate);
       await navigator.clipboard.writeText(signature);
-      toast.success('Email signature copied to clipboard');
+      toast.success(t('shareStep2.emailSignatureCopied'));
       setShowEmailSignatureDialog(false);
     } catch (error) {
-      toast.error('Failed to copy signature');
+      toast.error(t('shareStep2.failedToCopySignature'));
     }
   };
 
@@ -184,7 +186,7 @@ ${profileUrl}`;
     if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
       try {
         await navigator.share(shareData);
-        toast.success('Shared successfully');
+        toast.success(t('shareStep2.sharedSuccessfully'));
       } catch (error: any) {
         // User cancelled the share - don't show error
         if (error.name === 'AbortError') {
@@ -201,7 +203,7 @@ ${profileUrl}`;
         });
         
         // Fallback to copying URL
-        toast.info('Sharing not available, copying URL instead');
+        toast.info(t('shareStep2.sharingNotAvailable'));
         handleCopyUrl();
       }
     } else if (navigator.share) {
@@ -209,13 +211,13 @@ ${profileUrl}`;
       // Try anyway (some browsers don't support canShare)
       try {
         await navigator.share(shareData);
-        toast.success('Shared successfully');
+        toast.success(t('shareStep2.sharedSuccessfully'));
       } catch (error: any) {
         if (error.name === 'AbortError') {
           return;
         }
         console.error('Error sharing:', error);
-        toast.info('Sharing not available, copying URL instead');
+        toast.info(t('shareStep2.sharingNotAvailable'));
         handleCopyUrl();
       }
     } else {
@@ -312,7 +314,7 @@ ${profileUrl}`;
         URL.revokeObjectURL(blobUrl);
       }, 1000);
       
-      toast.success('Opening contact card... Select "Add to Contacts" to save.');
+      toast.success(t('shareStep2.openingContactCard'));
     } else {
       // Desktop: Standard download
       const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
@@ -324,7 +326,7 @@ ${profileUrl}`;
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      toast.success('Contact card downloaded');
+      toast.success(t('shareStep2.contactCardDownloaded'));
     }
   };
 
@@ -348,8 +350,8 @@ ${profileUrl}`;
               </div>
               <p className="text-sm text-[#83827d] text-center">
                 {groupInfo 
-                  ? `Scan QR code to share with ${groupInfo.name}`
-                  : 'Scan QR code to receive the card'
+                  ? t('shareStep2.scanQRCodeToShare', { name: groupInfo.name })
+                  : t('shareStep2.scanQRCodeToReceive')
                 }
               </p>
             </div>
@@ -363,14 +365,14 @@ ${profileUrl}`;
                   className="bg-[#e9e6dc] flex gap-2 items-center justify-center px-3 py-3 rounded-lg hover:bg-[#dad7cd] transition-colors"
                 >
                   <LinkIcon2 className="size-4 text-[#535146]" />
-                  <span className="text-sm text-[#535146]">Copy URL</span>
+                  <span className="text-sm text-[#535146]">{t('shareStep2.copyURL')}</span>
                 </button>
                 <button
                   onClick={handleCopyEmbed}
                   className="bg-[#e9e6dc] flex gap-2 items-center justify-center px-3 py-3 rounded-lg hover:bg-[#dad7cd] transition-colors"
                 >
                   <CodeIcon />
-                  <span className="text-sm text-[#535146]">Copy Embed</span>
+                  <span className="text-sm text-[#535146]">{t('shareStep2.copyEmbed')}</span>
                 </button>
               </div>
 
@@ -381,14 +383,14 @@ ${profileUrl}`;
                   className="bg-[#e9e6dc] flex gap-2 items-center justify-center px-3 py-3 rounded-lg hover:bg-[#dad7cd] transition-colors"
                 >
                   <MessageSquare className="size-4 text-[#535146]" />
-                  <span className="text-sm text-[#535146]">SMS</span>
+                  <span className="text-sm text-[#535146]">{t('shareStep2.sms')}</span>
                 </button>
                 <button
                   onClick={handleEmail}
                   className="bg-[#e9e6dc] flex gap-2 items-center justify-center px-3 py-3 rounded-lg hover:bg-[#dad7cd] transition-colors"
                 >
                   <Mail className="size-4 text-[#535146]" />
-                  <span className="text-sm text-[#535146]">Email</span>
+                  <span className="text-sm text-[#535146]">{t('shareStep2.email')}</span>
                 </button>
               </div>
 
@@ -399,14 +401,14 @@ ${profileUrl}`;
                   className="bg-[#e9e6dc] flex gap-2 items-center justify-center px-3 py-3 rounded-lg hover:bg-[#dad7cd] transition-colors"
                 >
                   <Wallet className="size-4 text-[#535146]" />
-                  <span className="text-sm text-[#535146]">Add to Wallet</span>
+                  <span className="text-sm text-[#535146]">{t('shareStep2.addToWallet')}</span>
                 </button>
                 <button
                   onClick={() => setShowEmailSignatureDialog(true)}
                   className="bg-[#e9e6dc] flex gap-2 items-center justify-center px-3 py-3 rounded-lg hover:bg-[#dad7cd] transition-colors"
                 >
                   <FileText className="size-4 text-[#535146]" />
-                  <span className="text-sm text-[#535146]">Email Signature</span>
+                  <span className="text-sm text-[#535146]">{t('shareStep2.emailSignature')}</span>
                 </button>
               </div>
 
@@ -416,7 +418,7 @@ ${profileUrl}`;
                 className="bg-[#c96442] flex gap-2 items-center justify-center px-4 py-3 rounded-lg hover:bg-[#b5583b] transition-colors w-full"
               >
                 <ShareIconWhite />
-                <span className="text-sm text-slate-50">Share</span>
+                <span className="text-sm text-slate-50">{t('shareStep2.share')}</span>
               </button>
             </div>
           </div>
@@ -427,8 +429,8 @@ ${profileUrl}`;
       <Dialog open={showEmailSignatureDialog} onOpenChange={setShowEmailSignatureDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Select Email Signature Template</DialogTitle>
-            <DialogDescription>Select a template to copy as your email signature.</DialogDescription>
+            <DialogTitle>{t('shareStep2.selectEmailSignatureTemplate')}</DialogTitle>
+            <DialogDescription>{t('shareStep2.selectTemplateDescription')}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 mt-4">
             {/* Template Options */}
@@ -443,7 +445,7 @@ ${profileUrl}`;
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-medium">Simple</p>
+                  <p className="text-sm font-medium">{t('shareStep2.simple')}</p>
                   {selectedTemplate === 'simple' && (
                     <div className="size-5 rounded-full bg-[#c96442] flex items-center justify-center">
                       <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -467,7 +469,7 @@ ${profileUrl}`;
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-medium">Detailed</p>
+                  <p className="text-sm font-medium">{t('shareStep2.detailed')}</p>
                   {selectedTemplate === 'detailed' && (
                     <div className="size-5 rounded-full bg-[#c96442] flex items-center justify-center">
                       <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -491,7 +493,7 @@ ${profileUrl}`;
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-medium">Compact</p>
+                  <p className="text-sm font-medium">{t('shareStep2.compact')}</p>
                   {selectedTemplate === 'compact' && (
                     <div className="size-5 rounded-full bg-[#c96442] flex items-center justify-center">
                       <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -512,7 +514,7 @@ ${profileUrl}`;
               className="bg-[#c96442] text-white px-4 py-2.5 rounded-lg hover:bg-[#b5583b] transition-colors flex items-center justify-center gap-2"
             >
               <Copy className="size-4" />
-              Copy Selected Signature
+              {t('shareStep2.copySelectedSignature')}
             </button>
           </div>
         </DialogContent>

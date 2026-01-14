@@ -4,8 +4,10 @@ import { FieldVisibilitySettings } from "./FieldVisibilitySettings";
 import { GroupConfiguration } from "./GroupConfiguration";
 import { AlertCircle, Share2, Users, Eye, Lock, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
+import { useTranslation } from "react-i18next";
 
 export function ShareConfiguration() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6 pb-32 sm:pb-24">
       {/* Section 1: Configure Groups */}
@@ -15,9 +17,9 @@ export function ShareConfiguration() {
             1
           </div>
           <div>
-            <h3 className="mb-1">Configure Your Groups</h3>
+            <h3 className="mb-1">{t('shareConfiguration.configureGroups')}</h3>
             <p className="text-sm text-[#71717a] leading-relaxed">
-              Create and customize contact groups to organize how you share your information
+              {t('shareConfiguration.configureGroupsDescription')}
             </p>
           </div>
         </div>
@@ -31,9 +33,9 @@ export function ShareConfiguration() {
             2
           </div>
           <div>
-            <h3 className="mb-1">Configure Field Visibility</h3>
+            <h3 className="mb-1">{t('shareConfiguration.configureFieldVisibility')}</h3>
             <p className="text-sm text-[#71717a] leading-relaxed">
-              Choose which fields each group can see, then generate share links in the Share tab
+              {t('shareConfiguration.configureFieldVisibilityDescription')}
             </p>
           </div>
         </div>

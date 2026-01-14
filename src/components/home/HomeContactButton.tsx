@@ -1,7 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import svgPaths from "../../imports/svg-ryed6k4ibx";
 
 export function HomeContactButton({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
@@ -38,7 +40,7 @@ export function HomeContactButton({ onClick }: { onClick: () => void }) {
             </div>
           </div>
           <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-nowrap text-slate-50">
-            <p className="leading-[20px] whitespace-pre">Contact</p>
+            <p className="leading-[20px] whitespace-pre">{t("common.contact")}</p>
           </div>
         </div>
       </div>

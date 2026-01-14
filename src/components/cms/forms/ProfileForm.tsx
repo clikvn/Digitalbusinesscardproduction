@@ -7,6 +7,7 @@ import { FileText, MapPin, Award, Briefcase, Languages, ShieldCheck, Sparkles } 
 import { BusinessCardData, VisibilityGroup } from "../../../types/business-card";
 import { FieldVisibilityPopover } from "../FieldVisibilityPopover";
 import { EditableFieldLabel } from "../EditableFieldLabel";
+import { useTranslation } from "react-i18next";
 
 interface ProfileFormProps {
   personal: BusinessCardData['personal'];
@@ -21,6 +22,7 @@ interface ProfileFormProps {
 const visibilityGroups: VisibilityGroup[] = ['Public', 'Private', 'Business', 'Personal'];
 
 export function ProfileForm({ personal, profile, customLabels, onPersonalChange, onProfileChange, onCustomLabelChange, onFieldFocus }: ProfileFormProps) {
+  const { t } = useTranslation();
   const profileForm = useForm({
     defaultValues: profile,
     values: profile,
@@ -77,7 +79,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
               <FileText className="w-5 h-5 text-[#0a0a0a]" />
               <CardTitle className="text-lg">
                 <EditableFieldLabel
-                  value={customLabels?.['profile.about'] || 'About'}
+                  value={customLabels?.['profile.about'] || t('profileForm.about')}
                   onSave={(value) => onCustomLabelChange?.('profile.about', value)}
                 />
               </CardTitle>
@@ -85,7 +87,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
             <FieldVisibilityPopover fieldPath="profile.about" />
           </div>
           <p className="text-sm text-[#71717a] m-[0px]">
-            Tell people about yourself and your expertise.
+            {t('profileForm.aboutDescription')}
           </p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6">
@@ -105,14 +107,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           handleProfileChange('about', e.target.value);
                           autoResize(e.target);
                         }}
-                        placeholder="Tell about yourself, your expertise, and what you do..."
+                        placeholder={t('profileForm.aboutPlaceholder')}
                         rows={1}
                         className="resize-none pr-10 min-h-[60px] overflow-hidden"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const label = customLabels?.['profile.about'] || 'About';
+                          const label = customLabels?.['profile.about'] || t('profileForm.about');
                           const reviewMessage = profile.about 
                             ? `Please review "${profile.about}" for my ${label} section`
                             : `Help me write content for my ${label} section`;
@@ -124,7 +126,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-[#f4f4f5] transition-colors"
-                        title="Get AI help"
+                        title={t('profileForm.getAIHelp')}
                       >
                         <Sparkles className="w-4 h-4 text-[#71717a]" />
                       </button>
@@ -146,14 +148,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
               <MapPin className="w-5 h-5 text-[#0a0a0a]" />
               <CardTitle className="text-lg">
                 <EditableFieldLabel
-                  value={customLabels?.['profile.serviceAreas'] || 'Service Areas'}
+                  value={customLabels?.['profile.serviceAreas'] || t('profileForm.serviceAreas')}
                   onSave={(value) => onCustomLabelChange?.('profile.serviceAreas', value)}
                 />
               </CardTitle>
             </div>
             <FieldVisibilityPopover fieldPath="profile.serviceAreas" />
           </div>
-          <p className="text-sm text-[#71717a] m-[0px]">Geographic areas where you provide services</p>
+          <p className="text-sm text-[#71717a] m-[0px]">{t('profileForm.serviceAreasDescription')}</p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6">
           <Form {...profileForm}>
@@ -172,14 +174,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           handleProfileChange('serviceAreas', e.target.value);
                           autoResize(e.target);
                         }}
-                        placeholder="e.g., Hanoi • Ha Tay • Hoa Binh • Bac Ninh"
+                        placeholder={t('profileForm.serviceAreasPlaceholder')}
                         rows={1}
                         className="resize-none pr-10 min-h-[60px] overflow-hidden"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const label = customLabels?.['profile.serviceAreas'] || 'Service Areas';
+                          const label = customLabels?.['profile.serviceAreas'] || t('profileForm.serviceAreas');
                           const reviewMessage = profile.serviceAreas 
                             ? `Please review "${profile.serviceAreas}" for my ${label} section`
                             : `Help me write content for my ${label} section`;
@@ -191,7 +193,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-[#f4f4f5] transition-colors"
-                        title="Get AI help"
+                        title={t('profileForm.getAIHelp')}
                       >
                         <Sparkles className="w-4 h-4 text-[#71717a]" />
                       </button>
@@ -213,14 +215,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
               <Award className="w-5 h-5 text-[#0a0a0a]" />
               <CardTitle className="text-lg">
                 <EditableFieldLabel
-                  value={customLabels?.['profile.specialties'] || 'Specialties'}
+                  value={customLabels?.['profile.specialties'] || t('profileForm.specialties')}
                   onSave={(value) => onCustomLabelChange?.('profile.specialties', value)}
                 />
               </CardTitle>
             </div>
             <FieldVisibilityPopover fieldPath="profile.specialties" />
           </div>
-          <p className="text-sm text-[#71717a] m-[0px]">Your areas of expertise and specialization</p>
+          <p className="text-sm text-[#71717a] m-[0px]">{t('profileForm.specialtiesDescription')}</p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6">
           <Form {...profileForm}>
@@ -239,14 +241,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           handleProfileChange('specialties', e.target.value);
                           autoResize(e.target);
                         }}
-                        placeholder="e.g., Buyer's Agent • Seller's Agent • Resale • Apartment"
+                        placeholder={t('profileForm.specialtiesPlaceholder')}
                         rows={1}
                         className="resize-none pr-10 min-h-[60px] overflow-hidden"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const label = customLabels?.['profile.specialties'] || 'Specialties';
+                          const label = customLabels?.['profile.specialties'] || t('profileForm.specialties');
                           const reviewMessage = profile.specialties 
                             ? `Please review "${profile.specialties}" for my ${label} section`
                             : `Help me write content for my ${label} section`;
@@ -258,7 +260,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-[#f4f4f5] transition-colors"
-                        title="Get AI help"
+                        title={t('profileForm.getAIHelp')}
                       >
                         <Sparkles className="w-4 h-4 text-[#71717a]" />
                       </button>
@@ -280,7 +282,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
               <Briefcase className="w-5 h-5 text-[#0a0a0a]" />
               <CardTitle className="text-lg">
                 <EditableFieldLabel
-                  value={customLabels?.['profile.experience'] || 'Experience'}
+                  value={customLabels?.['profile.experience'] || t('profileForm.experience')}
                   onSave={(value) => onCustomLabelChange?.('profile.experience', value)}
                 />
               </CardTitle>
@@ -288,7 +290,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
             <FieldVisibilityPopover fieldPath="profile.experience" />
           </div>
           <p className="text-sm text-[#71717a] m-[0px]">
-            Your professional work experience and background
+            {t('profileForm.experienceDescription')}
           </p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6">
@@ -308,14 +310,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           handleProfileChange('experience', e.target.value);
                           autoResize(e.target);
                         }}
-                        placeholder="Describe your professional experience and background..."
+                        placeholder={t('profileForm.experiencePlaceholder')}
                         rows={1}
                         className="resize-none pr-10 min-h-[60px] overflow-hidden"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const label = customLabels?.['profile.experience'] || 'Experience';
+                          const label = customLabels?.['profile.experience'] || t('profileForm.experience');
                           const reviewMessage = profile.experience 
                             ? `Please review "${profile.experience}" for my ${label} section`
                             : `Help me write content for my ${label} section`;
@@ -327,7 +329,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-[#f4f4f5] transition-colors"
-                        title="Get AI help"
+                        title={t('profileForm.getAIHelp')}
                       >
                         <Sparkles className="w-4 h-4 text-[#71717a]" />
                       </button>
@@ -349,14 +351,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
               <Languages className="w-5 h-5 text-[#0a0a0a]" />
               <CardTitle className="text-lg">
                 <EditableFieldLabel
-                  value={customLabels?.['profile.languages'] || 'Languages'}
+                  value={customLabels?.['profile.languages'] || t('profileForm.languages')}
                   onSave={(value) => onCustomLabelChange?.('profile.languages', value)}
                 />
               </CardTitle>
             </div>
             <FieldVisibilityPopover fieldPath="profile.languages" />
           </div>
-          <p className="text-sm text-[#71717a] m-[0px]">Languages you speak and communicate in</p>
+          <p className="text-sm text-[#71717a] m-[0px]">{t('profileForm.languagesDescription')}</p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6">
           <Form {...profileForm}>
@@ -375,14 +377,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           handleProfileChange('languages', e.target.value);
                           autoResize(e.target);
                         }}
-                        placeholder="e.g., Vietnamese • English • Korean"
+                        placeholder={t('profileForm.languagesPlaceholder')}
                         rows={1}
                         className="resize-none pr-10 min-h-[60px] overflow-hidden"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const label = customLabels?.['profile.languages'] || 'Languages';
+                          const label = customLabels?.['profile.languages'] || t('profileForm.languages');
                           const reviewMessage = profile.languages 
                             ? `Please review "${profile.languages}" for my ${label} section`
                             : `Help me write content for my ${label} section`;
@@ -394,7 +396,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-[#f4f4f5] transition-colors"
-                        title="Get AI help"
+                        title={t('profileForm.getAIHelp')}
                       >
                         <Sparkles className="w-4 h-4 text-[#71717a]" />
                       </button>
@@ -416,14 +418,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
               <ShieldCheck className="w-5 h-5 text-[#0a0a0a]" />
               <CardTitle className="text-lg">
                 <EditableFieldLabel
-                  value={customLabels?.['profile.certifications'] || 'Certifications'}
+                  value={customLabels?.['profile.certifications'] || t('profileForm.certifications')}
                   onSave={(value) => onCustomLabelChange?.('profile.certifications', value)}
                 />
               </CardTitle>
             </div>
             <FieldVisibilityPopover fieldPath="profile.certifications" />
           </div>
-          <p className="text-sm text-[#71717a] m-[0px]">Professional certifications and licenses you hold</p>
+          <p className="text-sm text-[#71717a] m-[0px]">{t('profileForm.certificationsDescription')}</p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6">
           <Form {...profileForm}>
@@ -442,14 +444,14 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           handleProfileChange('certifications', e.target.value);
                           autoResize(e.target);
                         }}
-                        placeholder="e.g., HN-1108"
+                        placeholder={t('profileForm.certificationsPlaceholder')}
                         rows={1}
                         className="resize-none pr-10 min-h-[60px] overflow-hidden"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const label = customLabels?.['profile.certifications'] || 'Certifications';
+                          const label = customLabels?.['profile.certifications'] || t('profileForm.certifications');
                           const reviewMessage = profile.certifications 
                             ? `Please review "${profile.certifications}" for my ${label} section`
                             : `Help me write content for my ${label} section`;
@@ -461,7 +463,7 @@ export function ProfileForm({ personal, profile, customLabels, onPersonalChange,
                           });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-[#f4f4f5] transition-colors"
-                        title="Get AI help"
+                        title={t('profileForm.getAIHelp')}
                       >
                         <Sparkles className="w-4 h-4 text-[#71717a]" />
                       </button>

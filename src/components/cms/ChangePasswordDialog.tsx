@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -13,6 +14,7 @@ interface ChangePasswordDialogProps {
 }
 
 export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps) {
+  const { t } = useTranslation();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,22 +28,22 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     
     // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error('Please fill in all fields');
+      toast.error(t('dialogs.pleaseFillAllFields'));
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters long');
+      toast.error(t('dialogs.passwordTooShort'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('New passwords do not match');
+      toast.error(t('dialogs.passwordsDoNotMatch'));
       return;
     }
 
     if (currentPassword === newPassword) {
-      toast.error('New password must be different from current password');
+      toast.error(t('dialogs.passwordSameAsCurrent'));
       return;
     }
 
@@ -51,7 +53,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       // First, verify the current password by attempting to sign in
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !user.email) {
-        toast.error('User not found. Please log in again.');
+        toast.error(t('dialogs.userNotFound'));
         setIsLoading(false);
         return;
       }
@@ -63,7 +65,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       });
 
       if (signInError) {
-        toast.error('Current password is incorrect');
+        toast.error(t('dialogs.currentPasswordIncorrect'));
         setIsLoading(false);
         return;
       }
@@ -75,13 +77,13 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
 
       if (updateError) {
         console.error('Password update error:', updateError);
-        toast.error(updateError.message || 'Failed to update password');
+        toast.error(updateError.message || t('dialogs.failedToUpdatePassword'));
         setIsLoading(false);
         return;
       }
 
       // Success
-      toast.success('Password updated successfully');
+      toast.success(t('dialogs.passwordUpdatedSuccess'));
       
       // Reset form
       setCurrentPassword('');
@@ -90,7 +92,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       onOpenChange(false);
     } catch (error: any) {
       console.error('Unexpected error:', error);
-      toast.error(error.message || 'An unexpected error occurred');
+      toast.error(error.message || t('error.unexpectedError'));
     } finally {
       setIsLoading(false);
     }
@@ -107,22 +109,22 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
+          <DialogTitle>{t('dialogs.changePassword')}</DialogTitle>
           <DialogDescription>
-            Enter your current password and choose a new password.
+            {t('dialogs.changePasswordDescription')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Current Password */}
           <div className="space-y-2">
-            <Label htmlFor="current-password">Current Password</Label>
+            <Label htmlFor="current-password">{t('dialogs.currentPassword')}</Label>
             <div className="relative">
               <Input
                 id="current-password"
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
+                placeholder={t('dialogs.enterCurrentPassword')}
                 disabled={isLoading}
                 className="pr-10"
               />
@@ -143,14 +145,14 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
 
           {/* New Password */}
           <div className="space-y-2">
-            <Label htmlFor="new-password">New Password</Label>
+            <Label htmlFor="new-password">{t('dialogs.newPassword')}</Label>
             <div className="relative">
               <Input
                 id="new-password"
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password (min. 6 characters)"
+                placeholder={t('dialogs.enterNewPassword')}
                 disabled={isLoading}
                 className="pr-10"
               />
@@ -171,14 +173,14 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
 
           {/* Confirm Password */}
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm New Password</Label>
+            <Label htmlFor="confirm-password">{t('dialogs.confirmNewPassword')}</Label>
             <div className="relative">
               <Input
                 id="confirm-password"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
+                placeholder={t('dialogs.confirmNewPasswordPlaceholder')}
                 disabled={isLoading}
                 className="pr-10"
               />
@@ -205,16 +207,16 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
               onClick={handleCancel}
               disabled={isLoading}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
+                  {t('common.updating')}
                 </>
               ) : (
-                'Update Password'
+                t('dialogs.updatePassword')
               )}
             </Button>
           </div>

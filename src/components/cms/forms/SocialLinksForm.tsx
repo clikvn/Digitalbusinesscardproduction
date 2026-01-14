@@ -5,6 +5,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "../../ui/input";
 import { BusinessCardData } from "../../../types/business-card";
 import { MessageCircle, Share2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface SocialLinksFormProps {
   messaging: BusinessCardData['socialMessaging'];
@@ -15,6 +16,7 @@ interface SocialLinksFormProps {
 }
 
 export function SocialLinksForm({ messaging, channels, onMessagingChange, onChannelsChange, onFieldFocus }: SocialLinksFormProps) {
+  const { t } = useTranslation();
   const messagingForm = useForm({
     defaultValues: messaging,
     values: messaging,
@@ -31,7 +33,7 @@ export function SocialLinksForm({ messaging, channels, onMessagingChange, onChan
       new URL(value);
       return true;
     } catch {
-      return "Please enter a valid URL (e.g., https://example.com)";
+      return t("socialLinksForm.invalidUrl");
     }
   };
 
@@ -56,9 +58,9 @@ export function SocialLinksForm({ messaging, channels, onMessagingChange, onChan
         <CardHeader className="px-4 md:px-6 md:pt-6 pb-[0px] pt-[12px] pr-[16px] pl-[16px]">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-[#0a0a0a]" />
-            <CardTitle className="text-lg">Messaging Apps</CardTitle>
+            <CardTitle className="text-lg">{t("socialLinksForm.messagingApps")}</CardTitle>
           </div>
-          <p className="text-sm text-[#71717a] m-[0px]">Direct messaging platforms</p>
+          <p className="text-sm text-[#71717a] m-[0px]">{t("socialLinksForm.directMessagingPlatforms")}</p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6 space-y-4">
           <Form {...messagingForm}>
@@ -224,9 +226,9 @@ export function SocialLinksForm({ messaging, channels, onMessagingChange, onChan
         <CardHeader className="px-4 md:px-6 md:pt-6 pb-[0px] pt-[12px] pr-[16px] pl-[16px]">
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-[#0a0a0a]" />
-            <CardTitle className="text-lg">Social Media</CardTitle>
+            <CardTitle className="text-lg">{t("socialLinksForm.socialMedia")}</CardTitle>
           </div>
-          <p className="text-sm text-[#71717a] m-[0px]">Public social profiles</p>
+          <p className="text-sm text-[#71717a] m-[0px]">{t("socialLinksForm.publicSocialProfiles")}</p>
         </CardHeader>
         <CardContent className="px-4 md:px-6 pb-5 md:pb-6 space-y-4">
           <Form {...channelsForm}>
@@ -342,11 +344,11 @@ export function SocialLinksForm({ messaging, channels, onMessagingChange, onChan
           </Form>
 
           <div className="bg-[#e9e6dc]/30 p-4 rounded-lg border border-[#535146]/10 mt-4">
-            <p className="text-sm font-medium text-[#535146] mb-2">💡 Tips</p>
+            <p className="text-sm font-medium text-[#535146] mb-2">{t("socialLinksForm.tips")}</p>
             <ul className="text-sm text-[#535146]/70 space-y-1">
-              <li>• Enter full URLs including https://</li>
-              <li>• Leave blank any platforms you don't use</li>
-              <li>• Double-check URLs to ensure they work</li>
+              <li>{t("socialLinksForm.enterFullUrls")}</li>
+              <li>{t("socialLinksForm.leaveBlankUnused")}</li>
+              <li>{t("socialLinksForm.doubleCheckUrls")}</li>
             </ul>
           </div>
         </CardContent>

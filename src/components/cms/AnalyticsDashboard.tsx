@@ -13,6 +13,7 @@ import { useContacts } from '../../hooks/useContacts';
 import { useSettings } from '../../hooks/useSettings';
 import { useBusinessCard } from '../../hooks/useBusinessCard';
 import { AnalyticsPeriod, AnalyticsFilters } from '../../types/analytics';
+import { useTranslation } from 'react-i18next';
 
 // Compact Metric Tile
 function MetricTile({ 
@@ -80,7 +81,7 @@ function PageStatsBlock({
       <div className="flex items-center gap-2 mb-3">
         <Icon className="w-5 h-5 text-foreground" />
         <h3>{title}</h3>
-        <span className="ml-auto text-sm text-muted-foreground">{pageViews} views</span>
+        <span className="ml-auto text-sm text-muted-foreground">{pageViews} {t('analyticsDashboard.views')}</span>
       </div>
       
       {showElements && allElements.length > 0 ? (
@@ -133,13 +134,13 @@ function PageStatsBlock({
                   <ElementIcon className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate">{element.label}</span>
                 </div>
-                <span className="text-foreground ml-2 flex-shrink-0">{element.clicks} Cliks</span>
+                <span className="text-foreground ml-2 flex-shrink-0">{element.clicks} {t('analyticsDashboard.cliks')}</span>
               </div>
             );
           })}
         </div>
       ) : showElements && allElements.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-2">No interactions yet</p>
+        <p className="text-sm text-muted-foreground py-2">{t('analyticsDashboard.noInteractionsYet')}</p>
       ) : null}
     </Card>
   );
@@ -153,6 +154,7 @@ function formatNumber(num: number): string {
 }
 
 export function AnalyticsDashboard() {
+  const { t } = useTranslation();
   const userCode = getUserCode();
   const { data: profile } = useBusinessCard(userCode);
   const { contacts } = useContacts(userCode);
@@ -394,7 +396,7 @@ export function AnalyticsDashboard() {
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-3"></div>
-          <p className="text-sm text-muted-foreground">Loading analytics...</p>
+          <p className="text-sm text-muted-foreground">{t('analyticsDashboard.loadingAnalytics')}</p>
         </div>
       </div>
     );
@@ -405,9 +407,9 @@ export function AnalyticsDashboard() {
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center max-w-md px-4">
           <Eye className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-          <h3 className="mb-2">No Analytics Data</h3>
+          <h3 className="mb-2">{t('analyticsDashboard.noAnalyticsData')}</h3>
           <p className="text-sm text-muted-foreground">
-            Start sharing your profile to see analytics data here.
+            {t('analyticsDashboard.startSharingToSeeData')}
           </p>
         </div>
       </div>
@@ -436,14 +438,14 @@ export function AnalyticsDashboard() {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 text-left min-w-0">
-            <div className="truncate">{profile.fullName || 'Your Profile'}</div>
-            <div className="text-sm text-muted-foreground">View Clik Card</div>
+            <div className="truncate">{profile.fullName || t('analyticsDashboard.yourProfile')}</div>
+            <div className="text-sm text-muted-foreground">{t('analyticsDashboard.viewClikCard')}</div>
           </div>
           <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" />
         </button>
         
         {/* Performance Title */}
-        <h1 className="text-xl">Performance</h1>
+        <h1 className="text-xl">{t('analyticsDashboard.performance')}</h1>
       </div>
 
       {/* Filter Bar */}
@@ -451,28 +453,28 @@ export function AnalyticsDashboard() {
         <div className="grid gap-3" style={{ gridTemplateColumns: selectedContactName ? '1fr auto 1fr' : '1fr 1fr auto' }}>
           {/* Time Period Filter */}
           <div className="min-w-0">
-            <label className="text-xs text-muted-foreground mb-1.5 block">Time Period</label>
+            <label className="text-xs text-muted-foreground mb-1.5 block">{t('analyticsDashboard.timePeriod')}</label>
             <Select 
               value={filters.period} 
               onValueChange={(value: AnalyticsPeriod) => setFilters(prev => ({ ...prev, period: value }))}
             >
               <SelectTrigger className="w-full" style={{ height: '40px' }}>
-                <SelectValue placeholder="Select period" />
+                <SelectValue placeholder={t('analyticsDashboard.selectPeriod')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1h">Last 1 hour</SelectItem>
-                <SelectItem value="1d">Last 1 day</SelectItem>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="90d">Last 90 days</SelectItem>
-                <SelectItem value="all">All time</SelectItem>
+                <SelectItem value="1h">{t('analyticsDashboard.last1Hour')}</SelectItem>
+                <SelectItem value="1d">{t('analyticsDashboard.last1Day')}</SelectItem>
+                <SelectItem value="7d">{t('analyticsDashboard.last7Days')}</SelectItem>
+                <SelectItem value="30d">{t('analyticsDashboard.last30Days')}</SelectItem>
+                <SelectItem value="90d">{t('analyticsDashboard.last90Days')}</SelectItem>
+                <SelectItem value="all">{t('analyticsDashboard.allTime')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Group Filter */}
           <div className="min-w-0">
-            <label className="text-xs text-muted-foreground mb-1.5 block">Group</label>
+            <label className="text-xs text-muted-foreground mb-1.5 block">{t('analyticsDashboard.group')}</label>
             {selectedContactGroup ? (
               // Show icon-only button when contact is selected (smaller width)
               <button
@@ -496,10 +498,10 @@ export function AnalyticsDashboard() {
                 }))}
               >
                 <SelectTrigger className="w-full" style={{ height: '40px' }}>
-                  <SelectValue placeholder="All groups" />
+                  <SelectValue placeholder={t('analyticsDashboard.allGroups')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All groups</SelectItem>
+                  <SelectItem value="all">{t('analyticsDashboard.allGroups')}</SelectItem>
                   {groups.map(group => {
                     const IconComponent = (LucideIcons as any)[group.icon];
                     return (
@@ -518,7 +520,7 @@ export function AnalyticsDashboard() {
 
           {/* Contact Search Button */}
           <div className="min-w-0">
-            <label className="text-xs text-muted-foreground mb-1.5 block">Contact</label>
+            <label className="text-xs text-muted-foreground mb-1.5 block">{t('analyticsDashboard.contact')}</label>
             {selectedContactName ? (
               <div className="flex items-center gap-2 px-3 border border-input rounded-md bg-background" style={{ height: '40px' }}>
                 <span className="text-sm flex-1 truncate min-w-0">{selectedContactName}</span>
@@ -547,14 +549,14 @@ export function AnalyticsDashboard() {
       <Dialog open={isContactSearchOpen} onOpenChange={setIsContactSearchOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Search Contact</DialogTitle>
-            <DialogDescription>Find a contact to filter analytics by.</DialogDescription>
+            <DialogTitle>{t('analyticsDashboard.searchContact')}</DialogTitle>
+            <DialogDescription>{t('analyticsDashboard.findContactToFilter')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name or email..."
+                placeholder={t('analyticsDashboard.searchByNameOrEmail')}
                 value={contactSearchQuery}
                 onChange={(e) => setContactSearchQuery(e.target.value)}
                 className="pl-9"
@@ -573,8 +575,8 @@ export function AnalyticsDashboard() {
                     }}
                     className="w-full text-left px-3 py-2.5 rounded-md hover:bg-accent transition-colors"
                   >
-                    <div>All Contacts</div>
-                    <div className="text-xs text-muted-foreground">Show analytics for everyone</div>
+                    <div>{t('analyticsDashboard.allContacts')}</div>
+                    <div className="text-xs text-muted-foreground">{t('analyticsDashboard.showAnalyticsForEveryone')}</div>
                   </button>
                   {filteredContacts.map((contact) => (
                     <button
@@ -592,7 +594,7 @@ export function AnalyticsDashboard() {
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No contacts found</p>
+                  <p className="text-sm">{t('analyticsDashboard.noContactsFound')}</p>
                 </div>
               )}
             </div>
@@ -604,28 +606,28 @@ export function AnalyticsDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricTile
           icon={Eye}
-          label="Total Views"
+          label={t('analyticsDashboard.totalViews')}
           value={formatNumber(overallMetrics.totalViews)}
           iconColor="text-blue-600"
           iconBg="bg-blue-50"
         />
         <MetricTile
           icon={MousePointerClick}
-          label="Total Cliks"
+          label={t('analyticsDashboard.totalCliks')}
           value={formatNumber(overallMetrics.totalClicks)}
           iconColor="text-purple-600"
           iconBg="bg-purple-50"
         />
         <MetricTile
           icon={Users}
-          label="Engaged Contacts"
+          label={t('analyticsDashboard.engagedContacts')}
           value={formatNumber(engagementContacts)}
           iconColor="text-green-600"
           iconBg="bg-green-50"
         />
         <MetricTile
           icon={Share2}
-          label="New Shares"
+          label={t('analyticsDashboard.newShares')}
           value={formatNumber(newShares)}
           iconColor="text-orange-600"
           iconBg="bg-orange-50"
@@ -636,39 +638,39 @@ export function AnalyticsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <PageStatsBlock
           icon={Home}
-          title="Home Screen"
+          title={t('analyticsDashboard.homeScreen')}
           pageViews={homeStats.views}
           elements={homeStats.elements}
         />
         <PageStatsBlock
           icon={Mail}
-          title="Contact Screen"
+          title={t('analyticsDashboard.contactScreen')}
           pageViews={contactStats.views}
           elements={contactStats.elements}
         />
         <PageStatsBlock
           icon={User}
-          title="Profile Screen"
+          title={t('analyticsDashboard.profileScreen')}
           pageViews={profileStats.views}
           elements={profileStats.elements}
           showElements={false}
         />
         <PageStatsBlock
           icon={Briefcase}
-          title="Portfolio Screen"
+          title={t('analyticsDashboard.portfolioScreen')}
           pageViews={portfolioStats.views}
           elements={portfolioStats.elements}
           interactionMetrics={[
             {
-              label: 'Play Video',
+              label: t('analyticsDashboard.playVideo'),
               value: portfolioInteractionMetrics.videoPlay,
             },
             {
-              label: 'Open Image',
+              label: t('analyticsDashboard.openImage'),
               value: portfolioInteractionMetrics.imageOpen,
             },
             {
-              label: 'Open Virtual Tour',
+              label: t('analyticsDashboard.openVirtualTour'),
               value: portfolioInteractionMetrics.virtualTourOpen,
             },
           ]}
@@ -680,7 +682,7 @@ export function AnalyticsDashboard() {
         <Card className="p-4">
           <h3 className="mb-3 flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
-            Top Contact Methods
+            {t('analyticsDashboard.topContactMethods')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {overallMetrics.topContactMethods.slice(0, 6).map((method, index) => {
@@ -703,7 +705,7 @@ export function AnalyticsDashboard() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-sm truncate">{method.label}</div>
-                    <div className="text-xs text-muted-foreground">{method.count} cliks</div>
+                    <div className="text-xs text-muted-foreground">{method.count} {t('analyticsDashboard.cliks')}</div>
                   </div>
                 </div>
               );

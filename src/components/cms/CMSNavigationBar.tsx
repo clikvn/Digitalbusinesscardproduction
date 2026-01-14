@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
+import { useTranslation } from "react-i18next";
 
 interface CMSNavigationBarProps {
   activeTab?: string;
@@ -16,16 +17,16 @@ interface CMSNavigationBarProps {
   isBusinessOwner?: boolean;
 }
 
-const getPageLabel = (tab: string) => {
+const getPageLabel = (tab: string, t: any) => {
   switch (tab) {
-    case "home": return "Home";
-    case "contact": return "Contact";
-    case "profile": return "Profile";
-    case "portfolio": return "Portfolio";
-    case "share": return "Share Contact";
-    case "shareconfig": return "Share Configuration";
-    case "analytics": return "Analytics";
-    case "employees": return "My Business";
+    case "home": return t("navigation.home");
+    case "contact": return t("navigation.contact");
+    case "profile": return t("navigation.profile");
+    case "portfolio": return t("navigation.portfolio");
+    case "share": return t("navigation.shareContact");
+    case "shareconfig": return t("navigation.shareConfig");
+    case "analytics": return t("navigation.analytics");
+    case "employees": return t("studio.myBusiness");
     default: return tab;
   }
 };
@@ -41,6 +42,7 @@ export function CMSNavigationBar({
   currentPage,
   isBusinessOwner = false,
 }: CMSNavigationBarProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex h-[46px] items-center px-4 md:px-8 overflow-hidden relative">
       {/* Left side */}
@@ -50,7 +52,7 @@ export function CMSNavigationBar({
           <button 
             onClick={onNavigateToStudio}
             className="shrink-0 size-[20px] flex items-center justify-center" 
-            aria-label="Back to Studio"
+            aria-label={t("navigation.studio")}
           >
             <ArrowLeft className="size-5 text-[#3D3D3A]" strokeWidth={2} />
           </button>
@@ -75,7 +77,7 @@ export function CMSNavigationBar({
         {currentPage === "overview" ? (
           // Show just "Business Card Studio" as current page
           <div className="text-sm text-[#0a0a0a] font-medium text-[16px]">
-            Business Card Studio
+            {t("navigation.studio")}
           </div>
         ) : (
           // Show breadcrumbs - simplified when center nav is visible (desktop)
@@ -86,7 +88,7 @@ export function CMSNavigationBar({
                   className="text-base text-[#71717a] hover:text-[#0a0a0a] cursor-pointer"
                   onClick={onNavigateToStudio}
                 >
-                  Studio
+                  {t("navigation.studio")}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               {/* Only show current page in breadcrumb when center nav is hidden (mobile) */}
@@ -94,7 +96,7 @@ export function CMSNavigationBar({
               <BreadcrumbSeparator className="md:hidden" />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-base text-[#0a0a0a] font-medium md:hidden">
-                  {getPageLabel(activeTab)}
+                  {getPageLabel(activeTab, t)}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -115,7 +117,7 @@ export function CMSNavigationBar({
                   : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
               }`}
             >
-              My Business
+              {t("studio.myBusiness")}
             </button>
           )}
           <button
@@ -126,7 +128,7 @@ export function CMSNavigationBar({
                 : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
             }`}
           >
-            Home
+            {t("navigation.home")}
           </button>
           <button
             onClick={() => onTabChange("contact")}
@@ -136,7 +138,7 @@ export function CMSNavigationBar({
                 : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
             }`}
           >
-            Contact
+            {t("navigation.contact")}
           </button>
           <button
             onClick={() => onTabChange("profile")}
@@ -146,7 +148,7 @@ export function CMSNavigationBar({
                 : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
             }`}
           >
-            Profile
+            {t("navigation.profile")}
           </button>
           <button
             onClick={() => onTabChange("portfolio")}
@@ -156,7 +158,7 @@ export function CMSNavigationBar({
                 : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
             }`}
           >
-            Portfolio
+            {t("navigation.portfolio")}
           </button>
           <button
             onClick={() => onTabChange("share")}
@@ -166,7 +168,7 @@ export function CMSNavigationBar({
                 : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
             }`}
           >
-            Share Contact
+            {t("navigation.shareContact")}
           </button>
           <button
             onClick={() => onTabChange("shareconfig")}
@@ -176,7 +178,7 @@ export function CMSNavigationBar({
                 : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
             }`}
           >
-            Share Config
+            {t("navigation.shareConfig")}
           </button>
           <button
             onClick={() => onTabChange("analytics")}
@@ -186,7 +188,7 @@ export function CMSNavigationBar({
                 : "text-[#71717a] hover:text-[#0a0a0a] hover:bg-accent"
             }`}
           >
-            Analytics
+            {t("navigation.analytics")}
           </button>
         </nav>
       )}

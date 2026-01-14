@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner@2.0.3";
 import { Copy, Check } from "lucide-react";
 import { usePublicBusinessCard } from "../../hooks/usePublicBusinessCard";
 import { getUserCode } from "../../utils/user-code";
 
 export function SaveContactCard({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const { userCode, groupCode } = useParams<{ userCode: string; groupCode?: string }>();
   const targetUserCode = userCode || getUserCode();
   
@@ -28,7 +30,7 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
         try {
           await navigator.clipboard.writeText(text);
           setCopiedField(field);
-          toast.success(`${field} copied!`);
+          toast.success(t("common.copied", { field }));
           setTimeout(() => setCopiedField(null), 2000);
           return;
         } catch (clipboardErr) {
@@ -51,14 +53,14 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
       
       if (successful) {
         setCopiedField(field);
-        toast.success(`${field} copied!`);
+        toast.success(t("common.copied", { field }));
         setTimeout(() => setCopiedField(null), 2000);
       } else {
         throw new Error('execCommand copy failed');
       }
     } catch (err) {
       console.error('Copy failed:', err);
-      toast.error("Failed to copy");
+      toast.error(t("common.failedToCopy"));
     }
   };
 
@@ -85,10 +87,10 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
       {/* Title and Instructions */}
       <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0 w-full">
         <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[32px] text-slate-50 tracking-[-0.384px]">
-          <p className="leading-[40px]">Save Contact</p>
+          <p className="leading-[40px]">{t("home.saveContact")}</p>
         </div>
         <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-slate-50 text-center">
-          <p className="leading-[18px]">Tap to copy each field to your clipboard</p>
+          <p className="leading-[18px]">{t("home.tapToCopyEachField")}</p>
         </div>
       </div>
 
@@ -98,18 +100,18 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
         <div className="w-full bg-[rgba(255,255,255,0.15)] backdrop-blur-sm rounded-[12px] flex items-center justify-between px-[12px] py-[8px]">
           <div className="flex flex-col gap-[2px] flex-1">
             <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic text-[10px] text-slate-200">
-              <p className="leading-[14px]">Name</p>
+              <p className="leading-[14px]">{t("common.name")}</p>
             </div>
             <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic text-[14px] text-slate-50">
               <p className="leading-[20px]">{contactInfo.name}</p>
             </div>
           </div>
           <button
-            onClick={() => copyToClipboard(contactInfo.name, "Name")}
+            onClick={() => copyToClipboard(contactInfo.name, t("common.name"))}
             className="p-[8px] hover:bg-[rgba(255,255,255,0.2)] rounded-[8px] transition-colors"
             aria-label="Copy name"
           >
-            {copiedField === "Name" ? (
+            {copiedField === t("common.name") ? (
               <Check className="w-[16px] h-[16px] text-green-300" />
             ) : (
               <Copy className="w-[16px] h-[16px] text-slate-50" />
@@ -121,18 +123,18 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
         <div className="w-full bg-[rgba(255,255,255,0.15)] backdrop-blur-sm rounded-[12px] flex items-center justify-between px-[12px] py-[8px]">
           <div className="flex flex-col gap-[2px] flex-1">
             <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic text-[10px] text-slate-200">
-              <p className="leading-[14px]">Position</p>
+              <p className="leading-[14px]">{t("common.position")}</p>
             </div>
             <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic text-[14px] text-slate-50">
               <p className="leading-[20px]">{contactInfo.position}</p>
             </div>
           </div>
           <button
-            onClick={() => copyToClipboard(contactInfo.position, "Position")}
+            onClick={() => copyToClipboard(contactInfo.position, t("common.position"))}
             className="p-[8px] hover:bg-[rgba(255,255,255,0.2)] rounded-[8px] transition-colors"
             aria-label="Copy position"
           >
-            {copiedField === "Position" ? (
+            {copiedField === t("common.position") ? (
               <Check className="w-[16px] h-[16px] text-green-300" />
             ) : (
               <Copy className="w-[16px] h-[16px] text-slate-50" />
@@ -144,18 +146,18 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
         <div className="w-full bg-[rgba(255,255,255,0.15)] backdrop-blur-sm rounded-[12px] flex items-center justify-between px-[12px] py-[8px]">
           <div className="flex flex-col gap-[2px] flex-1">
             <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic text-[10px] text-slate-200">
-              <p className="leading-[14px]">Phone</p>
+              <p className="leading-[14px]">{t("common.phone")}</p>
             </div>
             <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic text-[14px] text-slate-50">
               <p className="leading-[20px]">{contactInfo.phone}</p>
             </div>
           </div>
           <button
-            onClick={() => copyToClipboard(contactInfo.phone, "Phone")}
+            onClick={() => copyToClipboard(contactInfo.phone, t("common.phone"))}
             className="p-[8px] hover:bg-[rgba(255,255,255,0.2)] rounded-[8px] transition-colors"
             aria-label="Copy phone"
           >
-            {copiedField === "Phone" ? (
+            {copiedField === t("common.phone") ? (
               <Check className="w-[16px] h-[16px] text-green-300" />
             ) : (
               <Copy className="w-[16px] h-[16px] text-slate-50" />
@@ -167,18 +169,18 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
         <div className="w-full bg-[rgba(255,255,255,0.15)] backdrop-blur-sm rounded-[12px] p-[12px] flex items-center justify-between">
           <div className="flex flex-col gap-[2px] flex-1 min-w-0">
             <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic text-[10px] text-slate-200">
-              <p className="leading-[14px]">Website</p>
+              <p className="leading-[14px]">{t("common.website")}</p>
             </div>
             <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic text-[14px] text-slate-50">
               <p className="leading-[20px] truncate">{truncateUrl(contactInfo.url)}</p>
             </div>
           </div>
           <button
-            onClick={() => copyToClipboard(contactInfo.url, "Website")}
+            onClick={() => copyToClipboard(contactInfo.url, t("common.website"))}
             className="p-[8px] hover:bg-[rgba(255,255,255,0.2)] rounded-[8px] transition-colors shrink-0"
             aria-label="Copy website"
           >
-            {copiedField === "Website" ? (
+            {copiedField === t("common.website") ? (
               <Check className="w-[16px] h-[16px] text-green-300" />
             ) : (
               <Copy className="w-[16px] h-[16px] text-slate-50" />
@@ -194,7 +196,7 @@ export function SaveContactCard({ onClose }: { onClose: () => void }) {
       >
         <div className="flex flex-row items-center justify-center size-full">
           <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] not-italic text-[14px] text-nowrap text-slate-50">
-            <p className="leading-[20px] whitespace-pre">Done</p>
+            <p className="leading-[20px] whitespace-pre">{t("common.done")}</p>
           </div>
         </div>
       </button>

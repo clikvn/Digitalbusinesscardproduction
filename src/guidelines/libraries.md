@@ -17,6 +17,9 @@
 | recharts | ^2.x | Data visualization charts |
 | @supabase/supabase-js | Latest | Supabase PostgreSQL client |
 | date-fns | Latest | Date formatting utilities |
+| react-i18next | Latest | React bindings for i18next |
+| i18next | Latest | Internationalization framework |
+| i18next-browser-languagedetector | Latest | Language detection for browsers |
 
 ---
 
@@ -73,4 +76,4 @@
 
 ---
 
-_Last Updated: Dec 7, 2024_
+_Last Updated: Dec 2024_

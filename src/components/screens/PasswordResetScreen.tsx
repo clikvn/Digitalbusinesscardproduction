@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase-client';
 import { api } from '../../lib/api';
 import { toast } from 'sonner@2.0.3';
@@ -20,6 +21,7 @@ import { Loader2, CheckCircle2, XCircle, Lock } from 'lucide-react@0.487.0';
  * 5. Password is updated and user is redirected to login
  */
 export function PasswordResetScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'ready' | 'success' | 'error'>('loading');
@@ -32,6 +34,18 @@ export function PasswordResetScreen() {
     const handleResetToken = async () => {
       try {
         console.log('[PasswordReset] Processing password reset token...');
+        console.log('[PasswordReset] Current URL:', window.location.href);
+        console.log('[PasswordReset] Current pathname:', window.location.pathname);
+        
+        // If we're not on the reset-password page but have tokens, redirect to the correct page
+        if (window.location.pathname !== '/auth/reset-password' && 
+            (window.location.hash.includes('access_token') || window.location.search.includes('code'))) {
+          console.log('[PasswordReset] Redirecting to /auth/reset-password with tokens...');
+          const hash = window.location.hash;
+          const search = window.location.search;
+          navigate(`/auth/reset-password${search}${hash}`, { replace: true });
+          return;
+        }
         
         // Get the hash fragment from URL (Supabase uses hash-based tokens)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -49,13 +63,14 @@ export function PasswordResetScreen() {
           hasAccessToken: !!accessToken, 
           hasCode: !!code, 
           type,
-          error: errorParam 
+          error: errorParam,
+          pathname: window.location.pathname
         });
 
         // Handle error from Supabase
         if (errorParam) {
           console.error('[PasswordReset] Error from Supabase:', errorParam, errorDescription);
-          setErrorMessage(errorDescription || errorParam || 'Invalid or expired reset link');
+          setErrorMessage(errorDescription || errorParam || t('error.invalidOrExpiredResetLink'));
           setStatus('error');
           return;
         }
@@ -111,12 +126,12 @@ export function PasswordResetScreen() {
 
         // No valid authentication found
         console.error('[PasswordReset] No valid reset tokens found');
-        setErrorMessage('Invalid or expired reset link. Please request a new password reset.');
+        setErrorMessage(t('error.pleaseRequestNewReset'));
         setStatus('error');
 
       } catch (error: any) {
         console.error('[PasswordReset] Unexpected error:', error);
-        setErrorMessage(error.message || 'An unexpected error occurred');
+        setErrorMessage(error.message || t('error.unexpectedError'));
         setStatus('error');
       }
     };
@@ -129,12 +144,12 @@ export function PasswordResetScreen() {
     
     // Validation
     if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error(t('error.passwordMinLength'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('error.passwordsDoNotMatch'));
       return;
     }
 
@@ -146,7 +161,7 @@ export function PasswordResetScreen() {
       await api.auth.resetPassword(newPassword);
 
       setStatus('success');
-      toast.success('Password reset successfully! Redirecting to login...');
+      toast.success(t('auth.passwordResetRedirectingLogin'));
 
       // Sign out the user so they can log in with new password
       await supabase.auth.signOut({ scope: 'local' });
@@ -158,7 +173,7 @@ export function PasswordResetScreen() {
 
     } catch (error: any) {
       console.error('[PasswordReset] Reset error:', error);
-      toast.error(error.message || 'Failed to reset password');
+      toast.error(error.message || t('error.failedToResetPassword'));
     } finally {
       setIsResetting(false);
     }
@@ -172,9 +187,9 @@ export function PasswordResetScreen() {
             <div className="flex justify-center mb-4">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
-            <CardTitle>Verifying reset link...</CardTitle>
+            <CardTitle>{t('auth.verifyingResetLink')}</CardTitle>
             <CardDescription>
-              Please wait while we verify your password reset link.
+              {t('auth.pleaseWaitVerifyLink')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -190,7 +205,7 @@ export function PasswordResetScreen() {
             <div className="flex justify-center mb-4">
               <XCircle className="h-12 w-12 text-red-600" />
             </div>
-            <CardTitle className="text-red-600">Reset Link Invalid</CardTitle>
+            <CardTitle className="text-red-600">{t('auth.resetLinkInvalid')}</CardTitle>
             <CardDescription className="text-red-500">
               {errorMessage}
             </CardDescription>
@@ -201,7 +216,7 @@ export function PasswordResetScreen() {
               variant="outline"
               className="w-full"
             >
-              Return to Sign In
+              {t('common.returnToSignIn')}
             </Button>
           </CardContent>
         </Card>
@@ -217,9 +232,9 @@ export function PasswordResetScreen() {
             <div className="flex justify-center mb-4">
               <CheckCircle2 className="h-12 w-12 text-green-600" />
             </div>
-            <CardTitle className="text-green-600">Password Reset!</CardTitle>
+            <CardTitle className="text-green-600">{t('auth.passwordReset')}</CardTitle>
             <CardDescription>
-              Your password has been reset successfully. Redirecting to sign in...
+              {t('auth.passwordResetRedirecting')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -235,19 +250,19 @@ export function PasswordResetScreen() {
           <div className="flex justify-center mb-4">
             <Lock className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle>Reset Your Password</CardTitle>
+          <CardTitle>{t('auth.resetYourPassword')}</CardTitle>
           <CardDescription>
-            Enter your new password below.
+            {t('auth.enterNewPasswordBelow')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
+              <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
               <Input 
                 id="new-password" 
                 type="password" 
-                placeholder="Enter new password" 
+                placeholder={t('auth.enterNewPassword')} 
                 value={newPassword} 
                 onChange={e => setNewPassword(e.target.value)} 
                 required 
@@ -255,15 +270,15 @@ export function PasswordResetScreen() {
                 autoFocus
               />
               <p className="text-xs text-muted-foreground">
-                Password must be at least 6 characters
+                {t('error.passwordMinLength')}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Label htmlFor="confirm-password">{t('auth.confirmPassword')}</Label>
               <Input 
                 id="confirm-password" 
                 type="password" 
-                placeholder="Confirm new password" 
+                placeholder={t('auth.confirmNewPassword')} 
                 value={confirmPassword} 
                 onChange={e => setConfirmPassword(e.target.value)} 
                 required 
@@ -272,7 +287,7 @@ export function PasswordResetScreen() {
             </div>
             
             <Button type="submit" className="w-full" disabled={isResetting}>
-              {isResetting ? 'Resetting...' : 'Reset Password'}
+              {isResetting ? t('auth.resetting') : t('auth.resetPassword')}
             </Button>
             
             <div className="text-center text-sm text-muted-foreground">
@@ -281,7 +296,7 @@ export function PasswordResetScreen() {
                 onClick={() => navigate('/auth', { replace: true })}
                 className="text-primary hover:underline font-medium"
               >
-                Back to Sign In
+                {t('auth.backToSignIn')}
               </button>
             </div>
           </form>

@@ -12,6 +12,7 @@ import { SortableCategoryTab } from "../SortableCategoryTab";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../ui/alert-dialog";
+import { useTranslation } from "react-i18next";
 
 interface PortfolioFormProps {
   data: BusinessCardData['portfolio'];
@@ -22,6 +23,7 @@ interface PortfolioFormProps {
 }
 
 export function PortfolioForm({ data, categories, onChange, onCategoriesChange, onFieldFocus }: PortfolioFormProps) {
+  const { t } = useTranslation();
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [newItem, setNewItem] = useState<PortfolioItemType | null>(null);
@@ -125,10 +127,10 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
   };
 
   const handleDuplicate = (item: PortfolioItemType) => {
-    const duplicated: PortfolioItemType = {
-      ...item,
-      id: `portfolio-${Date.now()}`,
-      title: `${item.title} (Copy)`,
+      const duplicated: PortfolioItemType = {
+        ...item,
+        id: `portfolio-${Date.now()}`,
+        title: `${item.title} (${t("portfolioForm.copy")})`,
       // Ensure all type-specific fields are copied
       type: item.type,
       images: item.images ? [...item.images] : undefined,
@@ -196,7 +198,7 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
                 className="w-full border-dashed border-2 hover:bg-[#535146]/5"
               >
                 <FolderPlus className="w-4 h-4 mr-2" />
-                Add Category
+                {t("portfolioForm.addCategory")}
               </Button>
             </CardContent>
           </Card>
@@ -286,7 +288,7 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
                         className="w-full border-dashed border-2 hover:bg-[#535146]/5"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Add Item
+                        {t("portfolioForm.addItem")}
                       </Button>
                     )}
 
@@ -307,7 +309,7 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
                         className="w-full border-dashed border-2 hover:bg-[#535146]/5"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Add Item
+                        {t("portfolioForm.addItem")}
                       </Button>
                     )}
 
@@ -356,14 +358,14 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
       <Dialog open={isAddingCategory} onOpenChange={setIsAddingCategory}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Category</DialogTitle>
+            <DialogTitle>{t("portfolioForm.addNewCategory")}</DialogTitle>
             <DialogDescription>
-              Create a new category to organize your portfolio items
+              {t("portfolioForm.createNewCategoryDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Category Name</label>
+              <label className="text-sm font-medium">{t("portfolioForm.categoryName")}</label>
               <Input
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
@@ -372,7 +374,7 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
                     handleAddCategory();
                   }
                 }}
-                placeholder="e.g., Residential, Commercial, Modern"
+                placeholder={t("portfolioForm.categoryNamePlaceholder")}
                 autoFocus
               />
             </div>
@@ -385,14 +387,14 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
                 }}
                 className="flex-1"
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button 
                 onClick={handleAddCategory}
                 disabled={!newCategoryName.trim()}
                 className="flex-1"
               >
-                Add Category
+                {t("portfolioForm.addCategory")}
               </Button>
             </div>
           </div>
@@ -403,18 +405,18 @@ export function PortfolioForm({ data, categories, onChange, onCategoriesChange, 
       <AlertDialog open={categoryToDelete !== null} onOpenChange={(open) => !open && setCategoryToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Category?</AlertDialogTitle>
+            <AlertDialogTitle>{t("portfolioForm.deleteCategory")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will move all items in this category to the first remaining category. The items themselves will not be deleted.
+              {t("portfolioForm.deleteCategoryDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => categoryToDelete && handleDeleteCategory(categoryToDelete)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete Category
+              {t("portfolioForm.deleteCategoryAction")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

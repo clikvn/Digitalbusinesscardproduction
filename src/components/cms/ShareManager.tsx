@@ -12,12 +12,14 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { toast } from 'sonner@2.0.3';
+import { useTranslation } from 'react-i18next';
 
 interface ShareManagerProps {
   onMenu: () => void;
 }
 
 export function ShareManager({ onMenu }: ShareManagerProps) {
+  const { t } = useTranslation();
   const { userCode } = useParams<{ userCode: string }>();
   const { customGroups: groups } = useSettings(userCode);
   const { contacts, saveContacts, isSaving } = useContacts(userCode);
@@ -94,7 +96,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
   const handleSaveContact = async () => {
     if (!formData.name.trim()) {
-      toast.error('Contact name is required');
+      toast.error(t('shareManager.nameRequired'));
       return;
     }
 
@@ -117,7 +119,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
       // Save to database
       await saveContacts([...contacts, newContact]);
       
-      toast.success('Contact added successfully');
+      toast.success(t('shareManager.contactAddedSuccess'));
       setIsAddDialogOpen(false);
       
       // Reset form
@@ -130,14 +132,14 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
         group: 'public'
       });
     } catch (error) {
-      toast.error('Failed to add contact');
+      toast.error(t('shareManager.failedToAddContact'));
       console.error('Error adding contact:', error);
     }
   };
 
   const handleUpdateContact = async () => {
     if (!formData.name.trim()) {
-      toast.error('Contact name is required');
+      toast.error(t('shareManager.nameRequired'));
       return;
     }
 
@@ -163,7 +165,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
       );
       await saveContacts(updatedContacts);
       
-      toast.success('Contact updated successfully');
+      toast.success(t('shareManager.contactUpdatedSuccess'));
       setIsEditDialogOpen(false);
       
       // Reset form
@@ -176,7 +178,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
         group: 'public'
       });
     } catch (error) {
-      toast.error('Failed to update contact');
+      toast.error(t('shareManager.failedToUpdateContact'));
       console.error('Error updating contact:', error);
     }
   };
@@ -195,9 +197,9 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-4 sm:p-6">
             <DialogHeader className="flex-shrink-0">
-              <DialogTitle>Add Contact</DialogTitle>
+              <DialogTitle>{t('shareManager.addContact')}</DialogTitle>
               <DialogDescription>
-                Create a tracked share link for a specific contact
+                {t('shareManager.addContactDescription')}
               </DialogDescription>
             </DialogHeader>
 
@@ -298,10 +300,10 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                 variant="outline"
                 onClick={() => setIsAddDialogOpen(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button onClick={handleSaveContact} disabled={isSaving}>
-                {isSaving ? 'Adding...' : 'Add Contact'}
+                {isSaving ? t('shareManager.adding') : t('shareManager.addContact')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -311,9 +313,9 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-4 sm:p-6">
             <DialogHeader className="flex-shrink-0">
-              <DialogTitle>Edit Contact</DialogTitle>
+              <DialogTitle>{t('shareManager.editContact')}</DialogTitle>
               <DialogDescription>
-                Update the details of this contact
+                {t('shareManager.editContactDescription')}
               </DialogDescription>
             </DialogHeader>
 
@@ -322,9 +324,9 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
               <div className="space-y-4 py-4">
                 {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="edit-name">{t('shareManager.name')} *</Label>
                   <Input
-                    id="name"
+                    id="edit-name"
                     placeholder="John Doe"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -333,9 +335,9 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="edit-email">{t('shareManager.email')}</Label>
                   <Input
-                    id="email"
+                    id="edit-email"
                     type="email"
                     placeholder="john@example.com"
                     value={formData.email}
@@ -345,9 +347,9 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Phone */}
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="edit-phone">{t('shareManager.phone')}</Label>
                   <Input
-                    id="phone"
+                    id="edit-phone"
                     type="tel"
                     placeholder="+1 234 567 8900"
                     value={formData.phone}
@@ -357,9 +359,9 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Company */}
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="edit-company">{t('shareManager.company')}</Label>
                   <Input
-                    id="company"
+                    id="edit-company"
                     placeholder="ACME Corp"
                     value={formData.company}
                     onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
@@ -368,12 +370,12 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Group */}
                 <div className="space-y-2">
-                  <Label htmlFor="group">Share Group *</Label>
+                  <Label htmlFor="edit-group">{t('shareManager.shareGroup')} *</Label>
                   <Select
                     value={formData.group}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, group: value }))}
                   >
-                    <SelectTrigger id="group">
+                    <SelectTrigger id="edit-group">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -388,10 +390,10 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Notes */}
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
+                  <Label htmlFor="edit-notes">{t('shareManager.notes')}</Label>
                   <Textarea
-                    id="notes"
-                    placeholder="Add notes about this contact..."
+                    id="edit-notes"
+                    placeholder={t('shareManager.notesPlaceholder')}
                     value={formData.notes}
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                     rows={3}
@@ -402,8 +404,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                 {/* Info Box */}
                 <div className="p-3 bg-muted rounded-lg text-sm">
                   <p className="text-muted-foreground">
-                    A unique tracking code will be generated for this contact.
-                    Share the URL with them to track their engagement.
+                    {t('shareManager.trackingCodeInfo')}
                   </p>
                 </div>
               </div>
@@ -414,10 +415,10 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                 variant="outline"
                 onClick={() => setIsEditDialogOpen(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button onClick={handleUpdateContact} disabled={isSaving}>
-                {isSaving ? 'Updating...' : 'Update Contact'}
+                {isSaving ? t('shareManager.updating') : t('shareManager.editContact')}
               </Button>
             </DialogFooter>
           </DialogContent>

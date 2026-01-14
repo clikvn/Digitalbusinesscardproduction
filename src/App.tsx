@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { HelmetProvider } from "react-helmet-async";
@@ -16,6 +16,20 @@ import { parseProfileUrl } from "./utils/user-code";
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Check if we have password reset tokens on the wrong page and redirect
+  useEffect(() => {
+    const hash = window.location.hash;
+    const search = window.location.search;
+    const hasResetToken = hash.includes('access_token') || hash.includes('type=recovery') || search.includes('code=');
+    
+    // If we have reset tokens but we're not on the reset-password page, redirect there
+    if (hasResetToken && location.pathname !== '/auth/reset-password') {
+      console.log('[App] Detected password reset token on wrong page, redirecting to /auth/reset-password');
+      navigate(`/auth/reset-password${search}${hash}`, { replace: true });
+    }
+  }, [location.pathname, location.search, location.hash, navigate]);
   
   // Extract user code and route info from current URL
   const { userCode, isCMS } = parseProfileUrl(location.pathname);

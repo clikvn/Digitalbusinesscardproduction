@@ -20,8 +20,10 @@ import {
 } from "../ui/alert-dialog";
 import { useParams } from "react-router-dom";
 import { useSettings } from "../../hooks/useSettings";
+import { useTranslation } from "react-i18next";
 
 export function GroupConfiguration() {
+  const { t } = useTranslation();
   const { userCode } = useParams<{ userCode: string }>();
   const { settings: cloudSettings, customGroups: groups, saveGroups, saveSettings, saveAll } = useSettings(userCode);
   
@@ -77,7 +79,7 @@ export function GroupConfiguration() {
         
         try {
           await saveGroups(newGroups);
-          toast.success("Group updated successfully");
+          toast.success(t('groupConfiguration.groupUpdated'));
         } catch (e) {
           // toast handled in hook
           return;
@@ -86,7 +88,7 @@ export function GroupConfiguration() {
     } else {
       // Check if shareCode exists
       if (shareCode && newGroups.some(g => g.shareCode === shareCode)) {
-        toast.error("Share code already exists");
+        toast.error(t('groupConfiguration.shareCodeExists'));
         return;
       }
 
@@ -110,7 +112,7 @@ export function GroupConfiguration() {
         newSettings[newGroup.id] = [...DEFAULT_VISIBLE_FIELDS];
         
         await saveAll(newSettings, newGroups);
-        toast.success("Group created successfully");
+        toast.success(t('groupConfiguration.groupCreated'));
       } catch (e) {
         return;
       }
@@ -121,7 +123,7 @@ export function GroupConfiguration() {
 
   const handleDeleteClick = (group: CustomGroup) => {
     if (group.isDefault) {
-      toast.error("Default groups cannot be deleted");
+      toast.error(t('groupConfiguration.defaultGroupsCannotDelete'));
       return;
     }
     setGroupToDelete(group);
@@ -143,7 +145,7 @@ export function GroupConfiguration() {
           await saveGroups(newGroups);
         }
         
-        toast.success("Group deleted successfully");
+        toast.success(t('groupConfiguration.groupDeleted'));
       } catch (e) {
         // error
       }
@@ -176,7 +178,7 @@ export function GroupConfiguration() {
         <div className="flex justify-end">
           <Button onClick={handleCreate} size="sm" className="shrink-0">
             <Plus className="w-4 h-4 mr-2" />
-            Add Group
+            {t('groupConfiguration.addGroup')}
           </Button>
         </div>
 
@@ -242,10 +244,10 @@ export function GroupConfiguration() {
 
         {groups.length === 0 && (
           <div className="text-center py-8 text-[#71717a]">
-            <p className="mb-2">No groups yet</p>
+            <p className="mb-2">{t('groupConfiguration.noGroupsYet')}</p>
             <Button onClick={handleCreate} variant="outline" size="sm">
               <Plus className="w-4 h-4 mr-2" />
-              Create Your First Group
+              {t('groupConfiguration.createFirstGroup')}
             </Button>
           </div>
         )}
@@ -264,18 +266,18 @@ export function GroupConfiguration() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Group?</AlertDialogTitle>
+            <AlertDialogTitle>{t('groupConfiguration.deleteGroup')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{groupToDelete?.label}"? This will remove all visibility settings for this group. This action cannot be undone.
+              {t('groupConfiguration.deleteGroupDescription', { name: groupToDelete?.label })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete Group
+              {t('groupConfiguration.deleteGroupAction')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

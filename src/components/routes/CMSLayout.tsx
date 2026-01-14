@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { BusinessCardStudio } from "../cms/BusinessCardStudio";
 import { CMSDashboard } from "../cms/CMSDashboard";
@@ -14,6 +15,7 @@ export function CMSLayout() {
   const { userCode, section } = useParams<{ userCode: string; section?: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [userId, setUserId] = useState<string | undefined>();
@@ -55,7 +57,7 @@ export function CMSLayout() {
         } catch (error) {
           console.warn('SignOut error (non-critical):', error);
         }
-        toast.error(employeeStatus.message || 'Your account has been deactivated by your business owner. Please contact them for more information.');
+        toast.error(employeeStatus.message || t("auth.accountDeactivatedMessage"));
         navigate(`/${userCode}/auth`);
       } else {
         // User is authenticated and active (or not an employee)
@@ -93,7 +95,7 @@ export function CMSLayout() {
   };
 
   const handleOpenAIAssistant = () => {
-    toast.info("This feature will coming soon!");
+    toast.info(t("messages.comingSoon"));
   };
 
   if (!isAuthorized) {
@@ -136,7 +138,7 @@ export function CMSLayout() {
   // Handle personal-ai section - show coming soon and redirect to studio
   if (section === 'personal-ai') {
     useEffect(() => {
-      toast.info("This feature will coming soon!");
+      toast.info(t("messages.comingSoon"));
       navigate(buildCMSUrl(userCode));
     }, [navigate, userCode]);
     return null;

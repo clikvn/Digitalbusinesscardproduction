@@ -134,9 +134,42 @@ export const api = {
           return null;
         }
 
-        if (!cardData) {
-          console.log('[API] No card found for user code:', userCode, '(This is normal if the user code doesn\'t exist)');
-          return null;
+        // Skip check for default page (myclik)
+        if (userCode === 'myclik') {
+          // Default page - no employee status check needed, return null if no card data
+          // The hook will handle it by returning defaultBusinessCardData
+          if (!cardData) {
+            console.log('[API] No card found for default user code, returning null:', userCode);
+            return null;
+          }
+        } else {
+          // Check if user exists first (before checking employee status)
+          const { data: ownershipData } = await supabase
+            .from('user_code_ownership')
+            .select('user_id')
+            .eq('user_code', userCode)
+            .maybeSingle();
+
+          // If no ownership data, user code doesn't exist
+          if (!ownershipData) {
+            console.log('[API] User code not found:', userCode);
+            throw new Error('USER_CODE_NOT_FOUND');
+          }
+
+          // Check if this user is a deactivated employee - block access to their profile
+          const { data: employeeStatus } = await supabase
+            .rpc('check_employee_status', { p_user_id: ownershipData.user_id });
+
+          // If user is an employee and account is deactivated, block access
+          if (employeeStatus && employeeStatus.is_active === false) {
+            console.log('[API] Access blocked: User is a deactivated employee:', userCode);
+            throw new Error('EMPLOYEE_DEACTIVATED');
+          }
+
+          if (!cardData) {
+            console.log('[API] No card found for user code:', userCode, '(This is normal if the user code doesn\'t exist)');
+            throw new Error('USER_CODE_NOT_FOUND');
+          }
         }
 
         // Fetch share settings
@@ -156,12 +189,17 @@ export const api = {
 
         return businessCard;
       } catch (e: any) {
+        // Re-throw specific errors (USER_CODE_NOT_FOUND, EMPLOYEE_DEACTIVATED)
+        if (e?.message === 'USER_CODE_NOT_FOUND' || e?.message === 'EMPLOYEE_DEACTIVATED') {
+          throw e;
+        }
+        
         console.error('[API] Unexpected error fetching card:', {
           message: e?.message || 'Unknown error',
           stack: e?.stack,
           userCode
         });
-        // Return null instead of throwing to prevent app crashes
+        // Return null for unexpected errors to prevent app crashes
         return null;
       }
     },
@@ -1116,11 +1154,14 @@ export const api = {
     forgotPassword: async (email: string) => {
       console.log('[forgotPassword] Sending password reset email to:', email);
       
+      // Use absolute URL - Supabase requires exact match with whitelisted URLs
       const redirectUrl = `${window.location.origin}/auth/reset-password`;
       console.log('[forgotPassword] Redirect URL:', redirectUrl);
+      console.log('[forgotPassword] Current origin:', window.location.origin);
       
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
+        emailRedirectTo: redirectUrl, // Some Supabase versions need this too
       });
 
       if (error) {

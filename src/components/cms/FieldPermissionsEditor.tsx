@@ -17,6 +17,7 @@ import {
   Loader2,
   Users
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FieldPermissionsEditorProps {
   currentPermissions: Record<string, FieldPermissionLevel>;
@@ -41,10 +42,7 @@ const FIELD_GROUPS = [
   },
 ];
 
-const PERMISSION_OPTIONS: { value: FieldPermissionLevel; label: string; description: string }[] = [
-  { value: 'editable', label: 'Editable', description: 'Employee can edit this field' },
-  { value: 'readonly', label: 'Read Only', description: 'Employee can view but not edit' },
-];
+// PERMISSION_OPTIONS will be created inside component to use translations
 
 /**
  * FieldPermissionsEditor - UI for configuring which fields employees can edit
@@ -56,12 +54,18 @@ export function FieldPermissionsEditor({
   onSave,
   onCancel,
 }: FieldPermissionsEditorProps) {
+  const { t } = useTranslation();
   const [permissions, setPermissions] = useState<Record<string, FieldPermissionLevel>>(
     currentPermissions || {}
   );
   const [isSaving, setIsSaving] = useState(false);
   const [applyToFiltered, setApplyToFiltered] = useState(false);
   const [applyToAllBusiness, setApplyToAllBusiness] = useState(false);
+  
+  const PERMISSION_OPTIONS: { value: FieldPermissionLevel; label: string; description: string }[] = [
+    { value: 'editable', label: t('fieldPermissionsEditor.editable'), description: t('fieldPermissionsEditor.editableDescription') },
+    { value: 'readonly', label: t('fieldPermissionsEditor.readOnly'), description: t('fieldPermissionsEditor.readOnlyDescription') },
+  ];
   
   // Count how many employees will be affected
   const affectedCount = applyToAllBusiness 
@@ -138,17 +142,15 @@ export function FieldPermissionsEditor({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="space-y-1">
             <p className="text-sm font-medium text-blue-900">
-              Company Information Permissions
+              {t('fieldPermissionsEditor.companyInformationPermissions')}
             </p>
             <p className="text-xs sm:text-sm text-blue-700">
-              Configure permissions for company-related fields only. Employee personal information 
-              (avatar, social media, bio, contact details, profile, portfolio) is always controlled 
-              by the employee and cannot be restricted.
+              {t('fieldPermissionsEditor.configurePermissionsDescription')}
             </p>
             {restrictedCount > 0 && (
               <p className="text-xs sm:text-sm text-blue-600">
                 <span className="font-medium">
-                  {restrictedCount} field{restrictedCount !== 1 ? 's' : ''} restricted
+                  {t('fieldPermissionsEditor.fieldsRestricted', { count: restrictedCount, plural: restrictedCount !== 1 ? 's' : '' })}
                 </span>
               </p>
             )}
@@ -174,15 +176,14 @@ export function FieldPermissionsEditor({
                       className="text-xs sm:text-sm font-medium text-zinc-900 cursor-pointer flex items-center gap-2"
                     >
                       <Users className="h-3 w-3 sm:h-4 sm:w-4 text-zinc-500" />
-                      Apply to all employees in current filter
+                      {t('fieldPermissionsEditor.applyToFiltered')}
                     </Label>
                     <p className="text-xs text-zinc-600">
-                      This will apply the same permissions to all {filteredEmployees.length} employee{filteredEmployees.length !== 1 ? 's' : ''} 
-                      {' '}currently shown in the list (after filters).
+                      {t('fieldPermissionsEditor.applyToFilteredDescription', { count: filteredEmployees.length, plural: filteredEmployees.length !== 1 ? 's' : '' })}
                     </p>
                     {applyToFiltered && (
                       <p className="text-xs font-medium text-blue-700">
-                        ⚠️ {affectedCount} employee{affectedCount !== 1 ? 's' : ''} will be affected
+                        {t('fieldPermissionsEditor.employeesWillBeAffected', { count: affectedCount, plural: affectedCount !== 1 ? 's' : '' })}
                       </p>
                     )}
                   </div>
@@ -206,15 +207,14 @@ export function FieldPermissionsEditor({
                       className="text-xs sm:text-sm font-medium text-amber-900 cursor-pointer flex items-center gap-2"
                     >
                       <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
-                      Apply to all employees in business
+                      {t('fieldPermissionsEditor.applyToAllBusiness')}
                     </Label>
                     <p className="text-xs text-amber-700">
-                      This will apply the same permissions to all {allEmployees.length} employee{allEmployees.length !== 1 ? 's' : ''} 
-                      {' '}in your business, regardless of current filters.
+                      {t('fieldPermissionsEditor.applyToAllBusinessDescription', { count: allEmployees.length, plural: allEmployees.length !== 1 ? 's' : '' })}
                     </p>
                     {applyToAllBusiness && (
                       <p className="text-xs font-medium text-amber-800">
-                        ⚠️ {affectedCount} employee{affectedCount !== 1 ? 's' : ''} will be affected
+                        {t('fieldPermissionsEditor.employeesWillBeAffected', { count: affectedCount, plural: affectedCount !== 1 ? 's' : '' })}
                       </p>
                     )}
                   </div>
@@ -231,13 +231,14 @@ export function FieldPermissionsEditor({
             {/* Group Header */}
             <div className="flex items-center gap-2">
               <group.icon className="h-4 w-4 text-zinc-500" />
-              <h4 className="font-medium text-zinc-900">{group.label}</h4>
+              <h4 className="font-medium text-zinc-900">{t(`fieldPermissionsEditor.${group.id === 'company' ? 'companyInformation' : group.id}`)}</h4>
             </div>
 
             {/* Fields */}
             <div className="space-y-2 pl-6">
               {group.fields.map((field) => {
                 const currentPermission = getPermission(field.path);
+                const fieldLabelKey = field.path === 'personal.businessName' ? 'companyName' : 'professionalTitle';
                 return (
                   <div
                     key={field.path}
@@ -245,7 +246,7 @@ export function FieldPermissionsEditor({
                   >
                     <div className="flex items-center gap-3">
                       <Label className="text-sm font-normal text-zinc-700">
-                        {field.label}
+                        {t(`fieldPermissionsEditor.${fieldLabelKey}`)}
                       </Label>
                       <Badge 
                         variant="secondary" 
@@ -291,7 +292,7 @@ export function FieldPermissionsEditor({
             disabled={restrictedCount === 0}
             className="text-xs sm:text-sm"
           >
-            Allow All
+            {t('fieldPermissionsEditor.allowAll')}
           </Button>
           <Button
             variant="outline"
@@ -307,7 +308,7 @@ export function FieldPermissionsEditor({
             }}
             className="text-xs sm:text-sm"
           >
-            Set All Read Only
+            {t('fieldPermissionsEditor.setAllReadOnly')}
           </Button>
         </div>
 
@@ -321,7 +322,7 @@ export function FieldPermissionsEditor({
             size="sm"
             className="sm:size-default"
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
@@ -332,13 +333,13 @@ export function FieldPermissionsEditor({
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? `Saving for ${affectedCount} employees...` : 'Saving...'}</span>
-                <span className="sm:hidden">Saving...</span>
+                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? t('fieldPermissionsEditor.savingForEmployees', { count: affectedCount }) : t('fieldPermissionsEditor.saving')}</span>
+                <span className="sm:hidden">{t('fieldPermissionsEditor.saving')}</span>
               </>
             ) : (
               <>
-                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? `Save for ${affectedCount} Employees` : 'Save Permissions'}</span>
-                <span className="sm:hidden">Save</span>
+                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? t('fieldPermissionsEditor.saveForEmployees', { count: affectedCount }) : t('fieldPermissionsEditor.savePermissions')}</span>
+                <span className="sm:hidden">{t('fieldPermissionsEditor.save')}</span>
               </>
             )}
           </Button>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import svgPaths from "../../imports/svg-ryed6k4ibx";
 
 export function HomeNavBar({ onProfileClick, onPortfolioClick, onSaveClick, onShareClick }: {
@@ -7,6 +8,7 @@ export function HomeNavBar({ onProfileClick, onPortfolioClick, onSaveClick, onSh
   onSaveClick: () => void;
   onShareClick: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="content-stretch flex items-center justify-between relative shrink-0 w-full h-[72px]" data-name="home-nav-bar">
       <button
@@ -24,7 +26,7 @@ export function HomeNavBar({ onProfileClick, onPortfolioClick, onSaveClick, onSh
           </div>
         </div>
         <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-center text-nowrap text-slate-50">
-          <p className="leading-[16px] whitespace-pre">Profile</p>
+          <p className="leading-[16px] whitespace-pre">{t("common.profile")}</p>
         </div>
       </button>
       <button
@@ -45,7 +47,7 @@ export function HomeNavBar({ onProfileClick, onPortfolioClick, onSaveClick, onSh
           </div>
         </div>
         <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-center text-nowrap text-slate-50">
-          <p className="leading-[16px] whitespace-pre">Portfolio</p>
+          <p className="leading-[16px] whitespace-pre">{t("common.portfolio")}</p>
         </div>
       </button>
       <button
@@ -63,7 +65,7 @@ export function HomeNavBar({ onProfileClick, onPortfolioClick, onSaveClick, onSh
           </div>
         </div>
         <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-center text-nowrap text-slate-50">
-          <p className="leading-[16px] whitespace-pre">Save</p>
+          <p className="leading-[16px] whitespace-pre">{t("common.save")}</p>
         </div>
       </button>
       <button
@@ -81,7 +83,7 @@ export function HomeNavBar({ onProfileClick, onPortfolioClick, onSaveClick, onSh
           </div>
         </div>
         <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-center text-nowrap text-slate-50">
-          <p className="leading-[16px] whitespace-pre">Share</p>
+          <p className="leading-[16px] whitespace-pre">{t("navigation.share")}</p>
         </div>
       </button>
     </div>

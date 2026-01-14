@@ -19,6 +19,7 @@ import {
   Briefcase,
   Users,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EmployeeListItemProps {
   employee: EmployeeWithDetails;
@@ -36,6 +37,7 @@ export function EmployeeListItem({
   onEdit,
   onEditPermissions,
 }: EmployeeListItemProps) {
+  const { t } = useTranslation();
   // Get initials for avatar
   const getInitials = (name: string | null): string => {
     if (!name) return '?';
@@ -86,14 +88,14 @@ export function EmployeeListItem({
               filter: 'none',
               opacity: 1
             }}
-            aria-label={employee.is_active ? 'Active' : 'Inactive'}
-            title={employee.is_active ? 'Active employee' : 'Inactive employee'}
+            aria-label={employee.is_active ? t('employeeListItem.active') : t('employeeListItem.inactive')}
+            title={employee.is_active ? t('employeeListItem.activeEmployee') : t('employeeListItem.inactiveEmployee')}
           />
         </div>
         <div className={`basis-0 content-stretch flex flex-col grow items-start justify-center min-h-px min-w-px not-italic relative shrink-0 text-foreground text-left ${!employee.is_active ? 'opacity-50' : ''}`}>
           <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] relative shrink-0 w-full">
             <p className="leading-[24px]">
-              {employee.employee_name || employee.user_email || 'Unnamed Employee'}
+              {employee.employee_name || employee.user_email || t('employeeListItem.unnamedEmployee')}
             </p>
           </div>
           <p className="[white-space-collapse:collapse] font-['Inter:Regular',sans-serif] font-normal leading-[24px] overflow-ellipsis overflow-hidden relative shrink-0 text-nowrap w-full">
@@ -107,7 +109,7 @@ export function EmployeeListItem({
         <DropdownMenuTrigger asChild>
           <button
             className="flex items-center justify-center size-8 rounded-full hover:bg-background/80 transition-all shrink-0 active:scale-95"
-            aria-label="Employee actions"
+            aria-label={t('employeeListItem.employeeActions')}
           >
             <MoreVertical className="h-4 w-4 text-muted-foreground" />
           </button>
@@ -124,7 +126,7 @@ export function EmployeeListItem({
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  View Profile
+                  {t('employeeListItem.viewProfile')}
                 </a>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -134,7 +136,7 @@ export function EmployeeListItem({
           {/* Edit Permissions */}
           <DropdownMenuItem onClick={onEditPermissions} className="cursor-pointer">
             <Settings className="h-4 w-4 mr-2" />
-            Edit Permissions
+            {t('employeeListItem.editPermissions')}
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -147,12 +149,12 @@ export function EmployeeListItem({
             {employee.is_active ? (
               <>
                 <UserX className="h-4 w-4 mr-2" />
-                Deactivate
+                {t('employeeListItem.deactivate')}
               </>
             ) : (
               <>
                 <UserCheck className="h-4 w-4 mr-2" />
-                Activate
+                {t('employeeListItem.activate')}
               </>
             )}
           </DropdownMenuItem>

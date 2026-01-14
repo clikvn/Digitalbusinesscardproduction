@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react@0.487.0';
@@ -16,6 +17,7 @@ type CallbackStatus = 'loading' | 'success' | 'error';
  * 4. On success, initializes user data and redirects to login
  */
 export function AuthCallbackScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [status, setStatus] = useState<CallbackStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -47,7 +49,7 @@ export function AuthCallbackScreen() {
         // Handle error from Supabase
         if (errorParam) {
           console.error('[AuthCallback] Error from Supabase:', errorParam, errorDescription);
-          setErrorMessage(errorDescription || errorParam || 'Email confirmation failed');
+          setErrorMessage(errorDescription || errorParam || t('auth.emailConfirmationFailed'));
           setStatus('error');
           return;
         }
@@ -59,7 +61,7 @@ export function AuthCallbackScreen() {
           
           if (error) {
             console.error('[AuthCallback] Code exchange error:', error);
-            setErrorMessage(error.message || 'Failed to verify email');
+            setErrorMessage(error.message || t('auth.failedToVerifyEmail'));
             setStatus('error');
             return;
           }
@@ -81,7 +83,7 @@ export function AuthCallbackScreen() {
 
           if (error) {
             console.error('[AuthCallback] Session set error:', error);
-            setErrorMessage(error.message || 'Failed to verify email');
+            setErrorMessage(error.message || t('auth.failedToVerifyEmail'));
             setStatus('error');
             return;
           }
@@ -103,12 +105,12 @@ export function AuthCallbackScreen() {
 
         // No valid authentication found
         console.error('[AuthCallback] No valid authentication tokens found');
-        setErrorMessage('Invalid or expired confirmation link. Please try signing up again.');
+        setErrorMessage(t('auth.invalidOrExpiredConfirmationLink'));
         setStatus('error');
 
       } catch (error: any) {
         console.error('[AuthCallback] Unexpected error:', error);
-        setErrorMessage(error.message || 'An unexpected error occurred');
+        setErrorMessage(error.message || t('error.unexpectedError'));
         setStatus('error');
       }
     };
@@ -176,9 +178,9 @@ export function AuthCallbackScreen() {
               <div className="flex justify-center mb-4">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
               </div>
-              <CardTitle>Verifying your email...</CardTitle>
+              <CardTitle>{t('auth.verifyingEmail')}</CardTitle>
               <CardDescription>
-                Please wait while we confirm your email address.
+                {t('auth.pleaseWaitConfirmEmail')}
               </CardDescription>
             </>
           )}
@@ -188,9 +190,9 @@ export function AuthCallbackScreen() {
               <div className="flex justify-center mb-4">
                 <CheckCircle2 className="h-12 w-12 text-green-600" />
               </div>
-              <CardTitle className="text-green-600">Email Verified!</CardTitle>
+              <CardTitle className="text-green-600">{t('auth.emailVerifiedTitle')}</CardTitle>
               <CardDescription>
-                Your email has been confirmed. Redirecting you to sign in...
+                {t('auth.emailConfirmedRedirecting')}
               </CardDescription>
             </>
           )}
@@ -200,7 +202,7 @@ export function AuthCallbackScreen() {
               <div className="flex justify-center mb-4">
                 <XCircle className="h-12 w-12 text-red-600" />
               </div>
-              <CardTitle className="text-red-600">Verification Failed</CardTitle>
+              <CardTitle className="text-red-600">{t('auth.verificationFailed')}</CardTitle>
               <CardDescription className="text-red-500">
                 {errorMessage}
               </CardDescription>
@@ -214,7 +216,7 @@ export function AuthCallbackScreen() {
               onClick={() => navigate('/auth', { replace: true })}
               className="text-primary hover:underline font-medium"
             >
-              Return to Sign In
+              {t('auth.returnToSignIn')}
             </button>
           </CardContent>
         )}

@@ -8,6 +8,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Comprehensive Multi-Language Translation**: Completed translation implementation across the entire application
+  - Updated `AuthScreen` component with full Vietnamese translations for all authentication flows (login, signup, password reset, email confirmation)
+  - Updated `PasswordResetScreen` component with Vietnamese translations
+  - Updated `ContactButtons` component (Phone, Email, AI Agent buttons) with translations
+  - Updated `BusinessCardStudio` component with translations for all card titles and descriptions
+  - Updated `CMSDashboard` component with translations for menu items and messages
+  - Updated `PublicLayout` and `CMSLayout` components with translations for error messages and notifications
+  - Expanded translation files (`en.json`, `vi.json`) with comprehensive keys for:
+    - Studio card descriptions
+    - Error messages (password validation, reset link errors, etc.)
+    - Common UI elements (Phone, Email, User)
+    - Additional authentication flows
+  - All user-facing text (except data loaded from database) is now translatable between English and Vietnamese
+  - Language preference persists across sessions via localStorage
+- **Multi-Language Support (i18n)**: Added internationalization support with English and Vietnamese languages
+  - Installed `react-i18next`, `i18next`, and `i18next-browser-languagedetector` packages
+  - Created i18n configuration in `src/lib/i18n.ts` with automatic language detection from browser/localStorage
+  - Created translation files: `src/locales/en.json` (English) and `src/locales/vi.json` (Vietnamese)
+  - Created `LanguageSwitcher` component for switching between languages
+  - Language preference is stored in localStorage and persists across sessions
+  - Updated `AccountErrorPage` component to use translations
+  - Updated `PublicLayout` to use translations for error messages
+  - Integrated i18n into `main.tsx` to initialize on app startup
+  - Initial translations include: common terms, navigation labels, error messages, and auth labels
+- **Automatic URL Extraction for Social Media Inputs**: Added automatic username/ID extraction from URLs in contact editing forms
+  - When users paste full URLs (e.g., "https://zalo.me/0902452024") into social media or messaging app fields, the system automatically extracts just the username/ID (e.g., "0902452024")
+  - Supports both full URLs and plain usernames/IDs - if no URL pattern is detected, the value is used as-is
+  - Works for all messaging apps (Zalo, Messenger, Telegram, WhatsApp, KakaoTalk, Discord, WeChat) and social channels (Facebook, LinkedIn, Twitter/X, YouTube, TikTok)
+  - Handles various URL formats including protocols, www prefixes, and different domain patterns
+  - Created `social-url-parser.ts` utility with extraction functions for each platform
+  - Applied to ContactForm component for seamless user experience
+- **Clickable Preview Links in Contact Form**: Made preview links below each social media input field clickable
+  - Preview links are now clickable anchor tags that open in a new tab
+  - Links are only clickable when a username/ID is entered (placeholder text remains non-clickable)
+  - Users can click the preview link to verify if they pasted the correct username/ID
+  - Links use blue color with underline and hover effect for better UX
+  - Applied to all messaging apps and social channels in ContactForm
+- **AI Agent Assistant Disabled**: Disabled AI Agent Assistant section in Contact Form with "Coming soon" message
+  - Section is now disabled (opacity reduced, cursor-not-allowed)
+  - Shows "Coming soon" text instead of description
+  - FieldVisibilityPopover is disabled (pointer-events-none) to prevent interaction
+  - Prevents users from clicking on the feature until it's ready
+
+### Fixed
+- **Portfolio Page iframeRef Error**: Fixed ReferenceError where `iframeRef` was not defined in PortfolioItemDisplay component
+  - Added missing `iframeRef` definition using `useRef<HTMLIFrameElement>(null)`
+  - Fixes error when viewing portfolio items with embedded videos (YouTube/Vimeo)
+  - Prevents page crashes on portfolio page when videos are displayed
+- **Login Button Navigation**: Fixed login button navigating to wrong URL (e.g., `/srqajrvs/auth` instead of `/auth`)
+  - Changed `onLogin` handler in PublicLayout from `buildCMSUrl(getUserCode())` to `/auth`
+  - Login button now correctly navigates to `/auth` route instead of user-specific auth route
+  - Fixes issue where login button showed URLs like `https://clik.id/srqajrvs/auth` instead of proper auth page
+- **Deactivated Employee Profile Access**: Blocked public access to deactivated employee profiles
+  - Added check in `api.card.get` to verify if user is a deactivated employee before returning profile data
+  - Uses `check_employee_status` RPC function to check employee status
+  - Deactivated employee profiles now throw `EMPLOYEE_DEACTIVATED` error and are inaccessible to anyone (including public links)
+  - Prevents deactivated employees' profiles from being viewed even if someone has their profile link
+  - Default page (`/myclik`) is excluded from employee status check and returns null if no card data (hook handles it with defaultBusinessCardData)
+  - Login protection already in place: deactivated employees are signed out immediately after login attempt in AuthScreen and CMSLayout
+- **Error Messages for Invalid User Codes and Deactivated Accounts**: Added proper error handling and user feedback
+  - Modified `api.card.get` to throw specific errors: `USER_CODE_NOT_FOUND` for invalid user codes and `EMPLOYEE_DEACTIVATED` for deactivated employees
+  - Updated `usePublicBusinessCard` to propagate these errors instead of returning empty data
+  - Created `AccountErrorPage` component to display beautiful error pages for invalid user codes and deactivated accounts
+  - Updated `PublicLayout` to show error page instead of toast messages when account is not available or deactivated
+  - Error page displays centered message in a beautiful container with icon
+  - Added "Back to Welcome Page" button on error page that navigates to default page (/myclik)
+  - Users now see clear error pages instead of being redirected to default profile
+  - Error messages: "This account is not available. The user code you entered does not exist." and "This account has been deactivated and is no longer available."
 - **Forgot Password / Password Reset**: Implemented password recovery functionality
   - "Forgot password?" link on login screen
   - Password reset email sent via Resend SMTP

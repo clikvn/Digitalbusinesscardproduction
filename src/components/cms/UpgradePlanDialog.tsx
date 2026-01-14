@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -15,6 +16,7 @@ interface UpgradePlanDialogProps {
 }
 
 export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePlanDialogProps) {
+  const { t } = useTranslation();
   const [promotionCode, setPromotionCode] = useState('');
   const [isApplyingPromotion, setIsApplyingPromotion] = useState(false);
   const queryClient = useQueryClient();
@@ -30,7 +32,7 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
 
   const handleApplyPromotion = async () => {
     if (!promotionCode.trim()) {
-      toast.error('Please enter a promotion code');
+      toast.error(t('dialogs.pleaseEnterPromotionCode'));
       return;
     }
 
@@ -40,7 +42,7 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error('You must be logged in to apply a promotion code');
+        toast.error(t('dialogs.mustBeLoggedInForPromotion'));
         setIsApplyingPromotion(false);
         return;
       }
@@ -53,7 +55,7 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
 
       if (error) {
         console.error('Error applying promotion code:', error);
-        toast.error(error.message || 'Failed to apply promotion code');
+        toast.error(error.message || t('dialogs.failedToApplyPromotionCode'));
         setIsApplyingPromotion(false);
         return;
       }
@@ -61,7 +63,7 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
       // Handle response - check for both success and valid fields
       if (data && (data.success === true || data.valid === true)) {
         const planName = data.plan_name || '';
-        toast.success(data.message || 'Promotion code applied successfully!');
+        toast.success(data.message || t('dialogs.promotionCodeAppliedSuccess'));
         setPromotionCode('');
         
         // Invalidate queries to refresh plan and business owner status
@@ -84,13 +86,13 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
         }
       } else {
         // Show specific error message from validation
-        const errorMessage = data?.error || data?.message || 'Invalid or expired promotion code';
+        const errorMessage = data?.error || data?.message || t('dialogs.invalidOrExpiredPromotionCode');
         console.error('Promotion code validation failed:', data);
         toast.error(errorMessage);
       }
     } catch (error: any) {
       console.error('Unexpected error applying promotion:', error);
-      toast.error(error.message || 'An unexpected error occurred');
+      toast.error(error.message || t('error.unexpectedError'));
     } finally {
       setIsApplyingPromotion(false);
     }
@@ -98,42 +100,42 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
 
   const plans = [
     {
-      name: 'Free',
+      name: t('dialogs.freePlanName'),
       price: '$0',
-      period: 'Forever',
+      period: t('dialogs.freePlanPeriod'),
       features: [
-        'Basic digital business card',
-        'QR code generation',
-        'Share via URL',
-        'Basic analytics',
+        t('dialogs.freePlanFeature1'),
+        t('dialogs.freePlanFeature2'),
+        t('dialogs.freePlanFeature3'),
+        t('dialogs.freePlanFeature4'),
       ],
       current: currentPlan === 'free',
     },
     {
-      name: 'Premium',
+      name: t('dialogs.premiumPlanName'),
       price: '$9.99',
-      period: 'per month',
+      period: t('dialogs.premiumPlanPeriod'),
       features: [
-        'Everything in Free',
-        'Advanced analytics',
-        'Custom branding',
-        'Priority support',
-        'Unlimited portfolio items',
-        'Custom domain support',
+        t('dialogs.premiumPlanFeature1'),
+        t('dialogs.premiumPlanFeature2'),
+        t('dialogs.premiumPlanFeature3'),
+        t('dialogs.premiumPlanFeature4'),
+        t('dialogs.premiumPlanFeature5'),
+        t('dialogs.premiumPlanFeature6'),
       ],
       current: currentPlan === 'premium',
     },
     {
-      name: 'Business',
+      name: t('dialogs.businessPlanName'),
       price: '$29.99',
-      period: 'per month',
+      period: t('dialogs.businessPlanPeriod'),
       features: [
-        'Everything in Premium',
-        'Team management',
-        'Employee accounts',
-        'Advanced permissions',
-        'Bulk operations',
-        'Dedicated support',
+        t('dialogs.businessPlanFeature1'),
+        t('dialogs.businessPlanFeature2'),
+        t('dialogs.businessPlanFeature3'),
+        t('dialogs.businessPlanFeature4'),
+        t('dialogs.businessPlanFeature5'),
+        t('dialogs.businessPlanFeature6'),
       ],
       current: false,
     },
@@ -145,10 +147,10 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <Crown className="w-6 h-6 text-amber-500" />
-            Upgrade Your Plan
+            {t('dialogs.upgradeYourPlan')}
           </DialogTitle>
           <DialogDescription>
-            Choose the perfect plan for your business needs. Upgrade anytime to unlock more features.
+            {t('dialogs.upgradePlanDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -168,7 +170,7 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     {plan.name}
                     {plan.current && (
-                      <span className="text-xs font-normal text-muted-foreground">(Current)</span>
+                      <span className="text-xs font-normal text-muted-foreground">({t('dialogs.currentPlan')})</span>
                     )}
                   </h3>
                   <div className="mt-1">
@@ -178,7 +180,7 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
                 </div>
                 {plan.current ? (
                   <Button variant="outline" disabled>
-                    Current Plan
+                    {t('dialogs.currentPlan')}
                   </Button>
                 ) : (
                   <Button
@@ -186,10 +188,10 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
                       // TODO: Integrate with payment/subscription system
                       console.log(`Upgrade to ${plan.name} plan`);
                       // For now, show a message
-                      alert(`Upgrade to ${plan.name} plan - Payment integration coming soon!`);
+                      alert(`${t('dialogs.upgradeTo')} ${plan.name} ${t('dialogs.plan')} - ${t('dialogs.paymentIntegrationComingSoon')}`);
                     }}
                   >
-                    {isFreePlan && plan.name === 'Premium' ? 'Upgrade Now' : 'Select Plan'}
+                    {isFreePlan && plan.name === t('dialogs.premiumPlanName') ? t('dialogs.upgradeNow') : t('dialogs.selectPlan')}
                   </Button>
                 )}
               </div>
@@ -211,9 +213,9 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
           <div className="flex items-start gap-3 mb-4">
             <Sparkles className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900">Promotion Code</p>
+              <p className="text-sm font-semibold text-amber-900">{t('dialogs.promotionCode')}</p>
               <p className="text-xs text-amber-700 mt-1">
-                Have a promotion code? Enter it below to upgrade to Business Plan.
+                {t('dialogs.promotionCodeDescription')}
               </p>
             </div>
           </div>
@@ -221,13 +223,13 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
           <div className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="promotion-code" className="text-sm font-medium text-amber-900">
-                Enter Promotion Code
+                {t('dialogs.enterPromotionCode')}
               </Label>
               <div className="flex gap-2">
                 <Input
                   id="promotion-code"
                   type="text"
-                  placeholder="e.g., BUSINESS2024"
+                  placeholder={t('dialogs.promotionCodePlaceholder')}
                   value={promotionCode}
                   onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
                   onKeyDown={(e) => {
@@ -247,24 +249,24 @@ export function UpgradePlanDialog({ open, onOpenChange, currentPlan }: UpgradePl
                   {isApplyingPromotion ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Applying...
+                      {t('dialogs.applying')}
                     </>
                   ) : (
                     <>
-                      <span>Submit</span>
+                      <span>{t('dialogs.submit')}</span>
                     </>
                   )}
                 </Button>
               </div>
             </div>
             <p className="text-xs text-amber-600">
-              Promotion codes can upgrade your plan to Business. Codes expire after their expiration date.
+              {t('dialogs.promotionCodeHelp')}
             </p>
           </div>
         </div>
 
         <div className="mt-4 text-center text-xs text-muted-foreground">
-          <p>All plans include a 14-day free trial. Cancel anytime.</p>
+          <p>{t('dialogs.freeTrialNote')}</p>
         </div>
       </DialogContent>
     </Dialog>

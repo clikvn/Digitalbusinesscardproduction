@@ -5,6 +5,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Loader2, User, Mail, Lock, Briefcase, Building, Hash } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface AddEmployeeFormProps {
   onSuccess: () => void;
@@ -16,6 +17,7 @@ interface AddEmployeeFormProps {
  * Creates a new user account with 'employee' plan and links to business owner
  */
 export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
+  const { t } = useTranslation();
   const { createEmployee, isCreatingEmployee } = useBusinessManagement();
 
   const [formData, setFormData] = useState({
@@ -34,23 +36,23 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = t('addEmployeeForm.nameRequired');
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('addEmployeeForm.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = t('addEmployeeForm.invalidEmail');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('addEmployeeForm.passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = t('addEmployeeForm.passwordMinLength');
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('addEmployeeForm.passwordsDoNotMatch');
     }
 
     setErrors(newErrors);
@@ -74,15 +76,15 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
         department: formData.department.trim() || undefined,
       });
 
-      toast.success(`Employee account created! User code: ${result.userCode}`);
+      toast.success(t('addEmployeeForm.employeeAccountCreated', { code: result.userCode }));
       onSuccess();
     } catch (error: any) {
       console.error('Error creating employee:', error);
       
       if (error.message?.includes('already registered')) {
-        setErrors({ email: 'This email is already registered' });
+        setErrors({ email: t('addEmployeeForm.emailAlreadyRegistered') });
       } else {
-        toast.error(`Failed to create employee: ${error.message}`);
+        toast.error(t('addEmployeeForm.failedToCreateEmployee', { error: error.message }));
       }
     }
   };
@@ -101,7 +103,7 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
       <div className="space-y-2">
         <Label htmlFor="name" className="flex items-center gap-2">
           <User className="h-4 w-4 text-zinc-500" />
-          Full Name <span className="text-red-500">*</span>
+          {t('addEmployeeForm.fullName')} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="name"
@@ -118,7 +120,7 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
       <div className="space-y-2">
         <Label htmlFor="email" className="flex items-center gap-2">
           <Mail className="h-4 w-4 text-zinc-500" />
-          Email Address <span className="text-red-500">*</span>
+          {t('addEmployeeForm.emailAddress')} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="email"
@@ -136,7 +138,7 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
         <div className="space-y-2">
           <Label htmlFor="password" className="flex items-center gap-2">
             <Lock className="h-4 w-4 text-zinc-500" />
-            Password <span className="text-red-500">*</span>
+            {t('addEmployeeForm.password')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="password"
@@ -150,7 +152,7 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password <span className="text-red-500">*</span></Label>
+          <Label htmlFor="confirmPassword">{t('addEmployeeForm.confirmPassword')} <span className="text-red-500">*</span></Label>
           <Input
             id="confirmPassword"
             type="password"
@@ -165,14 +167,14 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
 
       {/* Optional Fields */}
       <div className="pt-2 border-t border-zinc-200">
-        <p className="text-sm text-zinc-500 mb-4">Optional Information</p>
+        <p className="text-sm text-zinc-500 mb-4">{t('addEmployeeForm.optionalInformation')}</p>
         
         <div className="grid grid-cols-2 gap-4">
           {/* Employee Code */}
           <div className="space-y-2">
             <Label htmlFor="employeeCode" className="flex items-center gap-2">
               <Hash className="h-4 w-4 text-zinc-500" />
-              Employee Code
+              {t('addEmployeeForm.employeeCode')}
             </Label>
             <Input
               id="employeeCode"
@@ -187,7 +189,7 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
           <div className="space-y-2">
             <Label htmlFor="role" className="flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-zinc-500" />
-              Role/Title
+              {t('addEmployeeForm.roleTitle')}
             </Label>
             <Input
               id="role"
@@ -203,7 +205,7 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
         <div className="space-y-2 mt-4">
           <Label htmlFor="department" className="flex items-center gap-2">
             <Building className="h-4 w-4 text-zinc-500" />
-            Department
+            {t('addEmployeeForm.department')}
           </Label>
           <Input
             id="department"
@@ -223,7 +225,7 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
           onClick={onCancel}
           disabled={isCreatingEmployee}
         >
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           type="submit"
@@ -232,10 +234,10 @@ export function AddEmployeeForm({ onSuccess, onCancel }: AddEmployeeFormProps) {
           {isCreatingEmployee ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Creating Account...
+              {t('addEmployeeForm.creatingAccount')}
             </>
           ) : (
-            'Create Employee Account'
+            t('addEmployeeForm.createEmployeeAccount')
           )}
         </Button>
       </div>

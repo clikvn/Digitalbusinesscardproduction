@@ -7,6 +7,7 @@ import { Label } from '../ui/label';
 import { Loader2, User, Mail, Briefcase, Building, Hash } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../../lib/api';
+import { useTranslation } from 'react-i18next';
 
 interface EditEmployeeFormProps {
   employee: EmployeeWithDetails;
@@ -19,6 +20,7 @@ interface EditEmployeeFormProps {
  * Updates employee details and business card data
  */
 export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployeeFormProps) {
+  const { t } = useTranslation();
   const { updateEmployee, isUpdatingEmployee } = useBusinessManagement();
 
   const [formData, setFormData] = useState({
@@ -61,13 +63,13 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = t('editEmployeeForm.nameRequired');
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('editEmployeeForm.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = t('editEmployeeForm.invalidEmail');
     }
 
     setErrors(newErrors);
@@ -157,12 +159,12 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
         } catch (error: any) {
           console.error('Error updating business card:', error);
           cardUpdateSuccess = false;
-          toast.error(`Failed to update business card: ${error.message}`);
+          toast.error(t('editEmployeeForm.failedToUpdateBusinessCard', { error: error.message }));
         }
       }
 
       if (cardUpdateSuccess) {
-        toast.success('Employee information updated successfully');
+        toast.success(t('editEmployeeForm.employeeUpdatedSuccess'));
         onSuccess();
       } else {
         // Still call onSuccess to close the dialog, but user saw the error
@@ -170,7 +172,7 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
       }
     } catch (error: any) {
       console.error('Error updating employee:', error);
-      toast.error(`Failed to update employee: ${error.message}`);
+      toast.error(t('editEmployeeForm.failedToUpdateEmployee', { error: error.message }));
     }
   };
 
@@ -196,7 +198,7 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
       <div className="space-y-2">
         <Label htmlFor="name" className="flex items-center gap-2">
           <User className="h-4 w-4 text-zinc-500" />
-          Full Name <span className="text-red-500">*</span>
+          {t('editEmployeeForm.fullName')} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="name"
@@ -213,7 +215,7 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
       <div className="space-y-2">
         <Label htmlFor="email" className="flex items-center gap-2">
           <Mail className="h-4 w-4 text-zinc-500" />
-          Email Address <span className="text-red-500">*</span>
+          {t('editEmployeeForm.emailAddress')} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="email"
@@ -228,14 +230,14 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
 
       {/* Optional Fields */}
       <div className="pt-2 border-t border-zinc-200">
-        <p className="text-sm text-zinc-500 mb-4">Optional Information</p>
+        <p className="text-sm text-zinc-500 mb-4">{t('editEmployeeForm.optionalInformation')}</p>
         
         <div className="grid grid-cols-2 gap-4">
           {/* Employee Code */}
           <div className="space-y-2">
             <Label htmlFor="employeeCode" className="flex items-center gap-2">
               <Hash className="h-4 w-4 text-zinc-500" />
-              Employee Code
+              {t('editEmployeeForm.employeeCode')}
             </Label>
             <Input
               id="employeeCode"
@@ -250,7 +252,7 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
           <div className="space-y-2">
             <Label htmlFor="role" className="flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-zinc-500" />
-              Role/Title
+              {t('editEmployeeForm.roleTitle')}
             </Label>
             <Input
               id="role"
@@ -266,7 +268,7 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
         <div className="space-y-2 mt-4">
           <Label htmlFor="department" className="flex items-center gap-2">
             <Building className="h-4 w-4 text-zinc-500" />
-            Department
+            {t('editEmployeeForm.department')}
           </Label>
           <Input
             id="department"
@@ -286,7 +288,7 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
           onClick={onCancel}
           disabled={isUpdatingEmployee}
         >
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           type="submit"
@@ -295,10 +297,10 @@ export function EditEmployeeForm({ employee, onSuccess, onCancel }: EditEmployee
           {isUpdatingEmployee ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Updating...
+              {t('editEmployeeForm.updating')}
             </>
           ) : (
-            'Save Changes'
+            t('editEmployeeForm.saveChanges')
           )}
         </Button>
       </div>

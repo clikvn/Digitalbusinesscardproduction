@@ -63,11 +63,15 @@ export function usePublicBusinessCard(userCode: string, groupCodeOrId?: string) 
       }
       
       // ============================================
-      // 3. Handle Missing Data
+      // 3. Handle Missing Data / Errors
       // ============================================
       if (!data) {
-        // Return demo data for "myclik", empty data for others
-        return userCode === 'myclik' ? defaultBusinessCardData : emptyBusinessCardData;
+        // For myclik (default page), return demo data instead of throwing error
+        if (userCode === 'myclik') {
+          return defaultBusinessCardData;
+        }
+        // For other user codes, throw error to show error page
+        throw new Error('USER_CODE_NOT_FOUND');
       }
 
       // ============================================

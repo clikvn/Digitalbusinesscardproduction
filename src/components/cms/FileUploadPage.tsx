@@ -9,6 +9,7 @@ import { toast } from 'sonner@2.0.3';
 import { buildCMSUrl } from '../../utils/user-code';
 import { AIFieldUploadSettings } from './AIFieldUploadSettings';
 import { ALL_SHAREABLE_FIELDS } from '../../utils/group-share-settings';
+import { useTranslation } from 'react-i18next';
 
 const SERVER_URL = 'https://agent-chat-widget-568865197474.europe-west1.run.app';
 
@@ -47,6 +48,7 @@ interface DocumentsList {
 }
 
 export function FileUploadPage() {
+  const { t } = useTranslation();
   const { userCode } = useParams<{ userCode: string }>();
   const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
@@ -86,7 +88,7 @@ export function FileUploadPage() {
         console.error('Failed to load documents:', data.error);
         // If store doesn't exist yet, that's okay - just set empty list
         if (data.error?.code !== 'NOT_FOUND') {
-          toast.error(data.error?.message || 'Failed to load documents');
+          toast.error(data.error?.message || t('fileUploadPage.failedToLoadDocuments'));
         } else {
           // Store doesn't exist yet - set empty documents
           setDocuments({
@@ -113,7 +115,7 @@ export function FileUploadPage() {
   };
 
   const handleDeleteDocument = async (documentName: string, displayName: string) => {
-    if (!confirm(`Are you sure you want to delete "${displayName}"?`)) {
+    if (!confirm(t('fileUploadPage.areYouSureDelete', { displayName }))) {
       return;
     }
 
@@ -153,15 +155,15 @@ export function FileUploadPage() {
       const data = await response.json();
       
       if (data.success) {
-        toast.success(`"${displayName}" deleted successfully`);
+        toast.success(t('fileUploadPage.deletedSuccessfully', { displayName }));
         // Reload documents list
         await loadDocuments();
       } else {
-        toast.error(data.error?.message || 'Failed to delete document');
+        toast.error(data.error?.message || t('fileUploadPage.failedToDeleteDocument'));
       }
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete document. Please try again.');
+      toast.error(error instanceof Error ? error.message : t('fileUploadPage.failedToDeleteDocumentTryAgain'));
     } finally {
       setDeletingFileUri(null);
     }
@@ -200,7 +202,7 @@ export function FileUploadPage() {
     if (file) {
       // Check file size (100 MB max)
       if (file.size > 100 * 1024 * 1024) {
-        toast.error('File size exceeds 100 MB limit');
+        toast.error(t('fileUploadPage.fileSizeExceedsLimit'));
         return;
       }
       setSelectedFile(file);
@@ -210,7 +212,7 @@ export function FileUploadPage() {
 
   const handleFileUpload = async () => {
     if (!selectedFile) {
-      toast.error('Please select a file');
+      toast.error(t('fileUploadPage.pleaseSelectFile'));
       return;
     }
 
@@ -234,7 +236,7 @@ export function FileUploadPage() {
       setUploadResult(data);
 
       if (data.success) {
-        toast.success(`File "${data.data?.fileName}" uploaded successfully!`);
+        toast.success(t('fileUploadPage.fileUploadedSuccessfully', { fileName: data.data?.fileName || '' }));
         setSelectedFile(null);
         // Reset file input
         const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -242,11 +244,11 @@ export function FileUploadPage() {
         // Reload documents list
         await loadDocuments();
       } else {
-        toast.error(data.error?.message || 'Upload failed');
+        toast.error(data.error?.message || t('fileUploadPage.uploadFailedGeneric'));
       }
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Failed to upload file. Please try again.');
+      toast.error(t('fileUploadPage.failedToUploadFileTryAgain'));
       setUploadResult({
         success: false,
         error: {
@@ -261,7 +263,7 @@ export function FileUploadPage() {
 
   const handleTextUpload = async () => {
     if (!textContent.trim()) {
-      toast.error('Please enter some text content');
+      toast.error(t('fileUploadPage.pleaseEnterTextContent'));
       return;
     }
 
@@ -330,11 +332,11 @@ export function FileUploadPage() {
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Studio
+            {t('fileUploadPage.backToStudio')}
           </Button>
-          <h1 className="text-2xl font-semibold text-[#3d3d3a]">Personal AI - File Upload</h1>
+          <h1 className="text-2xl font-semibold text-[#3d3d3a]">{t('fileUploadPage.personalAIFileUpload')}</h1>
           <p className="text-sm text-[#71717a] mt-2">
-            Upload documents to make them searchable through the AI chat widget. Friends can ask questions about your uploaded content.
+            {t('fileUploadPage.uploadDocumentsDescription')}
           </p>
         </div>
 
@@ -344,10 +346,10 @@ export function FileUploadPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="w-5 h-5" />
-                Upload File
+                {t('fileUploadPage.uploadFile')}
               </CardTitle>
               <CardDescription>
-                Upload PDF, Word, Text, HTML, or Excel files (max 100 MB)
+                {t('fileUploadPage.uploadFileDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -362,7 +364,7 @@ export function FileUploadPage() {
                 />
                 {selectedFile && (
                   <p className="text-sm text-[#71717a] mt-2">
-                    Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
+                    {t('fileUploadPage.selected')} {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
                   </p>
                 )}
               </div>
@@ -374,12 +376,12 @@ export function FileUploadPage() {
                 {uploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Uploading...
+                    {t('fileUploadPage.uploading')}
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload File
+                    {t('fileUploadPage.uploadFile')}
                   </>
                 )}
               </Button>
@@ -391,24 +393,24 @@ export function FileUploadPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Upload Text
+                {t('fileUploadPage.uploadText')}
               </CardTitle>
               <CardDescription>
-                Upload text content directly (max 10 MB)
+                {t('fileUploadPage.uploadTextDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Input
                   type="text"
-                  placeholder="File name (optional)"
+                  placeholder={t('fileUploadPage.fileNameOptional')}
                   value={textFileName}
                   onChange={(e) => setTextFileName(e.target.value)}
                   disabled={uploading}
                   className="mb-2"
                 />
                 <Textarea
-                  placeholder="Enter your text content here..."
+                  placeholder={t('fileUploadPage.enterTextContent')}
                   value={textContent}
                   onChange={(e) => setTextContent(e.target.value)}
                   disabled={uploading}
@@ -427,12 +429,12 @@ export function FileUploadPage() {
                 {uploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Uploading...
+                    {t('fileUploadPage.uploading')}
                   </>
                 ) : (
                   <>
                     <FileText className="w-4 h-4 mr-2" />
-                    Upload Text
+                    {t('fileUploadPage.uploadText')}
                   </>
                 )}
               </Button>
@@ -448,7 +450,7 @@ export function FileUploadPage() {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-medium text-green-900">Upload Successful!</p>
+                    <p className="font-medium text-green-900">{t('fileUploadPage.uploadSuccessful')}</p>
                     {uploadResult.data && (
                       <div className="mt-2 text-sm text-green-800 space-y-1">
                         <p>File: {uploadResult.data.fileName}</p>
@@ -464,7 +466,7 @@ export function FileUploadPage() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-medium text-red-900">Upload Failed</p>
+                    <p className="font-medium text-red-900">{t('fileUploadPage.uploadFailed')}</p>
                     {uploadResult.error && (
                       <p className="mt-1 text-sm text-red-800">
                         {uploadResult.error.message}
@@ -484,7 +486,7 @@ export function FileUploadPage() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <File className="w-5 h-5" />
-                  Uploaded Documents
+                  {t('fileUploadPage.uploadedDocuments')}
                 </CardTitle>
                 <CardDescription>
                   {(() => {
@@ -504,7 +506,7 @@ export function FileUploadPage() {
                 disabled={loadingDocuments}
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${loadingDocuments ? 'animate-spin' : ''}`} />
-                Refresh
+                {t('fileUploadPage.refresh')}
               </Button>
             </div>
           </CardHeader>
@@ -546,7 +548,7 @@ export function FileUploadPage() {
                               </span>
                             </div>
                             <p className="text-xs text-[#71717a] mt-1">
-                              Uploaded: {formatDate(file.createTime)}
+                              {t('fileUploadPage.uploaded')} {formatDate(file.createTime)}
                             </p>
                             {file.error && (
                               <p className="text-xs text-red-600 mt-1">
@@ -562,7 +564,7 @@ export function FileUploadPage() {
                         onClick={() => handleDeleteDocument(file.displayName, file.displayName)}
                         disabled={deletingFileUri === file.displayName || deletingFileUri === file.name}
                         className="ml-4 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        title={`Delete ${file.displayName}`}
+                        title={t('fileUploadPage.delete')}
                       >
                         {deletingFileUri === file.displayName ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -577,7 +579,7 @@ export function FileUploadPage() {
                 <div className="text-center py-8">
                   <FileText className="w-12 h-12 text-[#83827d] mx-auto mb-3 opacity-50" />
                   <p className="text-sm text-[#71717a]">No manually uploaded documents</p>
-                  <p className="text-xs text-[#83827d] mt-1">Upload files or text content above. Field-related documents are managed via the toggle switches above.</p>
+                  <p className="text-xs text-[#83827d] mt-1">{t('fileUploadPage.noDocumentsYet')}</p>
                 </div>
               );
             })()}

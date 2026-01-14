@@ -34,6 +34,7 @@ export function PortfolioItemDisplay({
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
   const [videoPlaybackError, setVideoPlaybackError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const totalDuration = 45; // Mock duration in seconds
   
   // Track portfolio item view on mount

@@ -21,6 +21,7 @@ import { AddEmployeeForm } from './AddEmployeeForm';
 import { EditEmployeeForm } from './EditEmployeeForm';
 import { EmployeeListItem } from './EmployeeListItem';
 import { FieldPermissionsEditor } from './FieldPermissionsEditor';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -59,6 +60,7 @@ import { supabase } from '../../lib/supabase-client';
  * - Configure field permissions
  */
 export function EmployeeManager() {
+  const { t } = useTranslation();
   const {
     isBusinessOwner,
     employees,
@@ -216,9 +218,9 @@ export function EmployeeManager() {
       <Card className="border-dashed border-border">
         <CardContent className="py-8 text-center">
           <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">Business Plan Required</h3>
+          <h3 className="text-lg font-medium text-foreground mb-2">{t('employeeManager.businessPlanRequired')}</h3>
           <p className="text-sm text-muted-foreground">
-            Upgrade to a Business Plan to manage employee accounts.
+            {t('employeeManager.upgradeToManageEmployees')}
           </p>
         </CardContent>
       </Card>
@@ -233,11 +235,11 @@ export function EmployeeManager() {
       });
       toast.success(
         employee.is_active
-          ? `${employee.employee_name || 'Employee'} has been deactivated`
-          : `${employee.employee_name || 'Employee'} has been activated`
+          ? t('employeeManager.employeeDeactivated', { name: employee.employee_name || 'Employee' })
+          : t('employeeManager.employeeActivated', { name: employee.employee_name || 'Employee' })
       );
     } catch (error: any) {
-      toast.error(`Failed to update employee status: ${error.message}`);
+      toast.error(t('employeeManager.failedToUpdateStatus', { error: error.message }));
     }
   };
 
@@ -331,14 +333,14 @@ export function EmployeeManager() {
 
       toast.success(
         totalCount === 1
-          ? 'Field permissions updated successfully'
-          : `Field permissions updated for ${totalCount} employees`
+          ? t('fieldPermissionsEditor.savePermissions')
+          : t('fieldPermissionsEditor.saveForEmployees', { count: totalCount })
       );
       setShowPermissionsEditor(false);
       setSelectedEmployee(null);
     } catch (error: any) {
       console.error('Error updating field permissions:', error);
-      toast.error(`Failed to update permissions: ${error.message}`);
+      toast.error(t('fieldPermissionsEditor.savePermissions') + ': ' + error.message);
     }
   };
 
@@ -398,11 +400,11 @@ export function EmployeeManager() {
       
       // Update state immediately
       setBrandLogo(url);
-      toast.success('Brand logo uploaded successfully');
+      toast.success(t('employeeManager.brandLogoUploaded'));
       setPendingLogoFile(null);
     } catch (error: any) {
       console.error('Error uploading logo:', error);
-      toast.error(`Failed to upload logo: ${error.message}`);
+      toast.error(t('employeeManager.failedToUploadLogo', { error: error.message }));
       setPendingLogoFile(null);
     } finally {
       setIsUploadingLogo(false);
@@ -416,7 +418,7 @@ export function EmployeeManager() {
   const statusFilters = [
     {
       id: 'all' as const,
-      label: 'All',
+      label: t('employeeManager.all'),
       count: employees.length,
       icon: Users,
       bgColor: 'bg-blue-50',
@@ -425,7 +427,7 @@ export function EmployeeManager() {
     },
     {
       id: 'active' as const,
-      label: 'Active',
+      label: t('employeeManager.active'),
       count: activeCount,
       icon: UserCheck,
       bgColor: 'bg-green-50',
@@ -434,7 +436,7 @@ export function EmployeeManager() {
     },
     {
       id: 'inactive' as const,
-      label: 'Inactive',
+      label: t('employeeManager.inactive'),
       count: inactiveCount,
       icon: UserX,
       bgColor: 'bg-zinc-50',
@@ -460,7 +462,7 @@ export function EmployeeManager() {
                     <button
                       onClick={handleLogoClick}
                       className="relative cursor-pointer group"
-                      title="Click to change logo"
+                      title={t('employeeManager.clickToChangeLogo')}
                     >
                       <img
                         src={brandLogo}
@@ -483,7 +485,7 @@ export function EmployeeManager() {
                       ) : (
                         <>
                           <ImageIcon className="h-5 w-5 text-zinc-400" />
-                          <span className="text-xs text-zinc-500">Upload Logo</span>
+                          <span className="text-xs text-zinc-500">{t('employeeManager.uploadLogo')}</span>
                         </>
                       )}
                     </button>
@@ -516,14 +518,14 @@ export function EmployeeManager() {
           {/* Header Text */}
           <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-muted-foreground text-center w-full">
             <p className="leading-[20px]">
-              Manage your team's digital business cards or{' '}
+              {t('employeeManager.manageTeam')}{' '}
               <button
                 onClick={() => setShowAddForm(true)}
                 className="underline hover:text-foreground transition-colors"
               >
-                Add new employee
+                {t('employeeManager.addNewEmployee')}
               </button>
-              {' '}to your team
+              {' '}{t('employeeManager.toYourTeam')}
             </p>
           </div>
 
@@ -540,7 +542,7 @@ export function EmployeeManager() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search"
+                    placeholder={t('employeeManager.search')}
                     className="flex-1 bg-transparent outline-none font-['Inter:Medium',sans-serif] font-medium text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
@@ -551,26 +553,26 @@ export function EmployeeManager() {
                     setSearchQuery('');
                     setSelectedDepartments([]);
                   }}
-                  className="p-1 hover:bg-muted/50 rounded-full transition-colors shrink-0"
-                  aria-label="Clear filters"
-                >
-                  <X className="size-4 text-muted-foreground hover:text-foreground" />
-                </button>
+                    className="p-1 hover:bg-muted/50 rounded-full transition-colors shrink-0"
+                    aria-label={t('employeeManager.clearFilters')}
+                  >
+                    <X className="size-4 text-muted-foreground hover:text-foreground" />
+                  </button>
               )}
               <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                 <PopoverTrigger asChild>
                   <button 
                     className={`relative shrink-0 size-[20px] hover:opacity-70 transition-opacity ${selectedDepartments.length > 0 ? 'text-primary' : ''}`}
-                    aria-label="Filter by department"
+                    aria-label={t('employeeManager.filterByDepartment')}
                   >
                     <Filter className="w-[20px] h-[20px] text-foreground" strokeWidth={1.5} />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-56 p-2" align="end">
                   <div className="space-y-1">
-                    <div className="px-2 py-1.5 text-sm font-semibold text-foreground">Filter by Department</div>
+                    <div className="px-2 py-1.5 text-sm font-semibold text-foreground">{t('employeeManager.filterByDepartment')}</div>
                     {departments.length === 0 ? (
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">No departments</div>
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('employeeManager.noDepartments')}</div>
                     ) : (
                       departments.map((dept) => {
                         const isSelected = selectedDepartments.includes(dept);
@@ -607,7 +609,7 @@ export function EmployeeManager() {
                           }}
                           className="w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors text-muted-foreground"
                         >
-                          Clear all
+                          {t('employeeManager.clearAll')}
                         </button>
                       </div>
                     )}
@@ -714,28 +716,28 @@ export function EmployeeManager() {
                 {searchQuery ? (
                   <div className="flex flex-col items-center">
                     <Search className="h-10 w-10 text-muted-foreground/30 mb-3" />
-                    <p className="text-[15px] font-medium">No results found matching your search</p>
+                    <p className="text-[15px] font-medium">{t('employeeManager.noResultsFound')}</p>
                     <button
                       onClick={() => setSearchQuery('')}
                       className="text-primary text-sm font-bold mt-2 hover:underline"
                     >
-                      Clear search
+                      {t('employeeManager.clearSearch')}
                     </button>
                   </div>
                 ) : employees.length === 0 ? (
                   <div className="flex flex-col items-center px-6">
                     <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">No Employees Yet</h3>
+                    <h3 className="text-lg font-medium text-foreground mb-2">{t('employeeManager.noEmployeesYet')}</h3>
                     <p className="text-sm text-muted-foreground mb-4 max-w-[240px]">
-                      Start building your team by adding your first employee.
+                      {t('employeeManager.startBuildingTeam')}
                     </p>
                     <Button onClick={() => setShowAddForm(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add First Employee
+                      {t('employeeManager.addFirstEmployee')}
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-[15px] font-medium text-muted-foreground">No employees in this category</p>
+                  <p className="text-[15px] font-medium text-muted-foreground">{t('employeeManager.noEmployeesInCategory')}</p>
                 )}
               </div>
             ) : (
@@ -757,7 +759,7 @@ export function EmployeeManager() {
       <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add New Employee</DialogTitle>
+            <DialogTitle>{t('employeeManager.addNewEmployeeTitle')}</DialogTitle>
           </DialogHeader>
           <AddEmployeeForm
             onSuccess={handleEmployeeCreated}
@@ -770,7 +772,7 @@ export function EmployeeManager() {
       <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Edit Employee</DialogTitle>
+            <DialogTitle>{t('employeeManager.editEmployeeTitle')}</DialogTitle>
           </DialogHeader>
           {selectedEmployee && (
             <EditEmployeeForm
@@ -790,7 +792,7 @@ export function EmployeeManager() {
         <DialogContent className="sm:max-w-[600px] max-h-[calc(100dvh-2rem)] sm:max-h-[80vh] overflow-hidden flex flex-col p-4 sm:p-6">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-base sm:text-lg pr-6">
-              Edit Permissions{selectedEmployee?.employee_name ? ` - ${selectedEmployee.employee_name}` : ''}
+              {t('employeeManager.editPermissions')}{selectedEmployee?.employee_name ? ` - ${selectedEmployee.employee_name}` : ''}
             </DialogTitle>
           </DialogHeader>
           {selectedEmployee && (
@@ -812,14 +814,14 @@ export function EmployeeManager() {
       <AlertDialog open={showLogoUploadConfirm} onOpenChange={setShowLogoUploadConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Upload New Logo</AlertDialogTitle>
+            <AlertDialogTitle>{t('employeeManager.uploadNewLogo')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Do you want to upload a new logo?
+              {t('employeeManager.uploadNewLogoDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setPendingLogoFile(null)}>
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
@@ -828,7 +830,7 @@ export function EmployeeManager() {
                 }
               }}
             >
-              Upload
+              {t('employeeManager.upload')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

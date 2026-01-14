@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -29,6 +30,7 @@ export interface GroupSecurity {
 }
 
 export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: GroupDialogProps) {
+  const { t } = useTranslation();
   const [label, setLabel] = useState(group?.label || "");
   const [description, setDescription] = useState(group?.description || "");
   const [icon, setIcon] = useState(group?.icon || "Users");
@@ -99,11 +101,11 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{group ? "Edit Group" : "Create New Group"}</DialogTitle>
+          <DialogTitle>{group ? t("dialogs.editGroup") : t("dialogs.createNewGroup")}</DialogTitle>
           <DialogDescription>
             {group 
-              ? "Update the details of this contact group"
-              : "Create a new contact group to organize your audience"
+              ? t("dialogs.updateGroupDetails")
+              : t("dialogs.createGroupDescription")
             }
           </DialogDescription>
         </DialogHeader>
@@ -111,24 +113,24 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
         <div className="space-y-6 py-4">
           {/* Label */}
           <div className="space-y-2">
-            <Label htmlFor="group-label">Group Name *</Label>
+            <Label htmlFor="group-label">{t("dialogs.groupName")} *</Label>
             <Input
               id="group-label"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="e.g., Family, Colleagues, VIP Clients"
+              placeholder={t("dialogs.groupNamePlaceholder")}
               maxLength={30}
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="group-description">Description</Label>
+            <Label htmlFor="group-description">{t("dialogs.description")}</Label>
             <Textarea
               id="group-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief description of who this group is for"
+              placeholder={t("dialogs.descriptionPlaceholder")}
               rows={2}
               maxLength={150}
             />
@@ -136,13 +138,13 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
 
           {/* Share Code */}
           <div className="space-y-2">
-            <Label htmlFor="share-code">Share Code *</Label>
+            <Label htmlFor="share-code">{t("dialogs.shareCode")} *</Label>
             <div className="relative">
               <Input
                 id="share-code"
                 value={shareCode}
                 onChange={(e) => setShareCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                placeholder="e.g., ABC123"
+                placeholder={t("dialogs.shareCodePlaceholder")}
                 maxLength={8}
                 className={`font-mono pr-10 ${
                   showShareCodeError 
@@ -172,11 +174,11 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
             {showShareCodeError ? (
               <p className="text-xs text-red-600 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
-                Must be 6-8 characters (A-Z, 0-9 only)
+                {t("dialogs.shareCodeError")}
               </p>
             ) : (
               <p className="text-xs text-[#71717a]">
-                6-8 characters, uppercase letters and numbers only
+                {t("dialogs.shareCodeHelp")}
               </p>
             )}
           </div>
@@ -184,7 +186,7 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
           {/* Icon & Color - Compact Row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="icon-select">Icon</Label>
+              <Label htmlFor="icon-select">{t("dialogs.icon")}</Label>
               <Select value={icon} onValueChange={setIcon}>
                 <SelectTrigger id="icon-select">
                   <SelectValue>
@@ -211,7 +213,7 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="color-select">Color</Label>
+              <Label htmlFor="color-select">{t("dialogs.color")}</Label>
               <Select value={color} onValueChange={setColor}>
                 <SelectTrigger id="color-select">
                   <SelectValue>
@@ -241,21 +243,21 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-[#71717a]" />
-              <Label className="mb-0">Security & Privacy</Label>
+              <Label className="mb-0">{t("dialogs.securityPrivacy")}</Label>
             </div>
 
             <Alert className="border-blue-200 bg-blue-50">
               <AlertCircle className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-xs text-blue-900">
-                <strong>Coming soon:</strong> Enhanced privacy features will be available in a future update.
+                <strong>{t("dialogs.comingSoon")}</strong> {t("dialogs.enhancedPrivacyComingSoon")}
               </AlertDescription>
             </Alert>
 
             {/* Password Protection */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="password-toggle" className="text-sm">Require Password</Label>
-                <p className="text-xs text-[#71717a]">Viewers must enter a password to access</p>
+                <Label htmlFor="password-toggle" className="text-sm">{t("dialogs.requirePassword")}</Label>
+                <p className="text-xs text-[#71717a]">{t("dialogs.requirePasswordDescription")}</p>
               </div>
               <Switch
                 id="password-toggle"
@@ -271,7 +273,7 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
+                  placeholder={t("dialogs.enterPassword")}
                   disabled
                 />
               </div>
@@ -280,8 +282,8 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
             {/* Require Approval */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="approval-toggle" className="text-sm">Require Approval</Label>
-                <p className="text-xs text-[#71717a]">You must approve each viewer request</p>
+                <Label htmlFor="approval-toggle" className="text-sm">{t("dialogs.requireApproval")}</Label>
+                <p className="text-xs text-[#71717a]">{t("dialogs.requireApprovalDescription")}</p>
               </div>
               <Switch
                 id="approval-toggle"
@@ -302,18 +304,18 @@ export function GroupDialog({ open, onOpenChange, group, onSave, onDelete }: Gro
               className="mr-auto"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Delete
+              {t("dialogs.delete")}
             </Button>
           )}
           
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button 
             onClick={handleSave} 
             disabled={!label.trim() || !shareCode.trim() || !isShareCodeValid}
           >
-            {group ? "Save Changes" : "Create Group"}
+            {group ? t("dialogs.saveChanges") : t("dialogs.createGroup")}
           </Button>
         </DialogFooter>
       </DialogContent>

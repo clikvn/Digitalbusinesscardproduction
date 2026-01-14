@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -44,6 +45,7 @@ interface ActiveField {
 }
 
 export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNavigateToStudio, onMenuClick, onOpenAIAssistant }: CMSDashboardProps) {
+  const { t } = useTranslation();
   // Get userCode from URL
   const { userCode } = parseProfileUrl(window.location.pathname);
   
@@ -181,7 +183,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
     a.download = `business-card-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Data exported successfully");
+    toast.success(t("common.success"));
   };
 
   const handleImport = () => {
@@ -202,10 +204,10 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
           // For now, reloading the page is the safest fallback for this legacy util.
           window.location.reload();
         } else {
-          toast.error("Invalid data format");
+          toast.error(t("common.error"));
         }
       } catch (error) {
-        toast.error("Failed to import data");
+          toast.error(t("common.error"));
       }
     };
     input.click();
@@ -242,7 +244,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               profileName={data.personal.name}
               onMenuClick={onMenuClick || (() => setMobileMenuOpen(true))}
               onAIClick={() => {
-                toast.info("This feature will coming soon!");
+                toast.info(t("messages.comingSoon"));
               }}
               onNavigateToStudio={onNavigateToStudio}
               currentPage="section"
@@ -426,28 +428,28 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               }`}
             >
               <BarChart3 className="w-5 h-5" />
-              <span>Analytics</span>
+              <span>{t("navigation.analytics")}</span>
             </button>
             <button
               onClick={() => {
-                toast.info("This feature will coming soon!");
+                toast.info(t("messages.comingSoon"));
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left text-[#71717a] hover:bg-[#f4f4f5]"
             >
               <Sparkles className="w-5 h-5" />
-              <span>Personal AI</span>
+              <span>{t("navigation.personalAI")}</span>
             </button>
             <Separator className="my-2" />
             <button
               onClick={() => {
-                toast.info("This feature will coming soon!");
+                toast.info(t("messages.comingSoon"));
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#71717a] hover:bg-[#f4f4f5] transition-colors text-left"
             >
               <Sparkles className="w-5 h-5" />
-              <span>AI Agent</span>
+              <span>{t("navigation.aiAgent")}</span>
             </button>
             <button
               onClick={() => {
@@ -457,7 +459,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#71717a] hover:bg-[#f4f4f5] transition-colors text-left"
             >
               <Home className="w-5 h-5" />
-              <span>View My Profile</span>
+              <span>{t("navigation.viewMyProfile")}</span>
             </button>
             <button
               onClick={() => {
@@ -467,7 +469,7 @@ export function CMSDashboard({ onLogout, onNavigateHome, activeSection, onNaviga
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-left"
             >
               <LogOut className="w-5 h-5" />
-              <span>Logout</span>
+              <span>{t("common.logout")}</span>
             </button>
           </div>
         </SheetContent>

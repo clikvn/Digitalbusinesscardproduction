@@ -18,6 +18,7 @@ import { getColorClasses, CustomGroup } from "../../utils/custom-groups";
 import * as LucideIcons from "lucide-react";
 import { useSettings } from "../../hooks/useSettings";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // Preset templates
 const VISIBILITY_PRESETS = {
@@ -53,6 +54,7 @@ const VISIBILITY_PRESETS = {
 };
 
 export function FieldVisibilitySettings() {
+  const { t } = useTranslation();
   const { userCode } = useParams<{ userCode: string }>();
   const { settings: cloudSettings, customGroups: groups, saveSettings, isLoading } = useSettings(userCode);
   
@@ -133,7 +135,7 @@ export function FieldVisibilitySettings() {
     try {
       await saveSettings(settings);
       // hasChanges will automatically update via the useEffect when cloudSettings updates
-      toast.success("Field visibility settings saved successfully");
+      toast.success(t('fieldVisibilitySettings.fieldVisibilitySaved'));
     } catch (e) {
       // toast handled in hook
     }
@@ -195,7 +197,7 @@ export function FieldVisibilitySettings() {
         <Alert className="border-amber-200 bg-amber-50">
           <AlertCircle className="h-5 w-5 text-amber-600" />
           <AlertDescription className="text-amber-800">
-            You have unsaved changes. Click "Save Settings" to apply your changes.
+            {t('fieldVisibilitySettings.unsavedChanges')}
           </AlertDescription>
         </Alert>
       )}
@@ -224,7 +226,7 @@ export function FieldVisibilitySettings() {
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{group.label}</div>
                     <div className="text-xs text-[#71717a]">
-                      {getVisibleCount(group.id)} of {ALL_SHAREABLE_FIELDS.length} fields visible
+                      {getVisibleCount(group.id)} {t('fieldVisibilitySettings.of')} {ALL_SHAREABLE_FIELDS.length} {t('fieldVisibilitySettings.fieldsVisible')}
                     </div>
                   </div>
                 </div>
@@ -252,7 +254,7 @@ export function FieldVisibilitySettings() {
                       className="flex-1"
                     >
                       <Check className="w-3 h-3 mr-1" />
-                      All
+                      {t('fieldVisibilitySettings.all')}
                     </Button>
                     <Button
                       variant="outline"
@@ -261,7 +263,7 @@ export function FieldVisibilitySettings() {
                       className="flex-1"
                     >
                       <EyeOff className="w-3 h-3 mr-1" />
-                      None
+                      {t('fieldVisibilitySettings.none')}
                     </Button>
                   </div>
 
@@ -269,10 +271,13 @@ export function FieldVisibilitySettings() {
                   {Object.entries(fieldsByCategory).map(([category, fields]) => {
                     if (fields.length === 0) return null;
                     
+                    const categoryKey = category.toLowerCase().replace(/\s+/g, '');
+                    const categoryLabel = t(`fieldVisibilitySettings.${categoryKey}`, category);
+                    
                     return (
                       <div key={category} className="space-y-2">
                         <h4 className="text-xs font-medium text-[#71717a] uppercase tracking-wide">
-                          {category}
+                          {categoryLabel}
                         </h4>
                         <div className="space-y-1">
                           {fields.map((fieldPath) => {
@@ -321,7 +326,7 @@ export function FieldVisibilitySettings() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 flex-1">
                   <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="font-medium">Unsaved changes</span>
+                  <span className="font-medium">{t('fieldVisibilitySettings.unsavedChangesLabel')}</span>
                 </div>
                 <Button
                   onClick={handleSave}
@@ -329,7 +334,7 @@ export function FieldVisibilitySettings() {
                   className="shadow-sm"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Save Settings
+                  {t('fieldVisibilitySettings.saveSettings')}
                 </Button>
               </div>
             </CardContent>

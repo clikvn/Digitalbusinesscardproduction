@@ -8,6 +8,7 @@ import { ImageUploader } from "../ImageUploader";
 import { BusinessCardData } from "../../../types/business-card";
 import { useAllFieldPermissions } from "../../../hooks/useBusinessManagement";
 import { Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PersonalInfoFormProps {
   data: BusinessCardData['personal'];
@@ -16,6 +17,7 @@ interface PersonalInfoFormProps {
 }
 
 export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoFormProps) {
+  const { t } = useTranslation();
   const form = useForm({
     defaultValues: data,
     values: data,
@@ -34,8 +36,8 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
   return (
     <Card className="border-[#e4e4e7] shadow-sm gap-3">
       <CardHeader className="px-4 md:px-6 md:pt-6 pb-[0px] pt-[12px] pr-[16px] pl-[16px]">
-        <CardTitle className="text-lg">Personal Information</CardTitle>
-        <p className="text-sm text-[#71717a] m-[0px]">Your name, title, and bio</p>
+        <CardTitle className="text-lg">{t("personalInfoForm.personalInformation")}</CardTitle>
+        <p className="text-sm text-[#71717a] m-[0px]">{t("personalInfoForm.personalInformationDescription")}</p>
       </CardHeader>
       <CardContent className="px-4 md:px-6 pb-5 md:pb-6 space-y-6">
         <Form {...form}>
@@ -44,7 +46,7 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name *</FormLabel>
+                <FormLabel>{t("personalInfoForm.fullName")} *</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -54,15 +56,15 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
                     }}
                     onFocus={() => {
                       onFieldFocus?.({
-                        label: 'Full Name',
+                        label: t("personalInfoForm.fullName"),
                         value: data.name,
                         onApply: (value) => handleChange('name', value)
                       });
                     }}
-                    placeholder="Enter your full name"
+                    placeholder={t("personalInfoForm.fullNamePlaceholder")}
                   />
                 </FormControl>
-                <FormDescription>This will be displayed prominently on your card</FormDescription>
+                <FormDescription>{t("personalInfoForm.fullNameDescription")}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -76,9 +78,9 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
               return (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
-                    Professional Title *
+                    {t("personalInfoForm.professionalTitle")} *
                     {readonly && (
-                      <Lock className="h-3.5 w-3.5 text-muted-foreground" title="This field is read-only" />
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground" title={t("homeForm.readOnlyFieldTooltip")} />
                     )}
                   </FormLabel>
                   <FormControl>
@@ -93,23 +95,23 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
                       onFocus={() => {
                         if (!readonly) {
                           onFieldFocus?.({
-                            label: 'Professional Title',
+                            label: t("personalInfoForm.professionalTitle"),
                             value: data.title,
                             onApply: (value) => handleChange('title', value)
                           });
                         }
                       }}
-                      placeholder="e.g., Interior Designer"
+                      placeholder={t("personalInfoForm.professionalTitlePlaceholder")}
                       disabled={readonly}
                       className={readonly ? 'bg-muted cursor-not-allowed' : ''}
                     />
                   </FormControl>
                   {readonly ? (
                     <FormDescription className="text-muted-foreground">
-                      This field is controlled by your business owner
+                      {t("personalInfoForm.fieldControlledByBusinessOwner")}
                     </FormDescription>
                   ) : (
-                    <FormDescription>Your job title or profession</FormDescription>
+                    <FormDescription>{t("personalInfoForm.professionalTitleDescription")}</FormDescription>
                   )}
                   <FormMessage />
                 </FormItem>
@@ -122,7 +124,7 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
             name="bio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Bio / About</FormLabel>
+                <FormLabel>{t("personalInfoForm.bioAbout")}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
@@ -132,17 +134,17 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
                     }}
                     onFocus={() => {
                       onFieldFocus?.({
-                        label: 'Bio',
+                        label: t("personalInfoForm.bioAbout"),
                         value: data.bio,
                         onApply: (value) => handleChange('bio', value)
                       });
                     }}
-                    placeholder="Tell people about yourself..."
+                    placeholder={t("personalInfoForm.bioPlaceholder")}
                     rows={4}
                     className="overflow-hidden"
                   />
                 </FormControl>
-                <FormDescription>A brief description about you and your work</FormDescription>
+                <FormDescription>{t("personalInfoForm.bioDescription")}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -150,13 +152,13 @@ export function PersonalInfoForm({ data, onChange, onFieldFocus }: PersonalInfoF
         </Form>
 
         <div className="space-y-4 pt-4 border-t">
-          <h3 className="font-medium">Images</h3>
+          <h3 className="font-medium">{t("personalInfoForm.images")}</h3>
           
           <ImageUploader
-            label="Profile Image"
+            label={t("personalInfoForm.profileImage")}
             value={data.profileImage}
             onChange={(value) => handleChange('profileImage', value)}
-            description="Optional - Your profile photo"
+            description={t("personalInfoForm.profileImageDescription")}
             aspectRatio="1/1"
           />
         </div>

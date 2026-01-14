@@ -1,5 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner@2.0.3";
 import { parseProfileUrl, getUserCode } from "../../utils/user-code";
 import { useAnalyticsTracking } from "../../hooks/useAnalytics";
@@ -16,6 +17,7 @@ export function ButtonMain({ phone, email, onAIClick }: { phone: string; email: 
 }
 
 export function AIButton({ onClick }: { onClick?: () => void }) {
+  const { t } = useTranslation();
   const { userCode, groupCode } = useParams<{ userCode: string; groupCode?: string }>();
   const targetUserCode = userCode || getUserCode();
   
@@ -33,7 +35,7 @@ export function AIButton({ onClick }: { onClick?: () => void }) {
     <button 
       onClick={() => {
         trackClickEvent('aiAgent');
-        toast.info("This feature will coming soon!");
+        toast.info(t("messages.comingSoon"));
       }}
       className="bg-[#c96442] h-[40px] relative rounded-[8px] shrink-0 w-full cursor-pointer transition-all hover:bg-[#b85838] active:scale-[0.98]" 
       data-name="button"
@@ -56,7 +58,7 @@ export function AIButton({ onClick }: { onClick?: () => void }) {
               </div>
             </div>
           </div>
-          <p className="font-['Inter:Medium',sans-serif] font-medium leading-[24px] not-italic relative shrink-0 text-[14px] text-nowrap text-slate-50 whitespace-pre">AI Agent</p>
+          <p className="font-['Inter:Medium',sans-serif] font-medium leading-[24px] not-italic relative shrink-0 text-[14px] text-nowrap text-slate-50 whitespace-pre">{t("navigation.aiAgent")}</p>
         </div>
       </div>
     </button>
@@ -73,6 +75,7 @@ export function Btn({ phone, email }: { phone: string; email: string }) {
 }
 
 export function PhoneButton({ phone }: { phone: string }) {
+  const { t } = useTranslation();
   const { userCode, groupCode } = useParams<{ userCode: string; groupCode?: string }>();
   const targetUserCode = userCode || getUserCode();
   const { trackClickEvent } = useAnalyticsTracking(targetUserCode, groupCode || '', undefined);
@@ -97,7 +100,7 @@ export function PhoneButton({ phone }: { phone: string }) {
               </svg>
             </div>
           </div>
-          <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535146] text-[14px] text-nowrap whitespace-pre">Phone</p>
+          <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535146] text-[14px] text-nowrap whitespace-pre">{t("common.phone")}</p>
         </div>
       </div>
     </button>
@@ -105,6 +108,7 @@ export function PhoneButton({ phone }: { phone: string }) {
 }
 
 export function EmailButton({ email }: { email: string }) {
+  const { t } = useTranslation();
   const { userCode, groupCode } = useParams<{ userCode: string; groupCode?: string }>();
   const targetUserCode = userCode || getUserCode();
   const { trackClickEvent } = useAnalyticsTracking(targetUserCode, groupCode || '', undefined);
@@ -134,7 +138,7 @@ export function EmailButton({ email }: { email: string }) {
               </svg>
             </div>
           </div>
-          <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535146] text-[14px] text-nowrap whitespace-pre">Email</p>
+          <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535146] text-[14px] text-nowrap whitespace-pre">{t("common.email")}</p>
         </div>
       </div>
     </button>

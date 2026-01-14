@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase-client';
 import { api } from '../../lib/api';
 import { toast } from 'sonner@2.0.3';
@@ -10,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { MailCheck, ArrowLeft } from 'lucide-react@0.487.0';
 
 export function AuthScreen() {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +30,7 @@ export function AuthScreen() {
   useEffect(() => {
     const confirmed = searchParams.get('confirmed');
     if (confirmed === 'true') {
-      toast.success('Email verified successfully! You can now sign in.');
+      toast.success(t('auth.emailVerified'));
       // Clean up the URL
       navigate('/auth', { replace: true });
     }
@@ -36,7 +38,7 @@ export function AuthScreen() {
     // Check for password reset success
     const reset = searchParams.get('reset');
     if (reset === 'success') {
-      toast.success('Password reset successfully! You can now sign in with your new password.');
+      toast.success(t('auth.passwordResetSuccess'));
       // Clean up the URL
       navigate('/auth', { replace: true });
     }
@@ -71,7 +73,7 @@ export function AuthScreen() {
 
         if (fetchError || !ownershipData) {
           console.error('Failed to fetch user code:', fetchError);
-          toast.error('Failed to load your profile. Please contact support.');
+          toast.error(t('auth.failedToLoadProfile'));
           throw new Error('User code not found');
         }
 
@@ -89,7 +91,7 @@ export function AuthScreen() {
           } catch (error) {
             console.warn('SignOut error (non-critical):', error);
           }
-          toast.error(employeeStatus.message || 'Your account has been deactivated by your business owner. Please contact them for more information.');
+          toast.error(employeeStatus.message || t('auth.accountDeactivatedMessage'));
           throw new Error('Account deactivated');
         }
 
@@ -97,7 +99,7 @@ export function AuthScreen() {
         const userCode = ownershipData.user_code;
         localStorage.setItem('user_code', userCode);
         
-        toast.success('Logged in successfully');
+        toast.success(t('auth.loginSuccess'));
         
         // Navigate to correct studio with database user code
         navigate(`/${userCode}/studio`);
@@ -127,7 +129,7 @@ export function AuthScreen() {
           localStorage.setItem('user_code', signupResponse.userCode);
         }
         
-        toast.success('Account created successfully');
+        toast.success(t('auth.accountCreated'));
         
         // Navigate to studio with the new user code
         navigate(`/${signupResponse.userCode}/studio`);
@@ -138,17 +140,17 @@ export function AuthScreen() {
       console.error('Auth error:', error);
       
       if (error.message?.includes("Invalid login credentials")) {
-         toast.error("Invalid email or password. Please check your credentials.");
+         toast.error(t('auth.invalidCredentials'));
       } else if (error.message?.includes("User already registered")) {
-         toast.error("This email is already registered. Please sign in.");
+         toast.error(t('auth.emailAlreadyRegistered'));
          setIsLogin(true);
       } else if (error.message?.includes("User code not found")) {
-         toast.error("Profile not found. Please contact support.");
+         toast.error(t('auth.profileNotFound'));
       } else if (error.message?.includes("Account deactivated")) {
          // Error message already shown in toast above
          // Don't show another error
       } else {
-         toast.error(error.message || 'Authentication failed');
+         toast.error(error.message || t('auth.authenticationFailed'));
       }
     } finally {
       setLoading(false);
@@ -162,25 +164,25 @@ export function AuthScreen() {
     const cleanEmail = email.trim();
     
     if (!cleanEmail) {
-      toast.error('Please enter your email address');
+      toast.error(t('auth.enterEmailAddress'));
       setForgotPasswordLoading(false);
       return;
     }
 
     try {
       await api.auth.forgotPassword(cleanEmail);
-      toast.success('Password reset email sent! Check your inbox.');
+      toast.success(t('auth.passwordResetEmailSent'));
       setShowForgotPassword(false);
       setEmail('');
     } catch (error: any) {
       console.error('Forgot password error:', error);
       if (error.message?.includes('not found') || error.message?.includes('does not exist')) {
         // Don't reveal if email exists or not for security
-        toast.success('If an account exists with this email, a password reset link has been sent.');
+        toast.success(t('auth.passwordResetLinkSent'));
         setShowForgotPassword(false);
         setEmail('');
       } else {
-        toast.error(error.message || 'Failed to send password reset email');
+        toast.error(error.message || t('auth.failedToSendResetEmail'));
       }
     } finally {
       setForgotPasswordLoading(false);
@@ -201,16 +203,16 @@ export function AuthScreen() {
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <CardTitle>Reset Password</CardTitle>
+              <CardTitle>{t('auth.resetPassword')}</CardTitle>
             </div>
             <CardDescription>
-              Enter your email address and we'll send you a link to reset your password.
+              {t('auth.resetPasswordDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="forgot-email">Email</Label>
+                <Label htmlFor="forgot-email">{t('auth.email')}</Label>
                 <Input 
                   id="forgot-email" 
                   type="email" 
@@ -223,7 +225,7 @@ export function AuthScreen() {
               </div>
               
               <Button type="submit" className="w-full" disabled={forgotPasswordLoading}>
-                {forgotPasswordLoading ? 'Sending...' : 'Send Reset Link'}
+                {forgotPasswordLoading ? t('common.sending') : t('auth.sendResetLink')}
               </Button>
               
               <div className="text-center text-sm text-muted-foreground">
@@ -232,7 +234,7 @@ export function AuthScreen() {
                   onClick={() => setShowForgotPassword(false)}
                   className="text-primary hover:underline font-medium"
                 >
-                  Back to Sign In
+                  {t('auth.backToSignIn')}
                 </button>
               </div>
             </form>
@@ -251,17 +253,17 @@ export function AuthScreen() {
             <div className="flex justify-center mb-4">
               <MailCheck className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle>Check Your Email</CardTitle>
+            <CardTitle>{t('auth.checkYourEmail')}</CardTitle>
             <CardDescription className="text-base">
-              We've sent a confirmation link to <strong>{pendingEmail || email}</strong>
+              {t('auth.confirmationLinkSent')} <strong>{pendingEmail || email}</strong>
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
-              Click the link in your email to verify your account and complete registration.
+              {t('auth.clickLinkToVerify')}
             </p>
             <p className="text-xs text-muted-foreground">
-              Didn't receive the email? Check your spam folder.
+              {t('auth.didntReceiveEmail')}
             </p>
             <Button
               type="button"
@@ -278,9 +280,9 @@ export function AuthScreen() {
                     },
                   });
                   if (error) {
-                    toast.error(error.message || 'Failed to resend email');
+                    toast.error(error.message || t('auth.failedToResendEmail'));
                   } else {
-                    toast.success('Confirmation email sent! Please check your inbox.');
+                    toast.success(t('auth.confirmationEmailSent'));
                   }
                 } catch (error: any) {
                   toast.error(error.message || 'Failed to resend email');
@@ -291,7 +293,7 @@ export function AuthScreen() {
               disabled={resendingEmail}
               className="w-full"
             >
-              {resendingEmail ? 'Sending...' : 'Resend Confirmation Email'}
+              {resendingEmail ? t('common.sending') : t('auth.resendConfirmationEmail')}
             </Button>
             <div className="pt-4 border-t">
               <button
@@ -302,7 +304,7 @@ export function AuthScreen() {
                 }}
                 className="text-primary hover:underline font-medium text-sm"
               >
-                Already confirmed? Sign In
+                {t('auth.alreadyConfirmed')}
               </button>
             </div>
           </CardContent>
@@ -315,18 +317,18 @@ export function AuthScreen() {
     <div className="min-h-screen w-full flex items-center justify-center bg-[#e9e6dc] p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>{isLogin ? 'Welcome Back' : 'Create Account'}</CardTitle>
+          <CardTitle>{isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}</CardTitle>
           <CardDescription>
             {isLogin 
-              ? 'Sign in to manage your digital business card' 
-              : 'Get started with your digital business card studio'}
+              ? t('auth.signInDescription')
+              : t('auth.signUpDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t('common.fullName')}</Label>
                 <Input 
                   id="name" 
                   placeholder="Jane Doe" 
@@ -337,7 +339,7 @@ export function AuthScreen() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input 
                 id="email" 
                 type="email" 
@@ -349,14 +351,14 @@ export function AuthScreen() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 {isLogin && (
                   <button
                     type="button"
                     onClick={() => setShowForgotPassword(true)}
                     className="text-xs text-primary hover:underline"
                   >
-                    Forgot password?
+                    {t('auth.forgotPassword')}
                   </button>
                 )}
               </div>
@@ -370,17 +372,17 @@ export function AuthScreen() {
             </div>
             
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
+              {loading ? t('common.pleaseWait') : (isLogin ? t('auth.signIn') : t('auth.signUp'))}
             </Button>
             
             <div className="text-center text-sm text-muted-foreground mt-4">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              {isLogin ? t('auth.dontHaveAccount') + ' ' : t('auth.alreadyHaveAccount') + ' '}
               <button 
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-primary hover:underline font-medium"
               >
-                {isLogin ? 'Sign Up' : 'Sign In'}
+                {isLogin ? t('auth.signUp') : t('auth.signIn')}
               </button>
             </div>
           </form>

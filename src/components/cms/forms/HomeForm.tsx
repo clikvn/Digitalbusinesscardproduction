@@ -18,6 +18,7 @@ import { getUserCode } from "../../../utils/user-code";
 import { toast } from "sonner@2.0.3";
 import { supabase } from "../../../lib/supabase-client";
 import { useAllFieldPermissions } from "../../../hooks/useBusinessManagement";
+import { useTranslation } from "react-i18next";
 import imgImg from "figma:asset/420b26ed698402e60bcb7141f4b23bc3850beb9d.png";
 
 interface HomeFormProps {
@@ -27,6 +28,7 @@ interface HomeFormProps {
 }
 
 export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
+  const { t } = useTranslation();
   const form = useForm({
     defaultValues: data,
     values: data,
@@ -81,7 +83,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
 
     try {
       const userCode = getUserCode();
-      toast.info("Uploading image...");
+      toast.info(t("homeForm.uploadingImage"));
       
       const { url } = await api.storage.upload(userCode, file);
       
@@ -90,13 +92,13 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
         position: { x: 0, y: 0, scale: 1 }
       };
       handleChange('profileImage', JSON.stringify(newData));
-      toast.success("Image uploaded successfully");
+      toast.success(t("homeForm.imageUploadedSuccessfully"));
       
       // Auto-open positioner after upload
       setTimeout(() => setShowPositioner(true), 100);
     } catch (error: any) {
       console.error("Upload failed:", error);
-      toast.error(`Upload failed: ${error.message || 'Unknown error'}`);
+      toast.error(`${t("homeForm.uploadFailed")}: ${error.message || t("homeForm.unknownError")}`);
     }
   };
 
@@ -128,7 +130,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
     // Check if image is uploaded
     if (!currentImageUrl) {
       console.log('[handleAIHelp] No image uploaded');
-      toast.error("You need to upload your portrait photo first");
+      toast.error(t("homeForm.needUploadPortraitFirst"));
       return;
     }
 
@@ -139,7 +141,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
       
       if (authError || !user) {
         console.error('[handleAIHelp] Auth error:', authError);
-        toast.error("Please sign in to use this feature");
+        toast.error(t("homeForm.pleaseSignInToUseFeature"));
         return;
       }
 
@@ -161,13 +163,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
         
         // Better error message for 0 limit vs exceeded limit
         if (quotaResult.monthlyLimit === 0) {
-          toast.error(
-            `This feature is not available for your plan. Your monthly limit is 0.`
-          );
+          toast.error(t("homeForm.featureNotAvailableForPlan"));
         } else {
-          toast.error(
-            `Monthly limit reached! You've used ${quotaResult.monthlyUsed} of ${limitText} allowed generations.`
-          );
+          toast.error(t("homeForm.monthlyLimitReached", { used: quotaResult.monthlyUsed, limit: limitText }));
         }
         return;
       }
@@ -175,7 +173,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
       console.log('[handleAIHelp] Quota check passed');
     } catch (error: any) {
       console.error('[handleAIHelp] Quota check failed:', error);
-      toast.error(`Failed to check quota: ${error.message}`);
+      toast.error(`${t("homeForm.failedToCheckQuota")}: ${error.message}`);
       return;
     }
 
@@ -215,7 +213,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
       setLoadingImages(initialLoadingState);
     } catch (error: any) {
       console.error("Failed to load templates:", error);
-      toast.error(`Failed to load templates: ${error.message || 'Unknown error'}`);
+      toast.error(`Failed to load templates: ${error.message || t("homeForm.unknownError")}`);
     } finally {
       setLoadingTemplates(false);
     }
@@ -227,7 +225,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
 
   const handleApplyTemplate = async () => {
     if (!selectedTemplate) {
-      toast.error("Missing required data");
+      toast.error(t("homeForm.missingRequiredData"));
       return;
     }
 
@@ -235,13 +233,13 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
     const photoToUse = currentImageUrl;
     
     if (!photoToUse) {
-      toast.error("No photo available for generation");
+      toast.error(t("homeForm.noPhotoAvailableForGeneration"));
       return;
     }
 
     try {
       setGeneratingPortrait(true);
-      toast.info("Generating your portrait...");
+      toast.info(t("homeForm.generatingYourPortrait"));
 
       // Build the prompt based on template and options
       let prompt = "";
@@ -436,10 +434,10 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
       setShowTemplateDialog(false);
       setShowPreviewDialog(true);
       
-      toast.success("Portrait generated successfully!");
+      toast.success(t("homeForm.portraitGeneratedSuccessfully"));
     } catch (error: any) {
       console.error("Portrait generation failed:", error);
-      toast.error(`Failed to generate portrait: ${error.message || 'Unknown error'}`);
+      toast.error(`${t("homeForm.failedToGeneratePortrait")}: ${error.message || t("homeForm.unknownError")}`);
     } finally {
       setGeneratingPortrait(false);
     }
@@ -449,7 +447,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
     if (!generatedImagePreview) return;
 
     try {
-      toast.info("Uploading generated portrait...");
+      toast.info(t("homeForm.uploadingGeneratedPortrait"));
 
       // Convert data URL to blob
       const response = await fetch(generatedImagePreview);
@@ -469,7 +467,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
       };
       handleChange('profileImage', JSON.stringify(newData));
       
-      toast.success("Portrait applied successfully!");
+      toast.success(t("homeForm.portraitAppliedSuccessfully"));
       setShowPreviewDialog(false);
       setGeneratedImagePreview(null);
       setSelectedTemplate(null);
@@ -478,7 +476,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
       setTimeout(() => setShowPositioner(true), 100);
     } catch (error: any) {
       console.error("Failed to apply portrait:", error);
-      toast.error(`Failed to apply portrait: ${error.message || 'Unknown error'}`);
+      toast.error(`${t("homeForm.failedToApplyPortrait")}: ${error.message || t("homeForm.unknownError")}`);
     }
   };
 
@@ -495,7 +493,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name *</FormLabel>
+                      <FormLabel>{t("homeForm.fullName")} *</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -503,7 +501,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                             field.onChange(e);
                             handleChange('name', e.target.value);
                           }}
-                          placeholder="Enter your full name"
+                          placeholder={t("homeForm.fullNamePlaceholder")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -519,9 +517,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                     return (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
-                          Professional Title *
+                          {t("homeForm.professionalTitle")} *
                           {readonly && (
-                            <Lock className="h-3.5 w-3.5 text-muted-foreground" title="This field is read-only" />
+                            <Lock className="h-3.5 w-3.5 text-muted-foreground" title={t("homeForm.readOnlyFieldTooltip")} />
                           )}
                         </FormLabel>
                         <FormControl>
@@ -533,14 +531,14 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 handleChange('title', e.target.value);
                               }
                             }}
-                            placeholder="e.g., Interior Designer"
+                            placeholder={t("personalInfoForm.professionalTitlePlaceholder")}
                             disabled={readonly}
                             className={readonly ? 'bg-muted cursor-not-allowed' : ''}
                           />
                         </FormControl>
                         {readonly && (
                           <p className="text-xs text-muted-foreground">
-                            This field is controlled by your business owner
+                            {t("homeForm.fieldControlledByBusinessOwner")}
                           </p>
                         )}
                         <FormMessage />
@@ -557,9 +555,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                     return (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
-                          Business Name
+                          {t("homeForm.businessName")}
                           {readonly && (
-                            <Lock className="h-3.5 w-3.5 text-muted-foreground" title="This field is read-only" />
+                            <Lock className="h-3.5 w-3.5 text-muted-foreground" title={t("homeForm.readOnlyFieldTooltip")} />
                           )}
                         </FormLabel>
                         <FormControl>
@@ -571,14 +569,14 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 handleChange('businessName', e.target.value);
                               }
                             }}
-                            placeholder="e.g., Design Solutions"
+                            placeholder={t("homeForm.businessNamePlaceholder")}
                             disabled={readonly}
                             className={readonly ? 'bg-muted cursor-not-allowed' : ''}
                           />
                         </FormControl>
                         {readonly && (
                           <p className="text-xs text-muted-foreground">
-                            This field is controlled by your business owner
+                            {t("homeForm.fieldControlledByBusinessOwner")}
                           </p>
                         )}
                         <FormMessage />
@@ -592,7 +590,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                   name="bio"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bio</FormLabel>
+                      <FormLabel>{t("homeForm.bio")}</FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
@@ -600,7 +598,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                             field.onChange(e);
                             handleChange('bio', e.target.value);
                           }}
-                          placeholder="Tell us about yourself..."
+                          placeholder={t("homeForm.bioPlaceholder")}
                           className="min-h-[100px]"
                         />
                       </FormControl>
@@ -618,9 +616,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
           <CardContent className="px-4 md:px-6 pb-5 md:pb-6 pt-5 md:pt-6">
             <div className="space-y-4">
               <div>
-                <Label>Home Background Image</Label>
+                <Label>{t("homeForm.homeBackgroundImage")}</Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Upload and position the background image for your home screen
+                  {t("homeForm.homeBackgroundImageDescription")}
                 </p>
               </div>
 
@@ -638,9 +636,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                       type="button"
                       onClick={handleAIHelp}
                       className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white/80 transition-all border border-white/30"
-                      title="AI Restyle with AI"
+                      title={t("homeForm.aiRestyle")}
                     >
-                      <span className="text-sm font-medium text-gray-900">AI Restyle</span>
+                      <span className="text-sm font-medium text-gray-900">{t("homeForm.aiRestyle")}</span>
                       <Sparkles className="w-4 h-4 text-gray-900" />
                     </button>
                   </div>
@@ -655,7 +653,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                       className="flex-1"
                     >
                       <Edit2 className="w-4 h-4 mr-2" />
-                      Edit Position
+                      {t("homeForm.editPosition")}
                     </Button>
                     <Button
                       type="button"
@@ -664,7 +662,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <Upload className="w-4 h-4 mr-2" />
-                      Change
+                      {t("homeForm.change")}
                     </Button>
                     <Button
                       type="button"
@@ -685,7 +683,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                 >
                   <div className="flex flex-col items-center gap-2">
                     <Upload className="w-8 h-8 text-muted-foreground" />
-                    <span className="text-sm">Upload Background Image</span>
+                    <span className="text-sm">{t("homeForm.uploadBackgroundImage")}</span>
                   </div>
                 </Button>
               )}
@@ -707,9 +705,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
             <CardContent className="px-4 md:px-6 pb-5 md:pb-6 pt-5 md:pt-6">
               <div className="space-y-4">
                 <div>
-                  <Label>Avatar Image Position</Label>
+                  <Label>{t("homeForm.avatarImagePosition")}</Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Adjust how your image appears in the circular avatar
+                    {t("homeForm.avatarImagePositionDescription")}
                   </p>
                 </div>
 
@@ -721,7 +719,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                   className="w-full"
                 >
                   <Edit2 className="w-4 h-4 mr-2" />
-                  Edit Avatar Position
+                  {t("homeForm.editAvatarPosition")}
                 </Button>
               </div>
             </CardContent>
@@ -783,7 +781,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
               {/* Title */}
               <div className="flex-1 text-center">
                 <p className="leading-[20px] text-[#3d3929] text-sm">
-                  Portrait Style
+                  {t("homeForm.portraitStyle")}
                 </p>
               </div>
               
@@ -796,7 +794,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
           <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
             {loadingTemplates ? (
               <div className="flex items-center justify-center py-8">
-                <div className="text-sm text-muted-foreground">Loading templates...</div>
+                <div className="text-sm text-muted-foreground">{t("homeForm.loadingTemplates")}</div>
               </div>
             ) : templates.length > 0 ? (
               <div className="space-y-4 pb-4">
@@ -894,7 +892,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            Simple
+                            {t("homeForm.simple")}
                           </button>
                           <button
                             type="button"
@@ -908,7 +906,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            Place
+                            {t("homeForm.place")}
                           </button>
                         </div>
                         
@@ -1002,7 +1000,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            Simple
+                            {t("homeForm.simple")}
                           </button>
                           <button
                             type="button"
@@ -1016,7 +1014,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            Place
+                            {t("homeForm.place")}
                           </button>
                         </div>
                         
@@ -1110,7 +1108,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            Simple
+                            {t("homeForm.simple")}
                           </button>
                           <button
                             type="button"
@@ -1124,7 +1122,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            Place
+                            {t("homeForm.place")}
                           </button>
                         </div>
                         
@@ -1210,7 +1208,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
                             type="button"
                             className="flex-1 py-2 px-3 rounded-md text-sm transition-all bg-background text-foreground shadow-sm"
                           >
-                            Style
+                            {t("homeForm.style")}
                           </button>
                         </div>
                         
@@ -1257,7 +1255,7 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
               </div>
             ) : (
               <div className="flex items-center justify-center py-8">
-                <div className="text-sm text-muted-foreground">No templates available</div>
+                <div className="text-sm text-muted-foreground">{t("homeForm.noTemplatesAvailable")}</div>
               </div>
             )}
           </div>
@@ -1273,10 +1271,10 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
               {generatingPortrait ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Generating...
+                  {t("homeForm.generating")}
                 </>
               ) : (
-                'Apply Style'
+                t("homeForm.applyStyle")
               )}
             </Button>
           </div>
@@ -1287,9 +1285,9 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
       <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Generated Portrait Preview</DialogTitle>
+            <DialogTitle>{t("homeForm.generatedPortraitPreview")}</DialogTitle>
             <DialogDescription>
-              Review and apply the generated portrait
+              {t("homeForm.reviewAndApply")}
             </DialogDescription>
           </DialogHeader>
           
@@ -1297,13 +1295,13 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
             <div className="relative w-full aspect-[3/4] bg-slate-100 rounded-lg overflow-hidden">
               <img
                 src={generatedImagePreview}
-                alt="Generated portrait preview"
+                alt={t("homeForm.generatedPortraitPreview")}
                 className="w-full h-full object-cover"
               />
             </div>
           ) : (
             <div className="flex items-center justify-center py-8">
-              <div className="text-sm text-muted-foreground">No preview available</div>
+              <div className="text-sm text-muted-foreground">{t("homeForm.noPreviewAvailable")}</div>
             </div>
           )}
           
@@ -1314,14 +1312,14 @@ export function HomeForm({ data, onChange, onFieldFocus }: HomeFormProps) {
               onClick={() => setShowPreviewDialog(false)}
               className="flex-1"
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="button"
               onClick={handleUseGeneratedImage}
               className="flex-1"
             >
-              Apply Portrait
+              {t("homeForm.applyPortrait")}
             </Button>
           </div>
         </DialogContent>
