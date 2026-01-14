@@ -21,25 +21,29 @@ function AppContent() {
   const navigate = useNavigate();
   
   // Check if we have password reset tokens on the wrong page and redirect
+  // IMPORTANT: Only redirect if type=recovery is present (password reset)
+  // Email confirmation links have type=signup or no type, and should go to /auth/callback
   useEffect(() => {
     const hash = window.location.hash;
     const search = window.location.search;
     const pathname = location.pathname;
     
-    // Check for password reset tokens in multiple formats
-    // Supabase password reset links typically have: type=recovery in hash or code= in query
-    const hasResetToken = 
-      hash.includes('access_token') || 
-      hash.includes('type=recovery') || 
-      hash.includes('recovery') ||
-      search.includes('code=') ||
-      search.includes('type=recovery') ||
-      (hash && (hash.includes('token') || hash.includes('recovery')));
+    // Parse hash and search params to check for type=recovery specifically
+    const hashParams = new URLSearchParams(hash.substring(1));
+    const searchParams = new URLSearchParams(search);
+    const type = hashParams.get('type') || searchParams.get('type');
     
-    // If we have reset tokens but we're not on the reset-password page, redirect there
-    if (hasResetToken && pathname !== '/auth/reset-password') {
-      console.log('[App] Detected password reset token on wrong page:', pathname);
-      console.log('[App] Hash:', hash);
+    // CRITICAL: Only redirect to reset-password if type=recovery is explicitly present
+    // Email confirmation links have type=signup or no type, and should NOT be caught here
+    const isPasswordReset = type === 'recovery';
+    
+    // Also check if we're already on /auth/callback (email confirmation) - don't interfere
+    const isEmailConfirmation = pathname === '/auth/callback';
+    
+    // If we have password reset tokens but we're not on the reset-password page, redirect there
+    if (isPasswordReset && !isEmailConfirmation && pathname !== '/auth/reset-password') {
+      console.log('[App] Detected password reset token (type=recovery) on wrong page:', pathname);
+      console.log('[App] Hash:', hash.substring(0, 100)); // Log first 100 chars
       console.log('[App] Search:', search);
       console.log('[App] Redirecting to /auth/reset-password');
       // Use replace: true to prevent back button issues

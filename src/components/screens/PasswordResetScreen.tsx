@@ -39,26 +39,34 @@ export function PasswordResetScreen() {
         console.log('[PasswordReset] Hash:', window.location.hash);
         console.log('[PasswordReset] Search:', window.location.search);
         
-        // Check for password reset tokens in multiple formats
+        // Parse hash and search params to check for type=recovery specifically
         const hash = window.location.hash;
         const search = window.location.search;
-        const hasResetToken = 
-          hash.includes('access_token') || 
-          hash.includes('type=recovery') ||
-          hash.includes('recovery') ||
-          search.includes('code=') ||
-          search.includes('type=recovery') ||
-          (hash && (hash.includes('token') || hash.includes('recovery')));
+        const hashParams = new URLSearchParams(hash.substring(1));
+        const searchParams = new URLSearchParams(search);
+        const type = hashParams.get('type') || searchParams.get('type');
         
-        // If we're not on the reset-password page but have tokens, redirect to the correct page
-        if (window.location.pathname !== '/auth/reset-password' && hasResetToken) {
-          console.log('[PasswordReset] Detected reset tokens on wrong page, redirecting to /auth/reset-password');
+        // CRITICAL: Only process if type=recovery is explicitly present
+        // Email confirmation links have type=signup or no type, and should go to /auth/callback
+        const isPasswordReset = type === 'recovery';
+        
+        // If we're not on the reset-password page but have password reset tokens, redirect to the correct page
+        if (window.location.pathname !== '/auth/reset-password' && isPasswordReset) {
+          console.log('[PasswordReset] Detected password reset token (type=recovery) on wrong page, redirecting to /auth/reset-password');
           navigate(`/auth/reset-password${search}${hash}`, { replace: true });
           return;
         }
         
+        // If we're on reset-password page but don't have type=recovery, check if it's email confirmation
+        if (window.location.pathname === '/auth/reset-password' && !isPasswordReset && type) {
+          console.log('[PasswordReset] Wrong token type on reset-password page. Type:', type);
+          console.log('[PasswordReset] This appears to be an email confirmation link, redirecting to /auth/callback');
+          navigate(`/auth/callback${search}${hash}`, { replace: true });
+          return;
+        }
+        
         // If we're on the reset-password page but don't have tokens, check if we should stay
-        if (window.location.pathname === '/auth/reset-password' && !hasResetToken) {
+        if (window.location.pathname === '/auth/reset-password' && !isPasswordReset && !type) {
           // Check if there's an existing session (user might have already set session)
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
@@ -74,10 +82,9 @@ export function PasswordResetScreen() {
         }
         
         // Get the hash fragment from URL (Supabase uses hash-based tokens)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        // Note: hashParams and type were already parsed above, but we need to get tokens
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
-        const type = hashParams.get('type');
         
         // Also check query params (some Supabase configurations use query params)
         const queryParams = new URLSearchParams(window.location.search);

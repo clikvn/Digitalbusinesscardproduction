@@ -51,7 +51,8 @@ function PageStatsBlock({
   pageViews,
   elements,
   showElements = true,
-  interactionMetrics
+  interactionMetrics,
+  t
 }: {
   icon: any;
   title: string;
@@ -59,6 +60,7 @@ function PageStatsBlock({
   elements: { label: string; clicks: number }[];
   showElements?: boolean;
   interactionMetrics?: Array<{ label: string; value: number }>;
+  t: (key: string) => string;
 }) {
   // Merge interaction metrics into elements list
   const allElements = useMemo(() => {
@@ -263,6 +265,11 @@ export function AnalyticsDashboard() {
       portfolio: []
     };
 
+    // Early return if profile is not loaded
+    if (!profile) {
+      return elements;
+    }
+
     // Home Screen elements - Navigation buttons only
     elements.home.push({ label: 'View Profile', type: 'navigation' });
     elements.home.push({ label: 'View Portfolio', type: 'navigation' });
@@ -270,74 +277,74 @@ export function AnalyticsDashboard() {
     elements.home.push({ label: 'Save Contact', type: 'save' });
     elements.home.push({ label: 'Share Profile', type: 'share' });
 
-    // Contact Screen elements
-    if (profile.contact.phone) {
+    // Contact Screen elements - with null safety
+    if (profile.contact?.phone) {
       elements.contact.push({ label: 'Phone', type: 'phone' });
     }
-    if (profile.contact.email) {
+    if (profile.contact?.email) {
       elements.contact.push({ label: 'Email', type: 'email' });
     }
-    if (profile.contact.address) {
+    if (profile.contact?.address) {
       elements.contact.push({ label: 'Address', type: 'location' });
     }
     
-    // Messaging apps
-    if (profile.socialMessaging.whatsapp) {
+    // Messaging apps - with null safety
+    if (profile.socialMessaging?.whatsapp) {
       elements.contact.push({ label: 'WhatsApp', type: 'whatsapp' });
     }
-    if (profile.socialMessaging.telegram) {
+    if (profile.socialMessaging?.telegram) {
       elements.contact.push({ label: 'Telegram', type: 'telegram' });
     }
-    if (profile.socialMessaging.messenger) {
+    if (profile.socialMessaging?.messenger) {
       elements.contact.push({ label: 'Messenger', type: 'messenger' });
     }
-    if (profile.socialMessaging.zalo) {
+    if (profile.socialMessaging?.zalo) {
       elements.contact.push({ label: 'Zalo', type: 'zalo' });
     }
-    if (profile.socialMessaging.kakao) {
+    if (profile.socialMessaging?.kakao) {
       elements.contact.push({ label: 'Kakao', type: 'kakao' });
     }
-    if (profile.socialMessaging.discord) {
+    if (profile.socialMessaging?.discord) {
       elements.contact.push({ label: 'Discord', type: 'discord' });
     }
-    if (profile.socialMessaging.wechat) {
+    if (profile.socialMessaging?.wechat) {
       elements.contact.push({ label: 'WeChat', type: 'wechat' });
     }
 
-    // Social channels
-    if (profile.socialChannels.facebook) {
+    // Social channels - with null safety
+    if (profile.socialChannels?.facebook) {
       elements.contact.push({ label: 'Facebook', type: 'facebook' });
     }
-    if (profile.socialChannels.linkedin) {
+    if (profile.socialChannels?.linkedin) {
       elements.contact.push({ label: 'LinkedIn', type: 'linkedin' });
     }
-    if (profile.socialChannels.twitter) {
+    if (profile.socialChannels?.twitter) {
       elements.contact.push({ label: 'Twitter', type: 'twitter' });
     }
-    if (profile.socialChannels.youtube) {
+    if (profile.socialChannels?.youtube) {
       elements.contact.push({ label: 'YouTube', type: 'youtube' });
     }
-    if (profile.socialChannels.tiktok) {
+    if (profile.socialChannels?.tiktok) {
       elements.contact.push({ label: 'TikTok', type: 'tiktok' });
     }
 
-    // Profile Screen elements
-    if (profile.profile.about) {
+    // Profile Screen elements - with null safety
+    if (profile.profile?.about) {
       elements.profile.push({ label: 'About', type: 'about' });
     }
-    if (profile.profile.serviceAreas) {
+    if (profile.profile?.serviceAreas) {
       elements.profile.push({ label: 'Service Areas', type: 'service' });
     }
-    if (profile.profile.specialties) {
+    if (profile.profile?.specialties) {
       elements.profile.push({ label: 'Specialties', type: 'specialties' });
     }
-    if (profile.profile.experience) {
+    if (profile.profile?.experience) {
       elements.profile.push({ label: 'Experience', type: 'experience' });
     }
-    if (profile.profile.languages) {
+    if (profile.profile?.languages) {
       elements.profile.push({ label: 'Languages', type: 'languages' });
     }
-    if (profile.profile.certifications) {
+    if (profile.profile?.certifications) {
       elements.profile.push({ label: 'Certifications', type: 'certifications' });
     }
 
@@ -416,6 +423,18 @@ export function AnalyticsDashboard() {
     );
   }
 
+  // Early return if profile is not loaded yet
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-3"></div>
+          <p className="text-sm text-muted-foreground">{t('analyticsDashboard.loadingAnalytics')}</p>
+        </div>
+      </div>
+    );
+  }
+
   const { overallMetrics } = dashboard;
   const homeStats = getPageStats('home');
   const contactStats = getPageStats('contact');
@@ -432,13 +451,13 @@ export function AnalyticsDashboard() {
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors w-full"
         >
           <Avatar className="w-12 h-12">
-            <AvatarImage src={profile.avatar} alt={profile.fullName} />
+            <AvatarImage src={profile?.avatar} alt={profile?.fullName || 'Profile'} />
             <AvatarFallback>
-              {profile.fullName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+              {profile?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 text-left min-w-0">
-            <div className="truncate">{profile.fullName || t('analyticsDashboard.yourProfile')}</div>
+            <div className="truncate">{profile?.fullName || t('analyticsDashboard.yourProfile')}</div>
             <div className="text-sm text-muted-foreground">{t('analyticsDashboard.viewClikCard')}</div>
           </div>
           <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -641,12 +660,14 @@ export function AnalyticsDashboard() {
           title={t('analyticsDashboard.homeScreen')}
           pageViews={homeStats.views}
           elements={homeStats.elements}
+          t={t}
         />
         <PageStatsBlock
           icon={Mail}
           title={t('analyticsDashboard.contactScreen')}
           pageViews={contactStats.views}
           elements={contactStats.elements}
+          t={t}
         />
         <PageStatsBlock
           icon={User}
@@ -654,6 +675,7 @@ export function AnalyticsDashboard() {
           pageViews={profileStats.views}
           elements={profileStats.elements}
           showElements={false}
+          t={t}
         />
         <PageStatsBlock
           icon={Briefcase}
@@ -674,6 +696,7 @@ export function AnalyticsDashboard() {
               value: portfolioInteractionMetrics.virtualTourOpen,
             },
           ]}
+          t={t}
         />
       </div>
 

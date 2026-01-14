@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Analytics Page Blank Screen for New Users**: Fixed "ReferenceError: t is not defined" error that caused blank screen on analytics page
+  - `PageStatsBlock` component was using `t()` translation function without access to `useTranslation` hook
+  - Added `t` as a required prop to `PageStatsBlock` component and passed it from parent `AnalyticsDashboard`
+  - Added null safety checks for profile data in `getAllScreenElements` useMemo to prevent crashes when profile is loading
+  - Added early return in `AnalyticsDashboard` to show loading state when profile is not yet loaded
+  - Added optional chaining (`?.`) throughout profile property access to prevent crashes on new accounts
+  - Analytics page now properly shows loading state and handles new users without profile data gracefully
+- **Email Confirmation Link Misrouting**: Fixed critical bug where email confirmation links were incorrectly routed to password reset page
+  - Token detection logic in App.tsx was too broad, matching `access_token` for both password reset AND email confirmation
+  - Email confirmation links have `type=signup` (or no type), while password reset links have `type=recovery`
+  - Updated App.tsx to only redirect to `/auth/reset-password` when `type=recovery` is explicitly present
+  - Updated PasswordResetScreen to detect and redirect email confirmation links to `/auth/callback` instead
+  - Email confirmation links now correctly go to `/auth/callback` and process properly
+  - Prevents users from seeing password reset form when clicking email confirmation links
 - **Password Reset Email Redirect**: Fixed issue where password reset email links redirected to home page instead of password reset page
   - Improved password reset token detection in App.tsx to catch all token formats (hash and query params)
   - Added check to skip session clearing on password reset page (user needs session to reset password)
