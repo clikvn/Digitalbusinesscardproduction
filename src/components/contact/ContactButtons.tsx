@@ -194,9 +194,11 @@ function getWebmailComposeUrl(provider: string, recipientEmail: string): string 
   
   switch (provider) {
     case 'gmail':
-      return `https://mail.google.com/mail/?view=cm&to=${encodedEmail}`;
+      // Use hash-based URL format for direct compose window
+      return `https://mail.google.com/mail/u/0/#compose?to=${encodedEmail}`;
     case 'outlook':
-      return `https://outlook.live.com/mail/0/deeplink/compose?to=${encodedEmail}`;
+      // Use path-based compose action for Outlook.com (works for both personal and Office 365)
+      return `https://outlook.live.com/mail/0/?path=/mail/action/compose&to=${encodedEmail}`;
     default:
       return `mailto:${recipientEmail}`;
   }
