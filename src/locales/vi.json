@@ -230,6 +230,7 @@
     "accountNotAvailable": "Tài khoản không khả dụng",
     "accountNotFound": "Tài khoản này không khả dụng. Mã người dùng bạn nhập không tồn tại.",
     "accountDeactivated": "Tài khoản này đã bị vô hiệu hóa và không còn khả dụng.",
+    "unauthorizedAccess": "Bạn không có quyền truy cập tài khoản này.",
     "backToWelcome": "Quay về Trang chào mừng",
     "invalidOrExpiredResetLink": "Liên kết đặt lại không hợp lệ hoặc đã hết hạn",
     "pleaseRequestNewReset": "Liên kết đặt lại không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu đặt lại mật khẩu mới.",
@@ -301,7 +302,16 @@
     "resetLinkInvalid": "Liên kết Đặt lại Không hợp lệ",
     "passwordReset": "Đặt lại Mật khẩu!",
     "passwordResetRedirecting": "Mật khẩu của bạn đã được đặt lại thành công. Đang chuyển hướng đến đăng nhập...",
-    "passwordResetRedirectingLogin": "Đặt lại mật khẩu thành công! Đang chuyển hướng đến đăng nhập..."
+    "passwordResetRedirectingLogin": "Đặt lại mật khẩu thành công! Đang chuyển hướng đến đăng nhập...",
+    "registerSuccessTitle": "Đăng ký thành công!",
+    "registerSuccessMessage": "Tài khoản của bạn đã được tạo thành công. Vui lòng xác minh email để tiếp tục.",
+    "verifyEmailBeforeLogin": "Để truy cập tài khoản và sử dụng tất cả các tính năng, bạn cần xác minh địa chỉ email trước.",
+    "step1CheckEmail": "Kiểm tra hộp thư đến email của bạn để tìm liên kết xác minh",
+    "step2ClickLink": "Nhấp vào liên kết xác minh trong email",
+    "step3ReturnToLogin": "Quay lại đây và đăng nhập bằng thông tin đăng nhập của bạn",
+    "goToLogin": "Đi đến Đăng nhập",
+    "verifyEmailFirst": "Vui lòng xác minh email trước khi đăng nhập",
+    "emailNotVerified": "Địa chỉ email của bạn chưa được xác minh. Vui lòng kiểm tra email và nhấp vào liên kết xác minh."
   },
   "messages": {
     "comingSoon": "Tính năng này sẽ sớm ra mắt!"

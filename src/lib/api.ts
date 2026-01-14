@@ -1110,10 +1110,25 @@ export const api = {
       console.log('[signup] User created successfully:', userId);
       console.log('[signup] User email confirmed?', signupData.user.email_confirmed_at ? 'YES' : 'NO');
       console.log('[signup] User identities:', signupData.user.identities);
+      console.log('[signup] Session exists?', signupData.session ? 'YES' : 'NO');
 
       // Check if email confirmation is required
-      // When email confirmation is enabled, identities array is empty until confirmed
-      const needsEmailConfirmation = !signupData.user.identities || signupData.user.identities.length === 0;
+      // Primary check: email_confirmed_at should be null/undefined if confirmation is required
+      const isEmailConfirmed = !!signupData.user.email_confirmed_at;
+      const hasSession = !!signupData.session;
+      const hasIdentities = signupData.user.identities && signupData.user.identities.length > 0;
+      
+      // Email confirmation is required if email is not confirmed
+      // This is the most reliable check - if email_confirmed_at is null/undefined, confirmation is needed
+      const needsEmailConfirmation = !isEmailConfirmed;
+      
+      console.log('[signup] Email confirmation check:', {
+        isEmailConfirmed,
+        emailConfirmedAt: signupData.user.email_confirmed_at,
+        hasSession,
+        hasIdentities,
+        needsEmailConfirmation
+      });
       
       if (needsEmailConfirmation) {
         console.log('[signup] Email confirmation required. User must verify email before proceeding.');

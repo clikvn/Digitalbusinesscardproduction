@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **CRITICAL SECURITY FIX: Unauthorized Access Prevention**: Fixed critical security vulnerability where users could access other users' studio/CMS by manipulating URLs
+  - Added user code ownership verification in `CMSLayout` before allowing access to studio/CMS features
+  - System now checks if logged-in user actually owns the user code they're trying to access
+  - Unauthorized access attempts are logged and users are redirected to their own studio or home page
+  - Prevents copy-paste URL attacks like accessing `/123/studio` when user doesn't own user code "123"
+  - Added translation keys for unauthorized access error messages in English and Vietnamese
+  - This was a critical security vulnerability that could allow users to access and modify other users' data
+- **Register Success Page Redirect**: Fixed issue where register success page was not showing after registration
+  - Improved email confirmation detection logic in signup flow to reliably check `email_confirmed_at` field
+  - Added better logging to debug email confirmation requirements
+  - Ensured proper navigation timing with setTimeout to prevent race conditions
+  - Now correctly redirects to `/auth/register-success` page when email confirmation is required
+  - Enhanced login flow to also redirect unverified users to register-success page with consistent navigation pattern
+  - Users attempting to login with unconfirmed email are now properly redirected to register-success page with verification instructions
+  - Fixed issue where Supabase throws "Email not confirmed" error (400 Bad Request) before email verification check
+  - Added error handling to catch AuthApiError for unconfirmed emails and redirect to register-success page
+  - Both error handling paths (direct check and catch block) now properly handle email confirmation errors
+
+### Added
+- **Email Verification Enforcement**: Strict email verification requirement before accessing main features
+  - Created `RegisterSuccessScreen` component that displays after registration with success message and email verification guidance
+  - Users are redirected to register success page after signup when email confirmation is required
+  - Added email verification check in login flow to prevent unverified users from logging in
+  - Added email verification check in `CMSLayout` to prevent unverified users from accessing CMS/studio features
+  - Unverified users are automatically signed out and redirected to register success page with clear instructions
+  - Added translation keys for register success page in both English and Vietnamese
+  - Users must verify their email before they can access any main features of the application
+- **Auto-Login Prevention**: Removed all auto-login functionality to prevent bypassing email verification
+  - Added global session check in `App.tsx` that clears unverified sessions on app start
+  - Modified `PublicLayout` to check email verification in both initial auth check and `onAuthStateChange` listener
+  - Enhanced `CMSLayout` with immediate unverified session clearing on mount to prevent race conditions
+  - All persisted sessions are now validated for email verification before allowing access
+  - Users must explicitly log in through the authentication screen - no automatic session restoration
+
 ### Changed
 - **Language Switcher with Flag Icons**: Updated LanguageSwitcher component to display country flag icons
   - Installed `react-country-flag` library for proper flag icon rendering

@@ -31,6 +31,17 @@ export function CMSLayout() {
     }
 
     const checkAuth = async () => {
+      // First, check and clear any unverified sessions immediately to prevent auto-login
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      if (initialSession && !initialSession.user.email_confirmed_at) {
+        console.log('[CMSLayout] Clearing unverified session on mount');
+        await supabase.auth.signOut({ scope: 'local' });
+        toast.error(t('auth.emailNotVerified'));
+        const email = initialSession.user.email || '';
+        navigate(`/auth/register-success?email=${encodeURIComponent(email)}`, { replace: true });
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         // Redirect to auth if not logged in
@@ -39,8 +50,63 @@ export function CMSLayout() {
         return;
       }
 
+      // Check if email is verified (double check after session retrieval)
+      if (!session.user.email_confirmed_at) {
+        // Sign out the user
+        await supabase.auth.signOut({ scope: 'local' });
+        toast.error(t('auth.emailNotVerified'));
+        // Redirect to register success page to guide user
+        const email = session.user.email || '';
+        navigate(`/auth/register-success?email=${encodeURIComponent(email)}`, { replace: true });
+        return;
+      }
+
       const userId = session.user.id;
 
+      // CRITICAL SECURITY CHECK: Verify user owns the user code they're trying to access
+      const { data: ownershipData, error: ownershipError } = await supabase
+        .from('user_code_ownership')
+        .select('user_id, user_code')
+        .eq('user_code', userCode)
+        .maybeSingle();
+
+      if (ownershipError) {
+        console.error('[CMSLayout] Error checking user code ownership:', ownershipError);
+        toast.error(t('error.unexpectedError') || 'An error occurred. Please try again.');
+        navigate('/');
+        return;
+      }
+
+      if (!ownershipData) {
+        // User code doesn't exist - redirect to error page
+        console.log('[CMSLayout] User code does not exist:', userCode);
+        toast.error(t('error.accountNotFound') || 'Account not found');
+        navigate(`/${userCode}`);
+        return;
+      }
+
+      // Check if the logged-in user owns this user code
+      if (ownershipData.user_id !== userId) {
+        // User is trying to access someone else's studio - SECURITY BREACH!
+        console.warn('[CMSLayout] SECURITY: User', userId, 'attempted to access user code', userCode, 'owned by', ownershipData.user_id);
+        toast.error(t('error.unauthorizedAccess') || 'You do not have permission to access this account');
+        
+        // Redirect to their own studio if they have one, otherwise to home
+        const { data: userOwnCode } = await supabase
+          .from('user_code_ownership')
+          .select('user_code')
+          .eq('user_id', userId)
+          .maybeSingle();
+        
+        if (userOwnCode?.user_code) {
+          navigate(`/${userOwnCode.user_code}/studio`, { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+        return;
+      }
+
+      // User owns the user code - proceed with employee status check
       // Check if user is an employee and if account is active
       const { data: employeeStatus, error: statusError } = await supabase
         .rpc('check_employee_status', { p_user_id: userId });
@@ -60,7 +126,7 @@ export function CMSLayout() {
         toast.error(employeeStatus.message || t("auth.accountDeactivatedMessage"));
         navigate(`/${userCode}/auth`);
       } else {
-        // User is authenticated and active (or not an employee)
+        // User is authenticated, owns the user code, and is active (or not an employee)
         setIsAuthorized(true);
         setUserId(session.user.id);
       }

@@ -120,15 +120,33 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session && isOwner);
-      setUserId(session?.user?.id);
+      // Only set authenticated if session exists, user is owner, AND email is verified
+      const isVerified = session?.user?.email_confirmed_at ? true : false;
+      if (session && !isVerified) {
+        // Clear unverified session to prevent auto-login
+        await supabase.auth.signOut({ scope: 'local' });
+        setIsAuthenticated(false);
+        setUserId(undefined);
+      } else {
+        setIsAuthenticated(!!session && isOwner && isVerified);
+        setUserId(session?.user?.id);
+      }
     };
     
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session && isOwner);
-      setUserId(session?.user?.id);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      // Only set authenticated if session exists, user is owner, AND email is verified
+      const isVerified = session?.user?.email_confirmed_at ? true : false;
+      if (session && !isVerified) {
+        // Clear unverified session to prevent auto-login
+        await supabase.auth.signOut({ scope: 'local' });
+        setIsAuthenticated(false);
+        setUserId(undefined);
+      } else {
+        setIsAuthenticated(!!session && isOwner && isVerified);
+        setUserId(session?.user?.id);
+      }
     });
 
     return () => subscription.unsubscribe();

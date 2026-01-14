@@ -230,6 +230,7 @@
     "accountNotAvailable": "Account Not Available",
     "accountNotFound": "This account is not available. The user code you entered does not exist.",
     "accountDeactivated": "This account has been deactivated and is no longer available.",
+    "unauthorizedAccess": "You do not have permission to access this account.",
     "backToWelcome": "Back to Welcome Page",
     "invalidOrExpiredResetLink": "Invalid or expired reset link",
     "pleaseRequestNewReset": "Invalid or expired reset link. Please request a new password reset.",
@@ -301,7 +302,16 @@
     "resetLinkInvalid": "Reset Link Invalid",
     "passwordReset": "Password Reset!",
     "passwordResetRedirecting": "Your password has been reset successfully. Redirecting to sign in...",
-    "passwordResetRedirectingLogin": "Password reset successfully! Redirecting to login..."
+    "passwordResetRedirectingLogin": "Password reset successfully! Redirecting to login...",
+    "registerSuccessTitle": "Registration Successful!",
+    "registerSuccessMessage": "Your account has been created successfully. Please verify your email to continue.",
+    "verifyEmailBeforeLogin": "To access your account and use all features, you need to verify your email address first.",
+    "step1CheckEmail": "Check your email inbox for a verification link",
+    "step2ClickLink": "Click the verification link in the email",
+    "step3ReturnToLogin": "Return here and sign in with your credentials",
+    "goToLogin": "Go to Login",
+    "verifyEmailFirst": "Please verify your email before signing in",
+    "emailNotVerified": "Your email address has not been verified. Please check your email and click the verification link."
   },
   "messages": {
     "comingSoon": "This feature will coming soon!"

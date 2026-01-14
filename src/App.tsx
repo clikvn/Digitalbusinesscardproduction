@@ -9,10 +9,12 @@ import { CMSLayout } from "./components/routes/CMSLayout";
 import { AuthScreen } from "./components/screens/AuthScreen";
 import { AuthCallbackScreen } from "./components/screens/AuthCallbackScreen";
 import { PasswordResetScreen } from "./components/screens/PasswordResetScreen";
+import { RegisterSuccessScreen } from "./components/screens/RegisterSuccessScreen";
 import { ensureDefaultUserExists } from "./utils/storage";
 import { Toaster } from "./components/ui/sonner";
 import { useChatWidget } from "./hooks/useChatWidget";
 import { parseProfileUrl } from "./utils/user-code";
+import { supabase } from "./lib/supabase-client";
 
 function AppContent() {
   const location = useLocation();
@@ -88,6 +90,23 @@ function AppContent() {
     ensureDefaultUserExists();
   }, []);
 
+  // Clear any unverified sessions on app start to prevent auto-login
+  useEffect(() => {
+    const clearUnverifiedSessions = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && !session.user.email_confirmed_at) {
+          console.log('[App] Clearing unverified session on app start');
+          await supabase.auth.signOut({ scope: 'local' });
+        }
+      } catch (error) {
+        console.warn('[App] Error checking session on app start:', error);
+      }
+    };
+
+    clearUnverifiedSessions();
+  }, []);
+
   return (
     <Routes>
       {/* Root Redirect */}
@@ -97,6 +116,7 @@ function AppContent() {
       <Route path="/auth" element={<AuthScreen />} />
       <Route path="/auth/callback" element={<AuthCallbackScreen />} />
       <Route path="/auth/reset-password" element={<PasswordResetScreen />} />
+      <Route path="/auth/register-success" element={<RegisterSuccessScreen />} />
       <Route path="/:userCode/auth" element={<AuthScreen />} />
       
       {/* CMS Routes */}

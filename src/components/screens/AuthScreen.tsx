@@ -61,7 +61,45 @@ export function AuthScreen() {
           email: cleanEmail,
           password: cleanPassword,
         });
-        if (error) throw error;
+        
+        // Check for email confirmation error first
+        if (error) {
+          // Supabase throws an error when email is not confirmed
+          // Error format: "Email not confirmed" or "AuthApiError: Email not confirmed"
+          const errorMessage = error.message?.toLowerCase() || '';
+          const isEmailNotConfirmed = 
+            errorMessage.includes('email not confirmed') ||
+            errorMessage.includes('email_not_confirmed') ||
+            errorMessage.includes('email confirmation') ||
+            (error.status === 400 && errorMessage.includes('not confirmed')) ||
+            error.name === 'AuthApiError' && errorMessage.includes('email');
+          
+          if (isEmailNotConfirmed) {
+            console.log('[AuthScreen] Email not confirmed error detected:', error.message);
+            setLoading(false);
+            toast.error(t('auth.emailNotVerified'));
+            setTimeout(() => {
+              navigate(`/auth/register-success?email=${encodeURIComponent(cleanEmail)}`, { replace: true });
+            }, 100);
+            return;
+          }
+          // If it's a different error, throw it to be handled by catch block
+          throw error;
+        }
+        
+        // Check if email is verified (fallback check in case error wasn't thrown)
+        if (signInData?.user && !signInData.user.email_confirmed_at) {
+          console.log('[AuthScreen] Email not verified - redirecting to register success page');
+          setLoading(false); // Stop loading before navigation
+          // Sign out the user
+          await supabase.auth.signOut({ scope: 'local' });
+          toast.error(t('auth.emailNotVerified'));
+          // Redirect to register success page to guide user
+          setTimeout(() => {
+            navigate(`/auth/register-success?email=${encodeURIComponent(cleanEmail)}`, { replace: true });
+          }, 100);
+          return;
+        }
         
         // Fetch user code from database (source of truth)
         const userId = signInData.user.id;
@@ -118,9 +156,14 @@ export function AuthScreen() {
         
         // Check if email confirmation is required
         if (signupResponse.needsEmailConfirmation) {
-          console.log('[AuthScreen] Email confirmation required');
-          setPendingEmail(cleanEmail);
-          setShowConfirmationPending(true);
+          console.log('[AuthScreen] Email confirmation required - redirecting to success page');
+          setLoading(false); // Stop loading before navigation
+          // Sign out the user to prevent any session access
+          await supabase.auth.signOut({ scope: 'local' });
+          // Use setTimeout to ensure navigation happens after state updates
+          setTimeout(() => {
+            navigate(`/auth/register-success?email=${encodeURIComponent(cleanEmail)}`, { replace: true });
+          }, 100);
           return; // Exit early - user needs to confirm email
         }
         
@@ -139,7 +182,25 @@ export function AuthScreen() {
     } catch (error: any) {
       console.error('Auth error:', error);
       
-      if (error.message?.includes("Invalid login credentials")) {
+      // Check if this is an email not confirmed error (should have been handled above, but just in case)
+      const errorMessage = error.message?.toLowerCase() || '';
+      const isEmailNotConfirmed = 
+        errorMessage.includes('email not confirmed') ||
+        errorMessage.includes('email_not_confirmed') ||
+        errorMessage.includes('email confirmation') ||
+        (error.status === 400 && errorMessage.includes('not confirmed')) ||
+        error.name === 'AuthApiError' && errorMessage.includes('email');
+      
+      if (isEmailNotConfirmed) {
+        // This should have been handled above, but handle it here as fallback
+        console.log('[AuthScreen] Email not confirmed error in catch block:', error.message);
+        setLoading(false);
+        toast.error(t('auth.emailNotVerified'));
+        setTimeout(() => {
+          navigate(`/auth/register-success?email=${encodeURIComponent(email.trim())}`, { replace: true });
+        }, 100);
+        return;
+      } else if (error.message?.includes("Invalid login credentials")) {
          toast.error(t('auth.invalidCredentials'));
       } else if (error.message?.includes("User already registered")) {
          toast.error(t('auth.emailAlreadyRegistered'));
