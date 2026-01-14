@@ -1248,14 +1248,60 @@ export const api = {
       // Use explicit site URL when available so production always uses the correct domain
       // (avoids sending reset emails with redirect_to pointing at the wrong host, e.g. clik.id vs www.clik.id)
       const configuredSiteUrl = (import.meta as any)?.env?.VITE_APP_SITE_URL as string | undefined;
-      const baseUrl = (configuredSiteUrl || window.location.origin).replace(/\/+$/, '');
-      const redirectUrl = `${baseUrl}/auth/reset-password`;
+      let baseUrl = (configuredSiteUrl || window.location.origin).replace(/\/+$/, '');
+      
+      // Ensure baseUrl is a valid URL with protocol
+      if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+        baseUrl = `https://${baseUrl}`;
+      }
+      
+      // CRITICAL: Always include the full path /auth/reset-password
+      // Supabase will fall back to Site URL (without path) if redirect URL is not whitelisted
+      // Ensure no double slashes and proper formatting
+      const redirectUrl = `${baseUrl.replace(/\/+$/, '')}/auth/reset-password`;
+      
+      // Validate redirect URL format
+      let validatedUrl: URL;
+      try {
+        validatedUrl = new URL(redirectUrl);
+      } catch (e) {
+        console.error('[forgotPassword] Invalid redirect URL format:', redirectUrl);
+        throw new Error('Invalid password reset URL configuration. Please contact support.');
+      }
+      
+      // Ensure redirect URL includes the path (Supabase might strip it if not whitelisted)
+      if (!redirectUrl.includes('/auth/reset-password')) {
+        console.error('[forgotPassword] Redirect URL missing required path:', redirectUrl);
+        throw new Error('Password reset URL configuration error. Please contact support.');
+      }
+      
+      // Final validation: ensure URL is properly formatted
+      if (validatedUrl.pathname !== '/auth/reset-password') {
+        console.warn('[forgotPassword] URL pathname mismatch. Expected: /auth/reset-password, Got:', validatedUrl.pathname);
+        console.warn('[forgotPassword] This might cause issues. Using:', redirectUrl);
+      }
+      
       console.log('[forgotPassword] Redirect URL:', redirectUrl);
       console.log('[forgotPassword] Base URL:', baseUrl);
+      console.log('[forgotPassword] Full redirect URL (must be whitelisted in Supabase Dashboard):', redirectUrl);
       
+      // CRITICAL: resetPasswordForEmail only accepts 'redirectTo', not 'emailRedirectTo'
+      // 'emailRedirectTo' is only for signUp(), not for password reset
+      // Using both parameters might cause Supabase to ignore the redirect URL
+      // 
+      // IMPORTANT: The redirect URL MUST be whitelisted in Supabase Dashboard
+      // If not whitelisted, Supabase will silently fall back to Site URL (without path)
+      // This causes redirect_to=https://www.clik.id/ instead of redirect_to=https://www.clik.id/auth/reset-password
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
-        emailRedirectTo: redirectUrl, // Some Supabase versions need this too
+      });
+      
+      // Log what we're sending to Supabase
+      console.log('[forgotPassword] Sent to Supabase:', {
+        email,
+        redirectTo: redirectUrl,
+        redirectUrlLength: redirectUrl.length,
+        redirectUrlIncludesPath: redirectUrl.includes('/auth/reset-password')
       });
 
       if (error) {
@@ -1267,14 +1313,24 @@ export const api = {
         });
         
         // Provide more helpful error messages
-        if (error.message?.includes('redirect') || error.message?.includes('URL')) {
-          throw new Error('Password reset URL not configured. Please contact support.');
+        if (error.message?.includes('redirect') || error.message?.includes('URL') || error.message?.includes('whitelist')) {
+          console.error('[forgotPassword] IMPORTANT: Redirect URL must be whitelisted in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs');
+          console.error('[forgotPassword] Required URL:', redirectUrl);
+          console.error('[forgotPassword] Check Supabase Dashboard and ensure this EXACT URL is whitelisted (case-sensitive)');
+          throw new Error('Password reset URL not configured. Please ensure the redirect URL is whitelisted in Supabase Dashboard.');
         }
         
         throw error;
       }
 
+      // If no error, the email was sent, but we need to verify the redirect URL is correct
       console.log('[forgotPassword] Password reset email sent successfully');
+      console.log('[forgotPassword] ⚠️ IMPORTANT: Check the actual email to verify redirect URL');
+      console.log('[forgotPassword] Expected redirect_to parameter: https://www.clik.id/auth/reset-password');
+      console.log('[forgotPassword] If email shows redirect_to=https://www.clik.id/ (missing path), the URL is NOT whitelisted correctly');
+      console.log('[forgotPassword] Verify in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs');
+      console.log('[forgotPassword] Required whitelist entry: https://www.clik.id/auth/reset-password (or wildcard: https://www.clik.id/*)');
+      
       return { success: true };
     },
 

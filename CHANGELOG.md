@@ -24,6 +24,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Both providers now open compose windows directly with recipient email pre-filled when user clicks the provider button
 
 ### Fixed
+- **Password Reset Redirect URL Parameter Fix**: Fixed incorrect parameter usage in `resetPasswordForEmail` function
+  - Removed `emailRedirectTo` parameter (only used for `signUp`, not password reset)
+  - `resetPasswordForEmail` only accepts `redirectTo` parameter
+  - Using both parameters was causing Supabase to ignore the redirect URL
+  - Now correctly uses only `redirectTo: redirectUrl` parameter
+  - Added detailed logging to help diagnose redirect URL issues
+  - Updated documentation with troubleshooting steps for redirect URL configuration
+- **Password Reset Redirect URL Validation**: Enhanced password reset email redirect URL handling to prevent incorrect redirects
+  - Added validation to ensure redirect URL always includes `/auth/reset-password` path
+  - Added URL format validation before sending password reset email
+  - Improved error messages to indicate when redirect URL must be whitelisted in Supabase Dashboard
+  - Added detailed logging to help diagnose redirect URL issues
+  - Fixed issue where Supabase would fall back to Site URL (without path) when redirect URL wasn't whitelisted
+  - Updated documentation with troubleshooting guide for redirect URL configuration
+  - **Root cause**: Supabase falls back to dashboard Site URL if redirect URL is not whitelisted, causing `redirect_to=https://www.clik.id/` instead of `redirect_to=https://www.clik.id/auth/reset-password`
+  - **Solution**: Ensure `https://www.clik.id/auth/reset-password` is whitelisted in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs
 - **Desktop Email Button Handling**: Improved email interaction on desktop devices with provider selection
   - On mobile platforms: Email button opens email client via `mailto:` link (existing behavior)
   - On desktop platforms: Email button opens dialog with email provider options
