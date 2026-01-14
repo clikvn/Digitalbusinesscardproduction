@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Facebook URL Format Support**: Enhanced Facebook URL detection to support multiple URL formats
+  - Updated `extractFacebookUsername` to handle `profile.php?id=...` format (e.g., `https://www.facebook.com/profile.php?id=100054995627099`)
+  - Now supports both username format (`https://facebook.com/vuphamtrantuan`) and numeric ID format (`https://www.facebook.com/profile.php?id=100054995627099`)
+  - Updated `socialChannelUrlPatterns.facebook` to automatically detect numeric IDs and generate correct `profile.php?id=` URLs
+  - Updated transformer to use same logic for consistent URL generation
+  - Supports both `www.facebook.com` and `facebook.com` domains
+  - Users can now paste any Facebook URL format and it will be correctly parsed and stored
 - **Analytics Page Blank Screen for New Users**: Fixed "ReferenceError: t is not defined" error that caused blank screen on analytics page
   - `PageStatsBlock` component was using `t()` translation function without access to `useTranslation` hook
   - Added `t` as a required prop to `PageStatsBlock` component and passed it from parent `AnalyticsDashboard`

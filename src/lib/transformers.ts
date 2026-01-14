@@ -43,7 +43,14 @@ export function businessCardToDb(data: BusinessCardData, userId: string, userCod
     ? `https://twitter.com/${data.socialChannels.twitter}` 
     : null;
   const facebookUrl = data.socialChannels?.facebook 
-    ? `https://facebook.com/${data.socialChannels.facebook}` 
+    ? (() => {
+        const username = data.socialChannels.facebook.trim();
+        // If username is numeric (looks like a Facebook ID), use profile.php?id= format
+        if (/^\d+$/.test(username)) {
+          return `https://www.facebook.com/profile.php?id=${username}`;
+        }
+        return `https://www.facebook.com/${username}`;
+      })()
     : null;
 
   // Helper to convert empty strings to null

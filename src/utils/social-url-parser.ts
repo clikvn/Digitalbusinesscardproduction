@@ -162,27 +162,50 @@ export function extractWeChatUsername(value: string): string {
 
 /**
  * Extract username/ID from Facebook URL or return as-is
+ * Supports multiple Facebook URL formats:
+ * - https://facebook.com/vuphamtrantuan
+ * - https://www.facebook.com/vuphamtrantuan
+ * - https://www.facebook.com/profile.php?id=100054995627099
+ * - fb.com/username
  */
 export function extractFacebookUsername(value: string): string {
   if (!value) return value;
   
+  const trimmed = value.trim();
+  
+  // Handle profile.php?id= format
+  // Match: https://www.facebook.com/profile.php?id=100054995627099
+  const profileIdPattern = /(?:https?:\/\/)?(?:www\.)?facebook\.com\/profile\.php\?id=([^&\s?#]+)/i;
+  const profileIdMatch = trimmed.match(profileIdPattern);
+  if (profileIdMatch && profileIdMatch[1]) {
+    return profileIdMatch[1].trim();
+  }
+  
+  // Handle regular username format
+  // Match: https://facebook.com/vuphamtrantuan or https://www.facebook.com/vuphamtrantuan
   const urlPatterns = [
     /(?:https?:\/\/)?(?:www\.)?facebook\.com\/([^\/\s?#]+)/i,
     /fb\.com\/([^\/\s?#]+)/i,
   ];
   
   for (const pattern of urlPatterns) {
-    const match = value.match(pattern);
+    const match = trimmed.match(pattern);
     if (match && match[1]) {
-      // Skip common Facebook paths like 'profile.php', 'pages', etc.
       const username = match[1].trim();
-      if (username && !username.startsWith('profile.php') && !username.startsWith('pages')) {
+      // Skip common Facebook paths that aren't usernames
+      if (username && 
+          !username.startsWith('profile.php') && 
+          !username.startsWith('pages') &&
+          !username.startsWith('groups') &&
+          !username.startsWith('events') &&
+          !username.startsWith('watch')) {
         return username;
       }
     }
   }
   
-  return value.trim();
+  // If no URL pattern matches, return as-is (already a username/ID)
+  return trimmed;
 }
 
 /**

@@ -230,7 +230,15 @@ export const messagingUrlPatterns = {
 };
 
 export const socialChannelUrlPatterns = {
-  facebook: (username: string) => username ? `https://facebook.com/${username}` : '',
+  facebook: (username: string) => {
+    if (!username) return '';
+    // If username is numeric (looks like a Facebook ID), use profile.php?id= format
+    // Otherwise, use regular username format
+    if (/^\d+$/.test(username.trim())) {
+      return `https://www.facebook.com/profile.php?id=${username.trim()}`;
+    }
+    return `https://www.facebook.com/${username.trim()}`;
+  },
   linkedin: (username: string) => username ? `https://linkedin.com/in/${username}` : '',
   twitter: (username: string) => username ? `https://twitter.com/${username}` : '',
   youtube: (username: string) => username ? `https://youtube.com/@${username}` : '',
