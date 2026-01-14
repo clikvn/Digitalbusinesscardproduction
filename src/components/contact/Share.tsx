@@ -1,5 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { usePublicBusinessCard } from "../../hooks/usePublicBusinessCard";
 import { parseProfileImage, calculateImagePosition } from "../../utils/profile-image-utils";
 import imgImg from "figma:asset/420b26ed698402e60bcb7141f4b23bc3850beb9d.png";
@@ -8,6 +9,7 @@ import { CallToAction } from "./CallToAction";
 import { getUserCode } from "../../utils/user-code";
 
 export function Share({ onAIClick }: { onAIClick?: () => void }) {
+  const { t } = useTranslation();
   const { userCode, groupCode } = useParams<{ userCode: string; groupCode?: string }>();
   const targetUserCode = userCode || getUserCode();
   
@@ -33,8 +35,8 @@ export function Share({ onAIClick }: { onAIClick?: () => void }) {
       <div className="box-border content-stretch flex flex-col gap-[24px] items-center p-[24px] relative rounded-tl-[24px] rounded-tr-[24px] shrink-0 w-full" data-name="share">
         <div className="flex flex-col items-center gap-4 p-8 text-center">
           <div className="text-[#c96442] text-lg">⚠️</div>
-          <p className="text-[#3d3d3a]">Unable to load profile</p>
-          <p className="text-sm text-[#83827d]">Please try again later</p>
+          <p className="text-[#3d3d3a]">{t("public.unableToLoadProfile")}</p>
+          <p className="text-sm text-[#83827d]">{t("public.pleaseTryAgainLater")}</p>
         </div>
       </div>
     );
@@ -46,7 +48,7 @@ export function Share({ onAIClick }: { onAIClick?: () => void }) {
     return (
       <div className="box-border content-stretch flex flex-col gap-[24px] items-center p-[24px] relative rounded-tl-[24px] rounded-tr-[24px] shrink-0 w-full" data-name="share">
         <div className="flex flex-col items-center gap-4 p-8 text-center">
-          <p className="text-[#3d3d3a]">Profile not found</p>
+          <p className="text-[#3d3d3a]">{t("public.profileNotFound")}</p>
         </div>
       </div>
     );

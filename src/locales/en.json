@@ -49,6 +49,22 @@
     "saveContact": "Save Contact",
     "tapToCopyEachField": "Tap to copy each field to your clipboard"
   },
+  "public": {
+    "backToHome": "Back to home",
+    "unableToLoadProfile": "Unable to load profile",
+    "pleaseTryAgainLater": "Please try again later",
+    "profileNotFound": "Profile not found",
+    "noCategoriesAvailable": "No categories available",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "noPortfolioItemsInCategory": "No portfolio items in this category",
+    "about": "ABOUT",
+    "serviceAreas": "SERVICE AREAS",
+    "specialties": "SPECIALTIES",
+    "experience": "EXPERIENCE",
+    "languages": "LANGUAGES",
+    "certifications": "CERTIFICATIONS"
+  },
   "navigation": {
     "menu": "Menu",
     "openMenu": "Open menu",
@@ -425,7 +441,12 @@
     "contactAddedSuccess": "Contact added successfully",
     "contactUpdatedSuccess": "Contact updated successfully",
     "failedToAddContact": "Failed to add contact",
-    "failedToUpdateContact": "Failed to update contact"
+    "failedToUpdateContact": "Failed to update contact",
+    "clearFilters": "Clear filters",
+    "filterByGroup": "Filter by Group",
+    "noGroups": "No groups",
+    "allGroups": "All Groups",
+    "clearAll": "Clear all"
   },
   "shareStep2": {
     "loading": "Loading...",

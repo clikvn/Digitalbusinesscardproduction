@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { PortfolioItem } from "../../types/business-card";
 import { PortfolioItemDisplay } from "./PortfolioItemDisplay";
 
@@ -9,6 +10,7 @@ export function PortfolioList({
   portfolioItems: PortfolioItem[]; 
   selectedCategoryId: string | null;
 }) {
+  const { t } = useTranslation();
   // Filter items by selected category
   const filteredItems = selectedCategoryId 
     ? portfolioItems.filter(item => item.categoryId === selectedCategoryId)
@@ -17,7 +19,7 @@ export function PortfolioList({
   if (filteredItems.length === 0) {
     return (
       <div className="content-stretch flex flex-col items-center justify-center relative shrink-0 w-full py-12">
-        <p className="text-zinc-500">No portfolio items in this category</p>
+        <p className="text-zinc-500">{t("public.noPortfolioItemsInCategory")}</p>
       </div>
     );
   }

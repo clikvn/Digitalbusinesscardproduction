@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
 import svgPaths from '../../imports/svg-p3p7jcj1vn';
 import shareIconPaths from '../../imports/svg-v3myfe0s0k';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
@@ -10,6 +10,8 @@ import { useSettings } from '../../hooks/useSettings';
 import { useContacts } from '../../hooks/useContacts';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Badge } from '../ui/badge';
 
 interface ShareStep1Props {
   onAddContact: () => void;
@@ -25,6 +27,7 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
   const { contacts } = useContacts(userCode);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   const groupCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -107,23 +110,143 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
           </div>
 
           {/* Search Bar */}
-          <div className="bg-background box-border content-stretch flex gap-[8px] h-[44px] items-center justify-center relative rounded-[12px] shrink-0 w-full py-[8px] px-[12px] py-[4px]">
+          <div className="bg-background box-border content-stretch flex flex-col gap-2 relative rounded-[12px] shrink-0 w-full py-[8px] px-[12px] py-[4px]">
             <div aria-hidden="true" className="absolute border border-border border-solid inset-0 pointer-events-none rounded-[12px]" />
-            <div className="basis-0 grow h-[39px] min-h-px min-w-px relative shrink-0">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[8px] h-[39px] items-center overflow-clip px-0 relative rounded-[inherit] w-full px-[0px] py-[8px] py-[4px]">
-                <Search className="w-[20px] h-[20px] text-foreground" strokeWidth={1.5} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('shareManager.search')}
-                  className="flex-1 bg-transparent outline-none font-['Inter:Medium',sans-serif] font-medium text-foreground placeholder:text-muted-foreground"
-                />
+            
+            {/* Search Input Row */}
+            <div className="flex gap-[8px] items-center relative">
+              <div className="basis-0 grow h-[39px] min-h-px min-w-px relative shrink-0">
+                <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[8px] h-[39px] items-center overflow-clip px-0 relative rounded-[inherit] w-full px-[0px] py-[8px] py-[4px]">
+                  <Search className="w-[20px] h-[20px] text-foreground" strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('shareManager.search')}
+                    className="flex-1 bg-transparent outline-none font-['Inter:Medium',sans-serif] font-medium text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
               </div>
+              {(searchQuery || selectedGroup) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedGroup(null);
+                  }}
+                  className="p-1 hover:bg-muted/50 rounded-full transition-colors shrink-0"
+                  aria-label={t('shareManager.clearFilters')}
+                >
+                  <X className="size-4 text-muted-foreground hover:text-foreground" />
+                </button>
+              )}
+              <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                <PopoverTrigger asChild>
+                  <button 
+                    className={`relative shrink-0 size-[20px] hover:opacity-70 transition-opacity ${selectedGroup ? 'text-primary' : ''}`}
+                    aria-label={t('shareManager.filterByGroup')}
+                  >
+                    <Filter className="w-[20px] h-[20px] text-foreground" strokeWidth={1.5} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-2" align="end">
+                  <div className="space-y-1">
+                    <div className="px-2 py-1.5 text-sm font-semibold text-foreground">{t('shareManager.filterByGroup')}</div>
+                    {groups.length === 0 ? (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('shareManager.noGroups')}</div>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setSelectedGroup(null);
+                            setIsFilterOpen(false);
+                          }}
+                          className={`w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors flex items-center gap-2 ${
+                            !selectedGroup ? 'bg-accent font-medium' : ''
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                            !selectedGroup ? 'bg-primary border-primary' : 'border-border'
+                          }`}>
+                            {!selectedGroup && <Check className="w-3 h-3 text-primary-foreground" />}
+                          </div>
+                          <span className="truncate flex-1">{t('shareManager.allGroups')}</span>
+                        </button>
+                        {groups.map((group) => {
+                          const IconComponent = (LucideIcons as any)[group.icon];
+                          const isSelected = selectedGroup === group.id;
+                          return (
+                            <button
+                              key={group.id}
+                              onClick={() => {
+                                setSelectedGroup(isSelected ? null : group.id);
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors flex items-center gap-2 ${
+                                isSelected ? 'bg-accent font-medium' : ''
+                              }`}
+                            >
+                              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                                isSelected ? 'bg-primary border-primary' : 'border-border'
+                              }`}>
+                                {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                              </div>
+                              {IconComponent && (
+                                <IconComponent className="w-4 h-4 shrink-0" />
+                              )}
+                              <span className="truncate flex-1">{group.label}</span>
+                              <span className="text-xs text-muted-foreground">({groupCounts[group.id] || 0})</span>
+                            </button>
+                          );
+                        })}
+                      </>
+                    )}
+                    {selectedGroup && (
+                      <div className="pt-2 border-t">
+                        <button
+                          onClick={() => {
+                            setSelectedGroup(null);
+                            setIsFilterOpen(false);
+                          }}
+                          className="w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors text-muted-foreground"
+                        >
+                          {t('shareManager.clearAll')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-            <button className="relative shrink-0 size-[20px] hover:opacity-70 transition-opacity">
-              <Filter className="w-[20px] h-[20px] text-foreground" strokeWidth={1.5} />
-            </button>
+
+            {/* Selected Group Tag */}
+            {selectedGroup && (
+              <div className="flex flex-wrap gap-2 px-2">
+                <Badge
+                  variant="secondary"
+                  className="flex items-center gap-1.5 px-2 py-1 text-xs"
+                >
+                  {(() => {
+                    const group = groups.find(g => g.id === selectedGroup);
+                    const IconComponent = group ? (LucideIcons as any)[group.icon] : null;
+                    return (
+                      <>
+                        {IconComponent && <IconComponent className="w-3 h-3" />}
+                        <span>{group?.label || selectedGroup}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedGroup(null);
+                          }}
+                          className="ml-1 hover:bg-muted rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </>
+                    );
+                  })()}
+                </Badge>
+              </div>
+            )}
           </div>
 
           {/* Contact Groups with Chevron Navigation */}
@@ -155,10 +278,13 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
                   <button
                     key={group.id}
                     onClick={(e) => {
-                      setSelectedGroup(selectedGroup === group.id ? null : group.id);
+                      // Trigger share when clicking the button (but not when clicking the share icon inside)
+                      if (onShareGroup && !(e.target as HTMLElement).closest('[data-share-icon]')) {
+                        onShareGroup(group.id);
+                      }
                       e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                     }}
-                    className={`box-border content-stretch flex flex-col items-start p-[12px] relative rounded-[12px] shrink-0 w-[100px] h-[70px] transition-all ${
+                    className={`box-border content-stretch flex flex-col items-start p-[12px] relative rounded-[12px] shrink-0 w-[100px] h-[70px] transition-all cursor-pointer hover:opacity-90 ${
                       selectedGroup === group.id ? 'ring-2 ring-inset ring-primary' : ''
                     } ${colorClasses.bg} ${colorClasses.border} border-2`}
                   >
@@ -177,6 +303,7 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
                         <p className="leading-[32px] whitespace-pre">{groupCounts[group.id] || 0}</p>
                       </div>
                       <div 
+                        data-share-icon
                         className="absolute right-[8px] size-[16px] top-[8px] cursor-pointer hover:opacity-70 transition-opacity z-10"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -221,12 +348,16 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
               filteredContacts.map((contact) => (
                 <div
                   key={contact.id}
-                  className="content-stretch flex gap-[16px] items-center relative shrink-0 w-full rounded-lg hover:bg-muted transition-colors p-2 -m-2"
+                  onClick={() => onSelectContact(contact)}
+                  className="content-stretch flex gap-[16px] items-center relative shrink-0 w-full rounded-lg hover:bg-muted transition-colors p-2 -m-2 cursor-pointer"
                 >
                   {/* Contact Info - Click to Edit */}
                   <button
-                    onClick={() => onEditContact(contact)}
-                    className="flex gap-[16px] items-center flex-1 text-left"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditContact(contact);
+                    }}
+                    className="contact-edit-area flex gap-[16px] items-center flex-1 text-left"
                   >
                     <div className="relative rounded-[100px] shrink-0 size-[40px]">
                       <ImageWithFallback
@@ -247,7 +378,10 @@ export function ShareStep1({ onAddContact, onSelectContact, onEditContact, onSha
                   
                   {/* Share Icon - Click to Share */}
                   <button
-                    onClick={() => onSelectContact(contact)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectContact(contact);
+                    }}
                     className="overflow-clip relative shrink-0 size-[16px]"
                     aria-label={t('shareManager.addContact')}
                   >

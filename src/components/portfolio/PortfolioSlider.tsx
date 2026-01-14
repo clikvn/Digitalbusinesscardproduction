@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { PortfolioCategory } from "../../types/business-card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -11,6 +12,7 @@ export function PortfolioSlider({
   selectedCategoryId: string | null; 
   onSelectCategory: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -54,7 +56,7 @@ export function PortfolioSlider({
   if (categories.length === 0) {
     return (
       <div className="absolute content-stretch flex gap-[8px] inset-0 items-center justify-center" data-name="slider">
-        <div className="text-zinc-500">No categories available</div>
+        <div className="text-zinc-500">{t("public.noCategoriesAvailable")}</div>
       </div>
     );
   }
@@ -66,7 +68,7 @@ export function PortfolioSlider({
         <button
           onClick={() => scroll('left')}
           className="shrink-0 w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white border border-zinc-200 rounded-full shadow-sm transition-colors z-10"
-          aria-label="Scroll left"
+          aria-label={t("public.scrollLeft")}
         >
           <ChevronLeft className="w-5 h-5 text-[#535146]" />
         </button>
@@ -94,7 +96,7 @@ export function PortfolioSlider({
         <button
           onClick={() => scroll('right')}
           className="shrink-0 w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white border border-zinc-200 rounded-full shadow-sm transition-colors z-10"
-          aria-label="Scroll right"
+          aria-label={t("public.scrollRight")}
         >
           <ChevronRight className="w-5 h-5 text-[#535146]" />
         </button>

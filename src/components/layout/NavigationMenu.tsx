@@ -88,8 +88,9 @@ export function NavigationMenu({
           Navigate to different sections of the app
         </SheetDescription>
         
-        {/* Plan Badge and Language Switcher - positioned at top left, same row as X button */}
+        {/* Language Switcher and Plan Badge - positioned at top left, same row as X button */}
         <div className="absolute top-4 left-4 flex items-center gap-2">
+          <LanguageSwitcher />
           {isAuthenticated && userPlan && (
             <button
               onClick={() => setShowUpgradePlanDialog(true)}
@@ -101,7 +102,6 @@ export function NavigationMenu({
               </Badge>
             </button>
           )}
-          <LanguageSwitcher />
         </div>
         
         <div className="flex flex-col px-4 mt-12 gap-1 overflow-y-auto flex-1 pb-6">

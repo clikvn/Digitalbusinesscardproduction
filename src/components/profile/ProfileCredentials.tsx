@@ -1,10 +1,12 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { usePublicBusinessCard } from "../../hooks/usePublicBusinessCard";
 import { getUserCode } from "../../utils/user-code";
 import { MarkdownText } from "../common/MarkdownText";
 
 export function ProfileCredentials() {
+  const { t } = useTranslation();
   const { userCode, groupCode } = useParams<{ userCode: string; groupCode?: string }>();
   const targetUserCode = userCode || getUserCode();
   
@@ -45,7 +47,7 @@ export function ProfileCredentials() {
         <div className="box-border content-stretch flex flex-col gap-[4px] items-start px-0 py-[8px] relative shrink-0 w-full" data-name="widget-elements-title">
           <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
             <div className="flex flex-col font-['Be_Vietnam_Pro:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[16px] text-nowrap">
-              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.about'] || 'ABOUT').toUpperCase()}</p>
+              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.about'] || t('public.about')).toUpperCase()}</p>
             </div>
           </div>
           <div className="flex flex-col font-['Be_Vietnam_Pro:Medium',sans-serif] justify-center leading-[20px] not-italic relative shrink-0 text-[#83827d] text-[14px] w-full">
@@ -58,7 +60,7 @@ export function ProfileCredentials() {
         <div className="box-border content-stretch flex flex-col gap-[4px] items-start px-0 py-[8px] relative shrink-0 w-full" data-name="widget-elements-title">
           <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
             <div className="flex flex-col font-['Be_Vietnam_Pro:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[16px] text-nowrap">
-              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.serviceAreas'] || 'SERVICE AREAS').toUpperCase()}</p>
+              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.serviceAreas'] || t('public.serviceAreas')).toUpperCase()}</p>
             </div>
           </div>
           <div className="flex flex-col font-['Be_Vietnam_Pro:Medium',sans-serif] justify-center leading-[20px] not-italic relative shrink-0 text-[#83827d] text-[14px] w-full">
@@ -71,7 +73,7 @@ export function ProfileCredentials() {
         <div className="box-border content-stretch flex flex-col gap-[4px] items-start px-0 py-[8px] relative shrink-0 w-full" data-name="widget-elements-title">
           <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
             <div className="flex flex-col font-['Be_Vietnam_Pro:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[16px] text-nowrap">
-              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.specialties'] || 'SPECIALTIES').toUpperCase()}</p>
+              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.specialties'] || t('public.specialties')).toUpperCase()}</p>
             </div>
           </div>
           <div className="flex flex-col font-['Be_Vietnam_Pro:Medium',sans-serif] justify-center leading-[20px] not-italic relative shrink-0 text-[#83827d] text-[14px] w-full">
@@ -84,7 +86,7 @@ export function ProfileCredentials() {
         <div className="box-border content-stretch flex flex-col gap-[4px] items-start px-0 py-[8px] relative shrink-0 w-full" data-name="widget-elements-title">
           <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
             <div className="flex flex-col font-['Be_Vietnam_Pro:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[16px] text-nowrap">
-              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.experience'] || 'EXPERIENCE').toUpperCase()}</p>
+              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.experience'] || t('public.experience')).toUpperCase()}</p>
             </div>
           </div>
           <div className="flex flex-col font-['Be_Vietnam_Pro:Medium',sans-serif] justify-center leading-[20px] not-italic relative shrink-0 text-[#83827d] text-[14px] w-full">
@@ -97,7 +99,7 @@ export function ProfileCredentials() {
         <div className="box-border content-stretch flex flex-col gap-[4px] items-start px-0 py-[8px] relative shrink-0 w-full" data-name="widget-elements-title">
           <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
             <div className="flex flex-col font-['Be_Vietnam_Pro:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[16px] text-nowrap">
-              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.languages'] || 'LANGUAGES').toUpperCase()}</p>
+              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.languages'] || t('public.languages')).toUpperCase()}</p>
             </div>
           </div>
           <div className="flex flex-col font-['Be_Vietnam_Pro:Medium',sans-serif] justify-center leading-[20px] not-italic relative shrink-0 text-[#83827d] text-[14px] w-full">
@@ -110,7 +112,7 @@ export function ProfileCredentials() {
         <div className="box-border content-stretch flex flex-col gap-[4px] items-start px-0 py-[8px] relative shrink-0 w-full" data-name="widget-elements-title">
           <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
             <div className="flex flex-col font-['Be_Vietnam_Pro:Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[16px] text-nowrap">
-              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.certifications'] || 'CERTIFICATIONS').toUpperCase()}</p>
+              <p className="leading-[24px] whitespace-pre">{(data.customLabels?.['profile.certifications'] || t('public.certifications')).toUpperCase()}</p>
             </div>
           </div>
           <div className="flex flex-col font-['Be_Vietnam_Pro:Medium',sans-serif] justify-center leading-[20px] not-italic relative shrink-0 text-[#83827d] text-[14px] w-full">

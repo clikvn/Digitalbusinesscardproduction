@@ -20,6 +20,7 @@
 | react-i18next | Latest | React bindings for i18next |
 | i18next | Latest | Internationalization framework |
 | i18next-browser-languagedetector | Latest | Language detection for browsers |
+| react-country-flag | Latest | Country flag icons (SVG/emoji) for language switcher |
 
 ---
 

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Language Switcher with Flag Icons**: Updated LanguageSwitcher component to display country flag icons
+  - Installed `react-country-flag` library for proper flag icon rendering
+  - Button now shows the SVG flag icon (US for English, VN for Vietnamese) corresponding to the currently selected language instead of Globe icon
+  - Dropdown menu items now display SVG flag icons alongside language labels
+  - Provides better visual feedback for language selection with high-quality flag icons
+- **Share Contact UX Improvements**: Enhanced Share Contact interface for better usability
+  - Made entire contact container clickable to trigger share feature (no longer need to click small share icon)
+  - Moved group filter functionality to filter icon in search bar (matches My Business page pattern)
+  - Added Popover-based filter menu with checkboxes for group selection
+  - Added filter badge display showing selected group with remove option
+  - Added clear filters button (X icon) when search query or group filter is active
+  - Group cards in horizontal scroll area are now for display/group sharing only (no longer filter on click)
+  - Contact edit functionality remains accessible by clicking on the contact info area (stops propagation to prevent share)
+  - Improved visual feedback with primary color highlighting on filter icon when filter is active
+- **Navigation Menu Layout**: Moved language selection to the left of Plan Badge in NavigationMenu
+  - Language switcher now appears before the Plan Badge in the top-left corner of the navigation menu
+
 ### Added
 - **Comprehensive Multi-Language Translation**: Completed translation implementation across the entire application
   - Updated `AuthScreen` component with full Vietnamese translations for all authentication flows (login, signup, password reset, email confirmation)
