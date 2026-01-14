@@ -1246,9 +1246,19 @@ export const api = {
       console.log('[forgotPassword] Sending password reset email to:', email);
       
       // Use explicit site URL when available so production always uses the correct domain
-      // (avoids sending reset emails with redirect_to pointing at the wrong host, e.g. clik.id vs www.clik.id)
+      // (avoids sending reset emails with redirect_to pointing at the wrong host, e.g. clik.vn vs www.clik.vn)
       const configuredSiteUrl = (import.meta as any)?.env?.VITE_APP_SITE_URL as string | undefined;
       let baseUrl = (configuredSiteUrl || window.location.origin).replace(/\/+$/, '');
+      
+      // CRITICAL: Normalize to www version for consistency (if both www and non-www are accessible)
+      // This ensures we always use the same domain regardless of how user accessed the site
+      // Example: If user accesses via https://clik.vn, we normalize to https://www.clik.vn
+      // This prevents whitelist mismatch issues
+      if (!configuredSiteUrl && baseUrl.includes('clik.vn') && !baseUrl.includes('www.')) {
+        console.log('[forgotPassword] Normalizing non-www domain to www version for consistency');
+        baseUrl = baseUrl.replace('https://clik.vn', 'https://www.clik.vn');
+        baseUrl = baseUrl.replace('http://clik.vn', 'http://www.clik.vn');
+      }
       
       // Ensure baseUrl is a valid URL with protocol
       if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
@@ -1258,7 +1268,15 @@ export const api = {
       // CRITICAL: Always include the full path /auth/reset-password
       // Supabase will fall back to Site URL (without path) if redirect URL is not whitelisted
       // Ensure no double slashes and proper formatting
+      // IMPORTANT: Remove ALL trailing slashes to ensure exact match with whitelist
       const redirectUrl = `${baseUrl.replace(/\/+$/, '')}/auth/reset-password`;
+      
+      // CRITICAL: The redirect URL must match EXACTLY what's in the whitelist
+      // Common issues:
+      // - Trailing slashes mismatch
+      // - Case sensitivity
+      // - Protocol mismatch (http vs https)
+      // - www vs non-www mismatch
       
       // Validate redirect URL format
       let validatedUrl: URL;
@@ -1292,17 +1310,41 @@ export const api = {
       // IMPORTANT: The redirect URL MUST be whitelisted in Supabase Dashboard
       // If not whitelisted, Supabase will silently fall back to Site URL (without path)
       // This causes redirect_to=https://www.clik.id/ instead of redirect_to=https://www.clik.id/auth/reset-password
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      
+      // Log the exact options object being sent
+      const options = {
         redirectTo: redirectUrl,
+      };
+      console.log('[forgotPassword] API Call Options:', JSON.stringify(options, null, 2));
+      console.log('[forgotPassword] About to call: supabase.auth.resetPasswordForEmail(email, options)');
+      
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, options);
+      
+      // Log the response
+      console.log('[forgotPassword] API Response:', {
+        hasData: !!data,
+        hasError: !!error,
+        errorMessage: error?.message,
+        errorStatus: error?.status
       });
       
-      // Log what we're sending to Supabase
+      // Log what we're sending to Supabase with detailed breakdown
+      const urlParts = new URL(redirectUrl);
       console.log('[forgotPassword] Sent to Supabase:', {
         email,
         redirectTo: redirectUrl,
         redirectUrlLength: redirectUrl.length,
-        redirectUrlIncludesPath: redirectUrl.includes('/auth/reset-password')
+        redirectUrlIncludesPath: redirectUrl.includes('/auth/reset-password'),
+        protocol: urlParts.protocol,
+        host: urlParts.host,
+        hostname: urlParts.hostname,
+        pathname: urlParts.pathname,
+        fullUrl: redirectUrl
       });
+      console.log('[forgotPassword] ⚠️ VERIFY THIS EXACT URL IS IN SUPABASE WHITELIST:', redirectUrl);
+      console.log('[forgotPassword] Expected whitelist entry: https://www.clik.id/auth/reset-password (NO trailing slash)');
+      console.log('[forgotPassword] ⚠️ If email shows redirect_to=https://www.clik.id (no path), Supabase rejected this URL');
+      console.log('[forgotPassword] ⚠️ This means the URL is NOT properly whitelisted or there is a format mismatch');
 
       if (error) {
         console.error('[forgotPassword] Error:', error);

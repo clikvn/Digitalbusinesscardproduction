@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Translation Issues in Portfolio Form**: Fixed missing Vietnamese translations in portfolio item form
+  - Fixed all hardcoded labels in `InlinePortfolioItemForm` component (Type, Title, Description, Images, Video URL, Virtual Tour URL, etc.)
+  - Fixed all hardcoded labels in `PortfolioItemEditor` component (Title, Category, Description, etc.)
+  - Added translation keys for all portfolio form fields, buttons, placeholders, descriptions, and error messages
+  - All portfolio form labels now display in Vietnamese when language is set to Vietnamese
+- **Translation Issues in CMS and Analytics**: Fixed missing Vietnamese translations in multiple areas
+  - Fixed Field Visibility Settings category names (Personal Information, Contact Information, etc.) - now properly convert to camelCase translation keys
+  - Fixed Analytics tracking item labels - `getClickTargetLabel` now uses i18n translations instead of hardcoded English labels
+  - Fixed Analytics Dashboard hardcoded labels - `getAllScreenElements` now uses `getClickTargetLabel` to get translated labels that match analytics data
+  - Improved `getClickTargetLabel` function to properly check if translations exist before using fallback labels
+  - Added `analytics.clickTarget` translation section with all click target labels in both English and Vietnamese
+  - Portfolio Form "Add Item" button already had translation key (`portfolioForm.addItem`) - verified it exists in both locale files
+  - Employee Manager "Add new employee" already uses translation key (`employeeManager.addNewEmployee`) - verified it exists
+  - All category names in Share Config field visibility now properly translate to Vietnamese when expanded
+  - All analytics tracking items (Phone, Email, Facebook, View Profile, View Portfolio, View Contact, Save Contact, Share Profile, etc.) now display in Vietnamese when language is set to Vietnamese
+  - Fixed issue where analytics dashboard showed English labels even when language was set to Vietnamese - now uses `getClickTargetLabel` for all element labels
+- **Translation Issues in Guest View**: Fixed missing translations for Vietnamese language in guest view
+  - Fixed "Social Messaging" and "Social Channels" titles on contact page - now use `common.socialMessaging` and `common.socialChannels` translation keys
+  - Fixed "Contact" title in navigation bar header - now uses `navigation.contact` translation key
+  - Fixed "Profile" title in navigation bar header - now uses `navigation.profile` translation key
+  - Fixed "Portfolio" title in navigation bar header - now uses `navigation.portfolio` translation key
+  - Added missing translation keys `common.socialMessaging` and `common.socialChannels` to both en.json and vi.json
+  - All titles now properly translate to Vietnamese when language is switched
+  - Fixed "Social Messaging" and "Social Channels" titles on contact page - now use `common.socialMessaging` and `common.socialChannels` translation keys
+  - Fixed "Contact" title in navigation bar header - now uses `navigation.contact` translation key
+  - Fixed "Profile" title in navigation bar header - now uses `navigation.profile` translation key
+  - All titles now properly translate to Vietnamese when language is switched
+
 ### Changed
 - **Copy Icon Size**: Updated copy icons to 24x24px (from 16x16px) for better visibility
   - Updated copy icons in phone number and email dialogs in ContactButtons component
@@ -24,6 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Both providers now open compose windows directly with recipient email pre-filled when user clicks the provider button
 
 ### Fixed
+- **Password Reset Redirect URL Domain Normalization**: Fixed issue where password reset emails failed when users accessed site via different domains (www vs non-www)
+  - Added automatic normalization to www version (e.g., `clik.vn` → `www.clik.vn`) for consistency
+  - Prevents whitelist mismatch when site is accessible via both `https://www.clik.vn` and `https://clik.vn`
+  - Code now always uses www version regardless of how user accessed the site
+  - **Root cause**: `window.location.origin` could be either domain, causing redirect URL to not match whitelist
+  - **Solution**: Normalize to www version OR whitelist both domains in Supabase Dashboard
+  - Updated documentation with instructions for handling www vs non-www domain scenarios
 - **Password Reset Redirect URL Parameter Fix**: Fixed incorrect parameter usage in `resetPasswordForEmail` function
   - Removed `emailRedirectTo` parameter (only used for `signUp`, not password reset)
   - `resetPasswordForEmail` only accepts `redirectTo` parameter

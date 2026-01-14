@@ -1,11 +1,13 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import profileSvgPaths from "../../imports/svg-i5dwj49pkv";
 
 export function ProfileLogo() {
+  const { t } = useTranslation();
   return (
     <div className="basis-0 content-stretch flex grow h-[48px] items-center justify-center min-h-px min-w-px relative shrink-0" data-name="logo">
       <div className="basis-0 flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold grow justify-center leading-[0] min-h-px min-w-px not-italic relative shrink-0 text-[#535146] text-[20px] tracking-[-0.1px]">
-        <p className="leading-[28px]">Profile</p>
+        <p className="leading-[28px]">{t("navigation.profile")}</p>
       </div>
     </div>
   );

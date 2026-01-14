@@ -271,7 +271,15 @@ export function FieldVisibilitySettings() {
                   {Object.entries(fieldsByCategory).map(([category, fields]) => {
                     if (fields.length === 0) return null;
                     
-                    const categoryKey = category.toLowerCase().replace(/\s+/g, '');
+                    // Convert "Personal Information" to "personalInformation" (camelCase)
+                    const categoryKey = category
+                      .split(' ')
+                      .map((word, index) => 
+                        index === 0 
+                          ? word.toLowerCase() 
+                          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                      )
+                      .join('');
                     const categoryLabel = t(`fieldVisibilitySettings.${categoryKey}`, category);
                     
                     return (

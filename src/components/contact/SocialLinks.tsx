@@ -1,5 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner@2.0.3";
 import { usePublicBusinessCard } from "../../hooks/usePublicBusinessCard";
 import { useAnalyticsTracking } from "../../hooks/useAnalytics";
@@ -39,11 +40,12 @@ export function Messaging() {
 }
 
 export function WidgetElementsTitle() {
+  const { t } = useTranslation();
   return (
     <div className="content-stretch flex flex-col gap-[4px] items-start justify-center relative shrink-0 w-full" data-name="widget-elements-title">
       <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
         <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[18px] text-nowrap">
-          <p className="leading-[28px] whitespace-pre">Social Messaging</p>
+          <p className="leading-[28px] whitespace-pre">{t("common.socialMessaging")}</p>
         </div>
       </div>
     </div>
@@ -139,11 +141,12 @@ export function Channels() {
 }
 
 export function WidgetElementsTitleChannels() {
+  const { t } = useTranslation();
   return (
     <div className="content-stretch flex flex-col gap-[4px] items-start justify-center relative shrink-0 w-full" data-name="widget-elements-title">
       <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full" data-name="title">
         <div className="flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] not-italic relative shrink-0 text-[#535146] text-[18px] text-nowrap">
-          <p className="leading-[28px] whitespace-pre">Social Channels</p>
+          <p className="leading-[28px] whitespace-pre">{t("common.socialChannels")}</p>
         </div>
       </div>
     </div>

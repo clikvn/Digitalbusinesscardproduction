@@ -133,41 +133,88 @@ Email link: redirect_to=https://www.clik.id/auth/reset-password  ← CORRECT
 #### Step 1: Whitelist the Redirect URL
 1. Go to **Supabase Dashboard > Authentication > URL Configuration > Redirect URLs**
 2. **Add the exact redirect URL** (with full path):
-   - `https://www.clik.id/auth/reset-password` (production)
+   - `https://www.clik.vn/auth/reset-password` (production with www)
+   - `https://clik.vn/auth/reset-password` (production without www - **REQUIRED if users can access via both domains**)
    - `http://localhost:3000/auth/reset-password` (local development)
 3. **Or use wildcard** (recommended):
-   - `https://www.clik.id/*`
+   - `https://www.clik.vn/*`
+   - `https://clik.vn/*` (if users can access via both www and non-www)
    - `http://localhost:3000/*`
+
+**⚠️ CRITICAL: Domain Mismatch Issue (www vs non-www)**
+- **Problem:** If your site is accessible via both `https://www.clik.vn` AND `https://clik.vn` (with/without www)
+- **Issue:** Code uses `window.location.origin` which could be either domain depending on how user accessed the site
+- **Solution 1 (Recommended):** Whitelist BOTH domains in Supabase:
+  - `https://www.clik.vn/auth/reset-password`
+  - `https://clik.vn/auth/reset-password`
+- **Solution 2:** The code now normalizes to www version automatically, but you should still whitelist both for safety
+- **Best Practice:** Set `VITE_APP_SITE_URL=https://www.clik.vn` in environment variables to force consistent domain
 
 #### Step 2: Verify Site URL Setting
 1. Go to **Supabase Dashboard > Authentication > Settings**
-2. Set **Site URL** to: `https://www.clik.id` (without trailing slash, without path)
-3. **What "fallback" means:**
+2. Set **Site URL** to: `https://www.clik.id` (⚠️ **NO trailing slash** - remove the `/` at the end)
+3. **CRITICAL:** If Site URL has a trailing slash (`https://www.clik.id/`), remove it!
+   - Wrong: `https://www.clik.id/` ❌
+   - Correct: `https://www.clik.id` ✅
+4. **What "fallback" means:**
    - If your redirect URL (`https://www.clik.id/auth/reset-password`) is **NOT whitelisted**, Supabase will reject it
    - When rejected, Supabase falls back to using the **Site URL** (`https://www.clik.id`) instead
    - This causes the problem: `redirect_to=https://www.clik.id/` (missing the `/auth/reset-password` path)
    - **If redirect URLs ARE whitelisted**, Supabase will use your redirect URL from code (with the path), NOT the Site URL
-4. **You should still set Site URL correctly** because:
+5. **You should still set Site URL correctly** because:
    - It's used in email templates that reference `{{ .SiteURL }}` variable
    - It serves as a safety net if redirect URL whitelisting fails
    - It's a best practice for Supabase configuration
-5. **Bottom line:** Site URL should be set, but whitelisting redirect URLs is the main fix
+6. **Bottom line:** Site URL should be set (without trailing slash), but whitelisting redirect URLs is the main fix
 
 #### Step 3: Verify Email Template
 1. Go to **Supabase Dashboard > Authentication > Email Templates**
 2. Open **"Reset Password"** template
 3. **CRITICAL:** Ensure the link uses the correct template variable:
-   - Use: `<a href="{{ .ConfirmationURL }}">Reset Password</a>` OR
-   - Use: `<a href="{{ .RedirectTo }}">Reset Password</a>`
-   - Both variables should work, but `{{ .ConfirmationURL }}` is the standard
+   - **Try using:** `<a href="{{ .RedirectTo }}">Reset Password</a>` (for password reset, this might work better)
+   - **Or use:** `<a href="{{ .ConfirmationURL }}">Reset Password</a>` (standard variable)
+   - **IMPORTANT:** Some Supabase versions require `{{ .RedirectTo }}` for password reset emails
+   - **DO NOT use:** `{{ .SiteURL }}` - this will always use Site URL instead of your redirect URL
 4. Do NOT hardcode URLs in the template - always use template variables
 5. The template variable will be automatically populated with your `redirectTo` URL from code
+6. **If using `{{ .RedirectTo }}`:** Make sure it's the full URL, not just the path
 
 ### Verification
-After fixing:
-1. Request a password reset email
-2. Check the email link - it should contain: `/auth/reset-password` in the `redirect_to` parameter
-3. Click the link - it should go directly to the password reset page, not the home page
+
+#### Method 1: Check the Actual Email (Recommended)
+1. **Request a password reset email** from your application
+2. **Check your email inbox** for the password reset email
+3. **Right-click on the "Reset your password" link** in the email
+4. **Select "Copy link address"** (or "Copy link location" depending on your email client)
+5. **Paste the link** somewhere to inspect it
+6. **Look for the `redirect_to` parameter** in the URL
+
+**Example of what you should see:**
+```
+✅ CORRECT:
+https://tqpgffxiewfvrwkacqry.supabase.co/auth/v1/verify?token=...&type=recovery&redirect_to=https://www.clik.id/auth/reset-password
+
+❌ WRONG (missing path):
+https://tqpgffxiewfvrwkacqry.supabase.co/auth/v1/verify?token=...&type=recovery&redirect_to=https://www.clik.id/
+```
+
+#### Method 2: Check Supabase Dashboard Logs
+1. Go to **Supabase Dashboard > Authentication > Logs**
+2. Look for recent password reset email events
+3. You can see if emails were sent successfully
+4. **Note:** You cannot see the actual email content or links in the dashboard - you must check the actual email
+
+#### Method 3: Use Browser Developer Tools
+1. **Request password reset** from your application
+2. **Open browser DevTools** (F12) > **Console** tab
+3. **Look for `[forgotPassword]` logs** - these show the redirect URL being sent
+4. The logs will show: `[forgotPassword] Sent to Supabase: { redirectTo: "https://www.clik.id/auth/reset-password" }`
+
+#### Method 4: Test the Link
+1. **Click the reset password link** in the email
+2. **Check the URL** in your browser's address bar after clicking
+3. **If working correctly:** You should be redirected to `https://www.clik.id/auth/reset-password` with tokens
+4. **If wrong:** You'll be redirected to `https://www.clik.id/` (home page) instead
 
 ### Code Implementation
 The code in `src/lib/api.ts` sets the correct redirect URL:
@@ -182,15 +229,48 @@ await supabase.auth.resetPasswordForEmail(email, {
 
 ### Still Not Working? Double-Check These:
 
-1. **Exact URL Match (Case-Sensitive)**
-   - Whitelist entry must be EXACTLY: `https://www.clik.id/auth/reset-password`
-   - Check for typos, extra spaces, or trailing slashes
-   - Supabase whitelist is case-sensitive
+1. **Check Browser Console First (CRITICAL)**
+   - Open browser DevTools (F12) > Console tab
+   - Request a password reset
+   - Look for `[forgotPassword]` logs
+   - **Copy the exact URL** shown in: `[forgotPassword] ⚠️ VERIFY THIS EXACT URL IS IN SUPABASE WHITELIST:`
+   - This is the EXACT URL being sent to Supabase - it MUST match your whitelist entry exactly
 
-2. **Use Wildcard Instead (Recommended)**
+2. **Site URL Trailing Slash Issue (COMMON PROBLEM)**
+   - Go to **Authentication > Settings > Site URL**
+   - **Remove the trailing slash** if present
+   - Wrong: `https://www.clik.id/` ❌
+   - Correct: `https://www.clik.id` ✅
+   - A trailing slash in Site URL can cause Supabase to ignore your redirect URL
+
+3. **Exact URL Match (Case-Sensitive) - MOST IMPORTANT**
+   - **Get the exact URL from browser console** (see step 1)
+   - Whitelist entry must match EXACTLY (character for character)
+   - Common mistakes:
+     - Extra spaces before/after URL
+     - Trailing slash: `https://www.clik.id/auth/reset-password/` ❌
+     - Missing path: `https://www.clik.id` ❌
+     - Case mismatch: `https://www.CLIK.id/auth/reset-password` ❌
+   - Correct format: `https://www.clik.id/auth/reset-password` ✅
+
+4. **Try Removing and Re-Adding Whitelist Entry**
+   - Go to **Authentication > URL Configuration > Redirect URLs**
+   - **Delete** the `https://www.clik.id/auth/reset-password` entry
+   - **Wait 30 seconds**
+   - **Add it back** exactly: `https://www.clik.id/auth/reset-password` (copy from console log)
+   - This clears any caching issues
+
+5. **Use Wildcard Instead (Recommended)**
    - Instead of exact URL, use: `https://www.clik.id/*`
    - This covers all paths under your domain
    - More reliable and easier to maintain
+   - Make sure wildcard entry is: `https://www.clik.id/*` (with asterisk, no trailing slash before asterisk)
+   - **Note:** Wildcard should work, but if exact URL doesn't work, wildcard might also fail
+
+6. **Verify No Duplicate Entries**
+   - Check if you have BOTH `https://www.clik.id/*` AND `https://www.clik.id/auth/reset-password`
+   - Having both should be fine, but try removing the exact match and keep only the wildcard
+   - Or vice versa - try keeping only the exact match
 
 3. **Check Browser Console**
    - Open browser DevTools (F12) > Console tab

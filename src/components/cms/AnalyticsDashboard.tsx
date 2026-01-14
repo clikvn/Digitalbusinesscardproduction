@@ -12,7 +12,7 @@ import { getUserCode } from '../../utils/user-code';
 import { useContacts } from '../../hooks/useContacts';
 import { useSettings } from '../../hooks/useSettings';
 import { useBusinessCard } from '../../hooks/useBusinessCard';
-import { AnalyticsPeriod, AnalyticsFilters } from '../../types/analytics';
+import { AnalyticsPeriod, AnalyticsFilters, getClickTargetLabel } from '../../types/analytics';
 import { useTranslation } from 'react-i18next';
 
 // Compact Metric Tile
@@ -271,61 +271,63 @@ export function AnalyticsDashboard() {
     }
 
     // Home Screen elements - Navigation buttons only
-    elements.home.push({ label: 'View Profile', type: 'navigation' });
-    elements.home.push({ label: 'View Portfolio', type: 'navigation' });
-    elements.home.push({ label: 'View Contact', type: 'navigation' });
-    elements.home.push({ label: 'Save Contact', type: 'save' });
-    elements.home.push({ label: 'Share Profile', type: 'share' });
+    // Use getClickTargetLabel to get translated labels that match analytics data
+    elements.home.push({ label: getClickTargetLabel('home.navigateToProfile'), type: 'navigation' });
+    elements.home.push({ label: getClickTargetLabel('home.navigateToPortfolio'), type: 'navigation' });
+    elements.home.push({ label: getClickTargetLabel('home.navigateToContact'), type: 'navigation' });
+    elements.home.push({ label: getClickTargetLabel('home.saveContact'), type: 'save' });
+    elements.home.push({ label: getClickTargetLabel('home.shareProfile'), type: 'share' });
 
     // Contact Screen elements - with null safety
+    // Use getClickTargetLabel to get translated labels
     if (profile.contact?.phone) {
-      elements.contact.push({ label: 'Phone', type: 'phone' });
+      elements.contact.push({ label: getClickTargetLabel('contact.phone'), type: 'phone' });
     }
     if (profile.contact?.email) {
-      elements.contact.push({ label: 'Email', type: 'email' });
+      elements.contact.push({ label: getClickTargetLabel('contact.email'), type: 'email' });
     }
     if (profile.contact?.address) {
-      elements.contact.push({ label: 'Address', type: 'location' });
+      elements.contact.push({ label: getClickTargetLabel('contact.address'), type: 'location' });
     }
     
     // Messaging apps - with null safety
     if (profile.socialMessaging?.whatsapp) {
-      elements.contact.push({ label: 'WhatsApp', type: 'whatsapp' });
+      elements.contact.push({ label: getClickTargetLabel('socialMessaging.whatsapp'), type: 'whatsapp' });
     }
     if (profile.socialMessaging?.telegram) {
-      elements.contact.push({ label: 'Telegram', type: 'telegram' });
+      elements.contact.push({ label: getClickTargetLabel('socialMessaging.telegram'), type: 'telegram' });
     }
     if (profile.socialMessaging?.messenger) {
-      elements.contact.push({ label: 'Messenger', type: 'messenger' });
+      elements.contact.push({ label: getClickTargetLabel('socialMessaging.messenger'), type: 'messenger' });
     }
     if (profile.socialMessaging?.zalo) {
-      elements.contact.push({ label: 'Zalo', type: 'zalo' });
+      elements.contact.push({ label: getClickTargetLabel('socialMessaging.zalo'), type: 'zalo' });
     }
     if (profile.socialMessaging?.kakao) {
-      elements.contact.push({ label: 'Kakao', type: 'kakao' });
+      elements.contact.push({ label: getClickTargetLabel('socialMessaging.kakao'), type: 'kakao' });
     }
     if (profile.socialMessaging?.discord) {
-      elements.contact.push({ label: 'Discord', type: 'discord' });
+      elements.contact.push({ label: getClickTargetLabel('socialMessaging.discord'), type: 'discord' });
     }
     if (profile.socialMessaging?.wechat) {
-      elements.contact.push({ label: 'WeChat', type: 'wechat' });
+      elements.contact.push({ label: getClickTargetLabel('socialMessaging.wechat'), type: 'wechat' });
     }
 
     // Social channels - with null safety
     if (profile.socialChannels?.facebook) {
-      elements.contact.push({ label: 'Facebook', type: 'facebook' });
+      elements.contact.push({ label: getClickTargetLabel('socialChannels.facebook'), type: 'facebook' });
     }
     if (profile.socialChannels?.linkedin) {
-      elements.contact.push({ label: 'LinkedIn', type: 'linkedin' });
+      elements.contact.push({ label: getClickTargetLabel('socialChannels.linkedin'), type: 'linkedin' });
     }
     if (profile.socialChannels?.twitter) {
-      elements.contact.push({ label: 'Twitter', type: 'twitter' });
+      elements.contact.push({ label: getClickTargetLabel('socialChannels.twitter'), type: 'twitter' });
     }
     if (profile.socialChannels?.youtube) {
-      elements.contact.push({ label: 'YouTube', type: 'youtube' });
+      elements.contact.push({ label: getClickTargetLabel('socialChannels.youtube'), type: 'youtube' });
     }
     if (profile.socialChannels?.tiktok) {
-      elements.contact.push({ label: 'TikTok', type: 'tiktok' });
+      elements.contact.push({ label: getClickTargetLabel('socialChannels.tiktok'), type: 'tiktok' });
     }
 
     // Profile Screen elements - with null safety

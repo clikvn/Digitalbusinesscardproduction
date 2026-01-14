@@ -6,6 +6,7 @@ import { Textarea } from "../ui/textarea";
 import { X, Check } from "lucide-react";
 import { PortfolioItem, PortfolioItemType as ItemType } from "../../types/business-card";
 import { ImageUploader } from "./ImageUploader";
+import { useTranslation } from "react-i18next";
 
 interface InlinePortfolioItemFormProps {
   item: PortfolioItem;
@@ -14,6 +15,7 @@ interface InlinePortfolioItemFormProps {
 }
 
 export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfolioItemFormProps) {
+  const { t } = useTranslation();
   const [currentItem, setCurrentItem] = useState(item);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -47,16 +49,16 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
     const newErrors: Record<string, string> = {};
 
     if (!currentItem.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = t('portfolioForm.titleRequired');
     }
 
     // Validate based on type
     if (currentItem.type === 'images' && (!currentItem.images || currentItem.images.length === 0)) {
-      newErrors.images = 'At least one image is required';
+      newErrors.images = t('portfolioForm.imagesRequired');
     } else if (currentItem.type === 'video' && !currentItem.videoUrl?.trim()) {
-      newErrors.videoUrl = 'Video URL is required';
+      newErrors.videoUrl = t('portfolioForm.videoUrlRequired');
     } else if (currentItem.type === 'virtual-tour' && !currentItem.tourUrl?.trim()) {
-      newErrors.tourUrl = 'Virtual tour URL is required';
+      newErrors.tourUrl = t('portfolioForm.virtualTourUrlRequired');
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -72,7 +74,7 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
       <CardContent className="space-y-4 p-[16px]">
       {/* Type Selection */}
       <div>
-        <label className="text-sm text-[#71717a] block mb-2">Type *</label>
+        <label className="text-sm text-[#71717a] block mb-2">{t('portfolioForm.type')} *</label>
         <div className="flex gap-2">
           <Button
             type="button"
@@ -81,7 +83,7 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
             onClick={() => handleTypeChange('images')}
             className={currentItem.type === 'images' ? 'bg-[#535146] hover:bg-[#535146]/90' : ''}
           >
-            Images
+            {t('portfolioForm.images')}
           </Button>
           <Button
             type="button"
@@ -90,7 +92,7 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
             onClick={() => handleTypeChange('video')}
             className={currentItem.type === 'video' ? 'bg-[#535146] hover:bg-[#535146]/90' : ''}
           >
-            Video
+            {t('portfolioForm.video')}
           </Button>
           <Button
             type="button"
@@ -99,18 +101,18 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
             onClick={() => handleTypeChange('virtual-tour')}
             className={currentItem.type === 'virtual-tour' ? 'bg-[#535146] hover:bg-[#535146]/90' : ''}
           >
-            Virtual Tour
+            {t('portfolioForm.virtualTour')}
           </Button>
         </div>
       </div>
 
       {/* Title */}
       <div>
-        <label className="text-sm font-medium block mb-2">Title *</label>
+        <label className="text-sm font-medium block mb-2">{t('portfolioForm.title')} *</label>
         <Input
           value={currentItem.title}
           onChange={(e) => handleChange('title', e.target.value)}
-          placeholder="Project title"
+          placeholder={t('portfolioForm.projectTitlePlaceholder')}
           className="h-10"
         />
         {errors.title && <p className="text-sm text-red-600 mt-1">{errors.title}</p>}
@@ -118,11 +120,11 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
 
       {/* Description */}
       <div>
-        <label className="text-sm font-medium block mb-2">Description</label>
+        <label className="text-sm font-medium block mb-2">{t('portfolioForm.description')}</label>
         <Input
           value={currentItem.description}
           onChange={(e) => handleChange('description', e.target.value)}
-          placeholder="Describe this project..."
+          placeholder={t('portfolioForm.describeProjectPlaceholder')}
           className="h-10"
         />
       </div>
@@ -131,10 +133,10 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
       {currentItem.type === 'images' && (
         <div>
           <ImageUploader
-            label="Project Images *"
+            label={`${t('portfolioForm.projectImages')} *`}
             value={currentItem.images || []}
             onChange={(value) => handleChange('images', value)}
-            description="Upload one or more images for this portfolio item"
+            description={t('portfolioForm.uploadImagesDescription')}
             aspectRatio="16/9"
           />
           {errors.images && <p className="text-sm text-red-600 mt-1">{errors.images}</p>}
@@ -143,26 +145,26 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
 
       {currentItem.type === 'video' && (
         <div>
-          <label className="text-sm font-medium block mb-2">Video URL *</label>
+          <label className="text-sm font-medium block mb-2">{t('portfolioForm.videoUrl')} *</label>
           <Input
             value={currentItem.videoUrl || ''}
             onChange={(e) => handleChange('videoUrl', e.target.value)}
-            placeholder="https://youtube.com/watch?v=..."
+            placeholder={t('portfolioForm.videoUrlPlaceholder')}
           />
-          <p className="text-xs text-[#71717a] mt-1">Supports YouTube, Vimeo, and other video platforms</p>
+          <p className="text-xs text-[#71717a] mt-1">{t('portfolioForm.videoUrlDescription')}</p>
           {errors.videoUrl && <p className="text-sm text-red-600 mt-1">{errors.videoUrl}</p>}
         </div>
       )}
 
       {currentItem.type === 'virtual-tour' && (
         <div>
-          <label className="text-sm font-medium block mb-2">Virtual Tour URL *</label>
+          <label className="text-sm font-medium block mb-2">{t('portfolioForm.virtualTourUrl')} *</label>
           <Input
             value={currentItem.tourUrl || ''}
             onChange={(e) => handleChange('tourUrl', e.target.value)}
-            placeholder="https://my.matterport.com/show/?m=..."
+            placeholder={t('portfolioForm.virtualTourUrlPlaceholder')}
           />
-          <p className="text-xs text-[#71717a] mt-1">Supports Matterport and other virtual tour platforms</p>
+          <p className="text-xs text-[#71717a] mt-1">{t('portfolioForm.virtualTourUrlDescription')}</p>
           {errors.tourUrl && <p className="text-sm text-red-600 mt-1">{errors.tourUrl}</p>}
         </div>
       )}
@@ -176,7 +178,7 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
           className="flex-1"
         >
           <X className="w-4 h-4 mr-2" />
-          Cancel
+          {t('portfolioForm.cancel')}
         </Button>
         <Button
           type="button"
@@ -184,7 +186,7 @@ export function InlinePortfolioItemForm({ item, onSave, onCancel }: InlinePortfo
           className="flex-1 bg-[#535146] hover:bg-[#535146]/90"
         >
           <Check className="w-4 h-4 mr-2" />
-          Save Item
+          {t('portfolioForm.saveItem')}
         </Button>
       </div>
       </CardContent>

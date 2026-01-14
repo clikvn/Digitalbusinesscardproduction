@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { ImageUploader } from "./ImageUploader";
 import { PortfolioItem, PortfolioCategory } from "../../types/business-card";
+import { useTranslation } from "react-i18next";
 
 interface PortfolioItemEditorProps {
   item: PortfolioItem;
@@ -16,6 +17,7 @@ interface PortfolioItemEditorProps {
 }
 
 export function PortfolioItemEditor({ item, categories, onSave, onCancel }: PortfolioItemEditorProps) {
+  const { t } = useTranslation();
   const [currentItem, setCurrentItem] = useState(item);
 
   const form = useForm({
@@ -32,15 +34,15 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
 
   const handleSubmit = () => {
     if (!currentItem.title.trim()) {
-      form.setError('title', { message: 'Title is required' });
+      form.setError('title', { message: t('portfolioForm.titleRequired') });
       return;
     }
     if (!currentItem.images || currentItem.images.length === 0) {
-      form.setError('images', { message: 'At least one image is required' });
+      form.setError('images', { message: t('portfolioForm.imagesRequired') });
       return;
     }
     if (!currentItem.categoryId) {
-      form.setError('categoryId', { message: 'Category is required' });
+      form.setError('categoryId', { message: t('portfolioForm.categoryRequired') });
       return;
     }
     onSave(currentItem);
@@ -55,7 +57,7 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Title *</FormLabel>
+                <FormLabel>{t('portfolioForm.title')} *</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -63,7 +65,7 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
                       field.onChange(e);
                       handleChange('title', e.target.value);
                     }}
-                    placeholder="Project title"
+                    placeholder={t('portfolioForm.projectTitlePlaceholder')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -76,7 +78,7 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
             name="categoryId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category *</FormLabel>
+                <FormLabel>{t('portfolioForm.category')} *</FormLabel>
                 <Select
                   value={currentItem.categoryId}
                   onValueChange={(value) => {
@@ -86,13 +88,13 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={t('portfolioForm.selectCategory')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {categories.length === 0 ? (
                       <SelectItem value="none" disabled>
-                        No categories available
+                        {t('portfolioForm.noCategoriesAvailable')}
                       </SelectItem>
                     ) : (
                       categories.map((category) => (
@@ -104,7 +106,7 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Choose which category this item belongs to
+                  {t('portfolioForm.chooseCategoryDescription')}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -116,7 +118,7 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{t('portfolioForm.description')}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
@@ -124,7 +126,7 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
                       field.onChange(e);
                       handleChange('description', e.target.value);
                     }}
-                    placeholder="Describe this project..."
+                    placeholder={t('portfolioForm.describeProjectPlaceholder')}
                     rows={4}
                   />
                 </FormControl>
@@ -136,19 +138,19 @@ export function PortfolioItemEditor({ item, categories, onSave, onCancel }: Port
       </Form>
 
       <ImageUploader
-        label="Project Images *"
+        label={`${t('portfolioForm.projectImages')} *`}
         value={currentItem.images || []}
         onChange={(value) => handleChange('images', value)}
-        description="Upload one or more images for this portfolio item"
+        description={t('portfolioForm.uploadImagesDescription')}
         aspectRatio="16/9"
       />
 
       <div className="flex gap-2 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-          Cancel
+          {t('portfolioForm.cancel')}
         </Button>
         <Button type="button" onClick={handleSubmit} className="flex-1 bg-[#535146] hover:bg-[#535146]/90">
-          Save Item
+          {t('portfolioForm.saveItem')}
         </Button>
       </div>
     </div>

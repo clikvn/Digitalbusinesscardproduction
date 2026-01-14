@@ -24,10 +24,30 @@ i18n
       escapeValue: false, // React already escapes values
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      // Only check localStorage for user preference
+      // If not found, will use default 'vi' (Vietnamese) set above
+      // Don't check navigator to avoid using browser language (which might be English)
+      order: ['localStorage'],
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
     },
+    // Return key if translation is missing (instead of showing full path)
+    returnEmptyString: false,
+    returnNull: false,
+    returnObjects: false,
+  })
+  .then(() => {
+    // Ensure Vietnamese is set if no language preference exists or if invalid language is stored
+    const storedLang = localStorage.getItem('i18nextLng');
+    if (!storedLang || (storedLang !== 'vi' && storedLang !== 'en')) {
+      i18n.changeLanguage('vi');
+      localStorage.setItem('i18nextLng', 'vi');
+    }
+    // If current language is not Vietnamese or English, default to Vietnamese
+    if (i18n.language !== 'vi' && i18n.language !== 'en') {
+      i18n.changeLanguage('vi');
+      localStorage.setItem('i18nextLng', 'vi');
+    }
   });
 
 export default i18n;

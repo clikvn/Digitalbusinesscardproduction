@@ -142,7 +142,9 @@ export interface AnalyticsDashboard {
   };
 }
 
-// Helper to get human-readable labels for click targets
+import i18n from '../lib/i18n';
+
+// Helper to get human-readable labels for click targets (fallback - English only)
 export const CLICK_TARGET_LABELS: Record<string, string> = {
   // Contact
   'contact.phone': 'Phone',
@@ -182,18 +184,37 @@ export const CLICK_TARGET_LABELS: Record<string, string> = {
 };
 
 export function getClickTargetLabel(target: string): string {
-  // Check predefined labels first
-  if (CLICK_TARGET_LABELS[target]) {
-    return CLICK_TARGET_LABELS[target];
-  }
-  
   // Handle portfolio item format: portfolio.item.{title}
   if (target.startsWith('portfolio.item.')) {
     return target.substring('portfolio.item.'.length);
   }
   
-  // Fallback to raw target
-  return target;
+  // Try to use translation with fallback to English label
+  const translationKey = `analytics.clickTarget.${target}`;
+  const fallbackLabel = CLICK_TARGET_LABELS[target] || target;
+  
+  // Check if i18n is initialized
+  if (!i18n.isInitialized) {
+    return fallbackLabel;
+  }
+  
+  // Check if translation exists using i18n.exists() if available, otherwise try to get it
+  try {
+    // Try to get translation - i18n.t() will return the key if translation doesn't exist
+    // So we check if the result is different from the key
+    const translated = i18n.t(translationKey);
+    
+    // If translation exists (result is different from key), use it
+    if (translated && translated !== translationKey && translated.trim() !== '') {
+      return translated;
+    }
+    
+    // Translation doesn't exist, use fallback
+    return fallbackLabel;
+  } catch (error) {
+    // If i18n fails, use fallback
+    return fallbackLabel;
+  }
 }
 
 // Helper to categorize click targets
