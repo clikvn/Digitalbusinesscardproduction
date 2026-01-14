@@ -7,7 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Copy Icon Size**: Updated copy icons to 24x24px (from 16x16px) for better visibility
+  - Updated copy icons in phone number and email dialogs in ContactButtons component
+  - Updated copy icon in email signature dialog in ShareStep2 component
+- **Email Dialog Text**: Updated email provider selection text to be more action-oriented
+  - Changed "Select Email Provider:" to "Send mail using website" for better user guidance
+  - Changed "Open Email Client" to "Send email using client app" for clearer action description
+  - Updated translations in both English and Vietnamese locales
+- **Email Dialog Layout**: Reordered email dialog sections for better user flow
+  - Moved "Send email using client app" section above "Send mail using website" section
+  - Client app option now appears first, followed by webmail provider options
+
 ### Fixed
+- **Desktop Email Button Handling**: Improved email interaction on desktop devices with provider selection
+  - On mobile platforms: Email button opens email client via `mailto:` link (existing behavior)
+  - On desktop platforms: Email button opens dialog with email provider options
+  - Users can choose between Gmail and Outlook with actual Flaticon brand logos
+  - Gmail icon: Created by Freepik - Flaticon (https://www.flaticon.com/free-icons/gmail)
+  - Outlook icon: Created by Pixel perfect - Flaticon (https://www.flaticon.com/free-icons/outlook)
+  - Each provider button opens the webmail compose page with recipient email pre-filled
+  - Removed auto-detection - users select their own email provider instead
+  - Additional options: "Open Email Client" (for installed apps) and "Copy Email" (to clipboard)
+  - Provider buttons display authentic Flaticon logos for better recognition
+  - Dialog shows recipient email address clearly at the top
+  - Added translation keys for email provider selection in English and Vietnamese
+- **Desktop Phone Number Handling**: Improved phone number interaction on desktop devices
+  - On mobile platforms (Android, iOS, etc.): Phone button opens dialer app via `tel:` link (existing behavior)
+  - On desktop platforms (Windows, Mac, Linux): Phone button opens dialog showing phone number with copy button
+  - Improved device detection to check actual platform capability rather than screen size
+  - Detection focuses on whether platform supports `tel:` protocol (mobile platforms) vs desktop platforms
+  - Desktop users can now easily copy phone numbers to clipboard
+  - Dialog includes phone number display and copy button with toast notification
+  - Added translation keys for phone number dialog in English and Vietnamese
 - **Facebook URL Format Support**: Enhanced Facebook URL detection to support multiple URL formats
   - Updated `extractFacebookUsername` to handle `profile.php?id=...` format (e.g., `https://www.facebook.com/profile.php?id=100054995627099`)
   - Now supports both username format (`https://facebook.com/vuphamtrantuan`) and numeric ID format (`https://www.facebook.com/profile.php?id=100054995627099`)

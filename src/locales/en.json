@@ -43,7 +43,17 @@
     "position": "Position",
     "website": "Website",
     "copied": "{field} copied!",
-    "failedToCopy": "Failed to copy"
+    "failedToCopy": "Failed to copy",
+    "copy": "Copy",
+    "phoneNumber": "Phone Number",
+    "phoneNumberCopied": "Phone number copied to clipboard!",
+    "copyPhoneNumberToClipboard": "Copy the phone number to your clipboard",
+    "emailAddress": "Email Address",
+    "emailCopied": "Email address copied to clipboard!",
+    "chooseEmailProvider": "Choose your email provider to send an email",
+    "selectEmailProvider": "Send mail using website",
+    "openEmailClient": "Send email using client app",
+    "openInWebmail": "Open in Webmail"
   },
   "home": {
     "saveContact": "Save Contact",

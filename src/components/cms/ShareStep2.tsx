@@ -513,7 +513,7 @@ ${profileUrl}`;
               onClick={handleCopySignature}
               className="bg-[#c96442] text-white px-4 py-2.5 rounded-lg hover:bg-[#b5583b] transition-colors flex items-center justify-center gap-2"
             >
-              <Copy className="size-4" />
+              <Copy className="size-6" />
               {t('shareStep2.copySelectedSignature')}
             </button>
           </div>

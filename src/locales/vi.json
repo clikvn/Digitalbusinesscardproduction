@@ -43,7 +43,17 @@
     "position": "Chức vụ",
     "website": "Trang web",
     "copied": "{field} đã được sao chép!",
-    "failedToCopy": "Không thể sao chép"
+    "failedToCopy": "Không thể sao chép",
+    "copy": "Sao chép",
+    "phoneNumber": "Số điện thoại",
+    "phoneNumberCopied": "Đã sao chép số điện thoại vào clipboard!",
+    "copyPhoneNumberToClipboard": "Sao chép số điện thoại vào clipboard của bạn",
+    "emailAddress": "Địa chỉ Email",
+    "emailCopied": "Đã sao chép địa chỉ email vào clipboard!",
+    "chooseEmailProvider": "Chọn nhà cung cấp email của bạn để gửi email",
+    "selectEmailProvider": "Gửi email bằng trang web",
+    "openEmailClient": "Gửi email bằng ứng dụng email",
+    "openInWebmail": "Mở trong Webmail"
   },
   "home": {
     "saveContact": "Lưu Liên hệ",
