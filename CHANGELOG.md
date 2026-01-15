@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Terms and Conditions Acceptance**: Added terms and conditions page that users must read and accept before registration
+  - Created `TermsAndConditionsScreen` component with scrollable content area
+  - Terms appear immediately when user clicks "Sign Up" button - before registration form is shown
+  - Users must accept terms before they can see and fill the registration form
+  - Added checkbox for acceptance - "Accept and Continue" button is disabled until terms are accepted
+  - **Dynamic Markdown Loading**: Terms content now loads from markdown files (`public/terms/terms-en.md` and `public/terms/terms-vi.md`) for easy updates without code changes
+  - Removed hardcoded content from JSON files - only metadata (title, description, button text) remains in JSON
+  - Terms content supports full markdown formatting (headings, lists, bold, links, etc.)
+  - Content width matches registration form width (`max-w-md`)
+  - Updated Vietnamese terms with complete Privacy Policy content in markdown format
+  - Users can go back to login screen if they don't want to proceed with registration
+
 ### Fixed
 - **Mobile Touch Target for Employee Actions Menu**: Improved touch target size for ellipsis menu button in EmployeeListItem
   - Increased minimum touch target to 44px (Apple's recommended minimum) on mobile devices
@@ -66,6 +79,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All titles now properly translate to Vietnamese when language is switched
 
 ### Changed
+- **Terms and Conditions CardHeader Spacing**: Reduced row gap in CardHeader from 6px to 0px for tighter vertical spacing
+  - Changed `gap-1.5` to `gap-y-0` in TermsAndConditionsScreen CardHeader component
+  - Applied to CardHeader with `flex-shrink-0 pb-0` className
+- **Terms and Conditions CardDescription Padding**: Added horizontal padding of 5px to CardDescription text
+  - Added `px-[5px]` utility class to CardDescription with `font-light text-red-600 text-xs` className
+  - Improves text readability and spacing around the warning message
 - **Copy Icon Size**: Updated copy icons to 24x24px (from 16x16px) for better visibility
   - Updated copy icons in phone number and email dialogs in ContactButtons component
   - Updated copy icon in email signature dialog in ShareStep2 component
@@ -80,6 +99,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Gmail: Using `https://mail.google.com/mail/?view=cm&fs=1&to=EMAIL` format (view=cm for compose, fs=1 for fullscreen)
   - Outlook: Using `https://outlook.live.com/mail/0/deeplink/compose?to=EMAIL` format (official deeplink compose)
   - Both providers now open compose windows directly with recipient email pre-filled when user clicks the provider button
+- **Terms and Conditions Typography**: Updated font sizes for better visual hierarchy
+  - CardTitle font size increased from 16px to 24px (added `text-2xl` class)
+  - CardDescription font size decreased from 16px to 12px (added `text-xs` class)
+  - Applied to TermsAndConditionsScreen component
+- **Terms and Conditions Card Padding**: Updated CardContent padding-right from 24px to 18px for better visual spacing
+  - Changed from `px-6` (24px both sides) to `pl-6 pr-[18px]` to reduce right padding while maintaining left padding
+  - Applied to TermsAndConditionsScreen component
+- **Terms and Conditions Scrollbar Styling**: Removed scrollbar arrow buttons (up/down) for cleaner visual appearance
+  - Added `::-webkit-scrollbar-button { display: none; }` to hide arrow buttons
+  - Scrollbar now shows only the track and thumb without navigation arrows
+- **Terms and Conditions CardHeader Padding**: Updated CardHeader padding-bottom from 0px to 16px for better spacing
+  - Changed `pb-0` to `pb-4` (16px) in TermsAndConditionsScreen CardHeader component
+  - Improves visual spacing between header content and scrollable content area
 
 ### Fixed
 - **Password Reset Redirect URL Domain Normalization**: Fixed issue where password reset emails failed when users accessed site via different domains (www vs non-www)

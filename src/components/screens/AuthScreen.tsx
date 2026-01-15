@@ -9,6 +9,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { MailCheck, ArrowLeft } from 'lucide-react@0.487.0';
+import { TermsAndConditionsScreen } from './TermsAndConditionsScreen';
 
 export function AuthScreen() {
   const { t } = useTranslation();
@@ -19,6 +20,8 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [showConfirmationPending, setShowConfirmationPending] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showTermsAndConditions, setShowTermsAndConditions] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
   const [resendingEmail, setResendingEmail] = useState(false);
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
@@ -44,8 +47,49 @@ export function AuthScreen() {
     }
   }, [searchParams, navigate]);
 
+  // Show terms when switching to signup if not yet accepted
+  useEffect(() => {
+    if (!isLogin && !termsAccepted && !showTermsAndConditions && !showForgotPassword && !showConfirmationPending) {
+      setShowTermsAndConditions(true);
+    }
+  }, [isLogin, termsAccepted, showTermsAndConditions, showForgotPassword, showConfirmationPending]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // For signup, proceed with registration (terms should already be accepted)
+    if (!isLogin) {
+      handleSignup();
+      return;
+    }
+    
+    // For login, proceed directly
+    handleSignup();
+  };
+
+  const handleShowTerms = () => {
+    setShowTermsAndConditions(true);
+  };
+
+  const handleTermsAccepted = () => {
+    setTermsAccepted(true);
+    setShowTermsAndConditions(false);
+    // After accepting terms, user can now see and fill the registration form
+  };
+
+  const handleSwitchToSignup = () => {
+    setIsLogin(false);
+    // Reset terms acceptance when switching to signup
+    setTermsAccepted(false);
+  };
+
+  const handleSwitchToLogin = () => {
+    setIsLogin(true);
+    // Reset terms acceptance when switching back to login
+    setTermsAccepted(false);
+  };
+
+  const handleSignup = async () => {
     setLoading(true);
     
     const cleanEmail = email.trim();
@@ -255,6 +299,20 @@ export function AuthScreen() {
     }
   };
 
+  // Show terms and conditions screen when switching to signup
+  if (showTermsAndConditions) {
+    return (
+      <TermsAndConditionsScreen
+        onAccept={handleTermsAccepted}
+        onBack={() => {
+          setShowTermsAndConditions(false);
+          setIsLogin(true); // Go back to login screen
+          setTermsAccepted(false); // Reset acceptance
+        }}
+      />
+    );
+  }
+
   // Show forgot password screen
   if (showForgotPassword) {
     return (
@@ -379,6 +437,14 @@ export function AuthScreen() {
     );
   }
 
+  // Only show registration form if terms are accepted (for signup) or if it's login
+  const canShowRegistrationForm = isLogin || (termsAccepted && !isLogin);
+
+  // Don't show the form if it's signup and terms haven't been accepted yet
+  if (!isLogin && !termsAccepted) {
+    return null; // Terms screen will be shown by useEffect
+  }
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#e9e6dc] p-4">
       <Card className="w-full max-w-md">
@@ -445,7 +511,13 @@ export function AuthScreen() {
               {isLogin ? t('auth.dontHaveAccount') + ' ' : t('auth.alreadyHaveAccount') + ' '}
               <button 
                 type="button"
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  if (isLogin) {
+                    handleSwitchToSignup();
+                  } else {
+                    handleSwitchToLogin();
+                  }
+                }}
                 className="text-primary hover:underline font-medium"
               >
                 {isLogin ? t('auth.signUp') : t('auth.signIn')}
