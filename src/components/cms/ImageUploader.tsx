@@ -9,6 +9,7 @@ import { validateImageFile } from "../../utils/file-utils";
 import { toast } from "sonner@2.0.3";
 import { api } from "../../lib/api";
 import { getUserCode } from "../../utils/user-code";
+import { useTranslation } from "react-i18next";
 
 interface ImageUploaderProps {
   label: string;
@@ -83,6 +84,7 @@ function SortableImageItem({ id, img, index, total, label, aspectRatio, onRemove
 }
 
 export function ImageUploader({ label, value, onChange, aspectRatio, description }: ImageUploaderProps) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -106,7 +108,7 @@ export function ImageUploader({ label, value, onChange, aspectRatio, description
     for (const file of files) {
       const error = validateImageFile(file);
       if (error) {
-        toast.error(`${file.name}: ${error}`);
+        toast.error(t('imageUploader.fileError', { fileName: file.name, error }));
         hasError = true;
         continue;
       }
@@ -115,7 +117,10 @@ export function ImageUploader({ label, value, onChange, aspectRatio, description
         const { url } = await api.storage.upload(userCode, file);
         newImages.push(url);
       } catch (error: any) {
-        toast.error(`Failed to upload ${file.name}: ${error.message || 'Unknown error'}`);
+        toast.error(t('imageUploader.failedToUpload', { 
+          fileName: file.name, 
+          error: error.message || t('imageUploader.unknownError', 'Unknown error') 
+        }));
         console.error(error);
         hasError = true;
       }
@@ -124,7 +129,10 @@ export function ImageUploader({ label, value, onChange, aspectRatio, description
     if (newImages.length > 0) {
       onChange([...value, ...newImages]);
       if (!hasError) {
-        toast.success(`${newImages.length} image${newImages.length > 1 ? 's' : ''} uploaded successfully`);
+        toast.success(t('imageUploader.imagesUploadedSuccess', { 
+          count: newImages.length,
+          plural: newImages.length > 1 ? 's' : ''
+        }));
       }
     }
 
@@ -202,7 +210,7 @@ export function ImageUploader({ label, value, onChange, aspectRatio, description
                 className="flex-1"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {isUploading ? "Uploading..." : "Add More Images"}
+                {isUploading ? t('imageUploader.uploading') : t('imageUploader.addMoreImages')}
               </Button>
               <Button
                 type="button"
@@ -211,7 +219,7 @@ export function ImageUploader({ label, value, onChange, aspectRatio, description
                 className="text-red-600 hover:text-red-700"
               >
                 <X className="w-4 h-4 mr-1" />
-                Remove All
+                {t('imageUploader.removeAll')}
               </Button>
             </div>
           </div>
@@ -223,9 +231,9 @@ export function ImageUploader({ label, value, onChange, aspectRatio, description
               style={aspectRatio ? { aspectRatio } : undefined}
             >
               <ImageIcon className="w-12 h-12 text-[#535146]/30 mb-2" />
-              <p className="text-sm text-[#535146] text-center">Click to upload images.</p>
-              <p className="text-sm text-[#535146]">You can select multiple images.</p>
-              <p className="text-xs text-[#535146]/40 mt-1">JPG, PNG, GIF or WebP (max 5MB each)</p>
+              <p className="text-sm text-[#535146] text-center">{t('imageUploader.clickToUpload')}</p>
+              <p className="text-sm text-[#535146]">{t('imageUploader.selectMultiple')}</p>
+              <p className="text-xs text-[#535146]/40 mt-1">{t('imageUploader.fileFormats')}</p>
             </div>
             <Button
               type="button"
@@ -235,7 +243,7 @@ export function ImageUploader({ label, value, onChange, aspectRatio, description
               className="w-full"
             >
               <Upload className="w-4 h-4 mr-2" />
-              {isUploading ? "Uploading..." : "Choose Images"}
+              {isUploading ? t('imageUploader.uploading') : t('imageUploader.chooseImages')}
             </Button>
           </>
         )}

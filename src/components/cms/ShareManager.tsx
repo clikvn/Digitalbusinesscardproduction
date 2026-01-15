@@ -208,10 +208,10 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
               <div className="space-y-4 py-4">
                 {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="name">{t('shareManager.name')} *</Label>
                   <Input
                     id="name"
-                    placeholder="John Doe"
+                    placeholder={t('shareManager.namePlaceholder')}
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   />
@@ -219,11 +219,11 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('shareManager.email')}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder={t('shareManager.emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   />
@@ -231,11 +231,11 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Phone */}
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t('shareManager.phone')}</Label>
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+1 234 567 8900"
+                    placeholder={t('shareManager.phonePlaceholder')}
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   />
@@ -243,10 +243,10 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Company */}
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="company">{t('shareManager.company')}</Label>
                   <Input
                     id="company"
-                    placeholder="ACME Corp"
+                    placeholder={t('shareManager.companyPlaceholder')}
                     value={formData.company}
                     onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
                   />
@@ -254,7 +254,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Group */}
                 <div className="space-y-2">
-                  <Label htmlFor="group">Share Group *</Label>
+                  <Label htmlFor="group">{t('shareManager.shareGroup')} *</Label>
                   <Select
                     value={formData.group}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, group: value }))}
@@ -274,10 +274,10 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
 
                 {/* Notes */}
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
+                  <Label htmlFor="notes">{t('shareManager.notes')}</Label>
                   <Textarea
                     id="notes"
-                    placeholder="Add notes about this contact..."
+                    placeholder={t('shareManager.notesPlaceholder')}
                     value={formData.notes}
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                     rows={3}
@@ -288,8 +288,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                 {/* Info Box */}
                 <div className="p-3 bg-muted rounded-lg text-sm">
                   <p className="text-muted-foreground">
-                    A unique tracking code will be generated for this contact.
-                    Share the URL with them to track their engagement.
+                    {t('shareManager.trackingCodeInfo')}
                   </p>
                 </div>
               </div>
@@ -327,7 +326,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                   <Label htmlFor="edit-name">{t('shareManager.name')} *</Label>
                   <Input
                     id="edit-name"
-                    placeholder="John Doe"
+                    placeholder={t('shareManager.namePlaceholder')}
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   />
@@ -339,7 +338,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                   <Input
                     id="edit-email"
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder={t('shareManager.emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   />
@@ -351,7 +350,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                   <Input
                     id="edit-phone"
                     type="tel"
-                    placeholder="+1 234 567 8900"
+                    placeholder={t('shareManager.phonePlaceholder')}
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   />
@@ -362,7 +361,7 @@ export function ShareManager({ onMenu }: ShareManagerProps) {
                   <Label htmlFor="edit-company">{t('shareManager.company')}</Label>
                   <Input
                     id="edit-company"
-                    placeholder="ACME Corp"
+                    placeholder={t('shareManager.companyPlaceholder')}
                     value={formData.company}
                     onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
                   />

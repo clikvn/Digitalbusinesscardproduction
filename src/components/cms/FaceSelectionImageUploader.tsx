@@ -5,6 +5,7 @@ import { Upload, X, Image as ImageIcon, Check, User } from "lucide-react";
 import { fileToDataURL, validateImageFile } from "../../utils/file-utils";
 import { toast } from "sonner@2.0.3";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "../ui/dialog";
+import { useTranslation } from "react-i18next";
 
 export interface ProfileImageData {
   imageUrl: string;
@@ -31,6 +32,7 @@ export function FaceSelectionImageUploader({
   aspectRatio, 
   description 
 }: FaceSelectionImageUploaderProps) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hasInitialized = useRef(false);
@@ -731,8 +733,8 @@ export function FaceSelectionImageUploader({
               style={aspectRatio ? { aspectRatio } : undefined}
             >
               <ImageIcon className="w-12 h-12 text-[#535146]/30 mb-2" />
-              <p className="text-sm text-[#535146] text-center">Click to upload profile image</p>
-              <p className="text-xs text-[#535146]/40 mt-1">JPG, PNG, GIF or WebP (max 5MB)</p>
+              <p className="text-sm text-[#535146] text-center">{t('imageUploader.clickToUploadProfileImage')}</p>
+              <p className="text-xs text-[#535146]/40 mt-1">{t('imageUploader.fileFormatsSingle')}</p>
             </div>
             <Button
               type="button"
@@ -742,7 +744,7 @@ export function FaceSelectionImageUploader({
               className="w-full"
             >
               <Upload className="w-4 h-4 mr-2" />
-              {isUploading ? "Uploading..." : "Choose Image"}
+              {isUploading ? t('imageUploader.uploading') : t('imageUploader.chooseImage')}
             </Button>
           </>
         )}

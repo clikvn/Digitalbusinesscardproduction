@@ -175,6 +175,21 @@ export function FieldVisibilitySettings() {
     return settings[groupId]?.length || 0;
   };
 
+  // Get translated field label, keeping provider names (social messaging/channels) as-is
+  const getFieldLabel = (fieldPath: string): string => {
+    // Social messaging and social channels are provider names - keep as-is
+    if (fieldPath.startsWith('socialMessaging.') || fieldPath.startsWith('socialChannels.')) {
+      return FIELD_LABELS[fieldPath] || fieldPath;
+    }
+    
+    // All other fields should be translated
+    const translationKey = `fieldVisibilitySettings.fieldLabels.${fieldPath}`;
+    const translated = t(translationKey);
+    
+    // If translation exists (not the same as key), use it; otherwise fallback to FIELD_LABELS
+    return translated !== translationKey ? translated : (FIELD_LABELS[fieldPath] || fieldPath);
+  };
+
   const renderIcon = (iconName: string, className: string = "w-6 h-6") => {
     const IconComponent = (LucideIcons as any)[iconName];
     return IconComponent ? <IconComponent className={className} /> : null;
@@ -307,7 +322,7 @@ export function FieldVisibilitySettings() {
                                   className="h-4 w-4"
                                 />
                                 <span className="flex-1 text-sm">
-                                  {FIELD_LABELS[fieldPath] || fieldPath}
+                                  {getFieldLabel(fieldPath)}
                                 </span>
                                 {isVisible && (
                                   <Eye className="w-4 h-4 text-[#22c55e]" />

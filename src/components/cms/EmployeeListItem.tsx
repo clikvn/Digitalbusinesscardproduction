@@ -108,7 +108,7 @@ export function EmployeeListItem({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className="flex items-center justify-center size-8 rounded-full hover:bg-background/80 transition-all shrink-0 active:scale-95"
+            className="flex items-center justify-center min-h-[44px] min-w-[44px] h-10 w-10 sm:size-8 rounded-full hover:bg-background/80 transition-all shrink-0 active:scale-95 p-2 -m-2"
             aria-label={t('employeeListItem.employeeActions')}
           >
             <MoreVertical className="h-4 w-4 text-muted-foreground" />

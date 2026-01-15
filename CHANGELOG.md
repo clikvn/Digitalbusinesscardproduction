@@ -8,6 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Mobile Touch Target for Employee Actions Menu**: Improved touch target size for ellipsis menu button in EmployeeListItem
+  - Increased minimum touch target to 44px (Apple's recommended minimum) on mobile devices
+  - Added padding with negative margin to expand touch area without changing visual appearance
+  - Button now uses `min-h-[44px] min-w-[44px]` on mobile and `size-8` on desktop
+  - Makes the settings/actions menu button much easier to tap on mobile devices
+- **Translation Interpolation in Field Permissions Editor**: Fixed translation interpolation not working for count values
+  - Fixed `{count}` showing literally instead of actual count values in FieldPermissionsEditor component
+  - Updated all translation calls to properly pass count and plural parameters
+  - Fixed interpolation for "fieldsRestricted", "applyToFilteredDescription", "applyToAllBusinessDescription", and "employeesWillBeAffected" messages
+  - Count values now properly display in both English and Vietnamese translations
+- **Translation Issues in Image Uploader Components**: Fixed missing translations in ImageUploader and FaceSelectionImageUploader components
+  - Fixed all hardcoded text in ImageUploader component ("Click to upload images.", "You can select multiple images.", "JPG, PNG, GIF or WebP (max 5MB each)", "Choose Images", "Add More Images", "Remove All", "Uploading...")
+  - Fixed all hardcoded text in FaceSelectionImageUploader component ("Click to upload profile image", "JPG, PNG, GIF or WebP (max 5MB)", "Choose Image")
+  - Added translation keys for all uploader messages including success/error toasts
+  - Added `imageUploader` translation section with all uploader-related text in both English and Vietnamese
+  - All uploader UI text now displays in Vietnamese when language is set to Vietnamese
+- **Translation Issues in Field Visibility Settings**: Fixed missing translations for field labels in Share Config
+  - Fixed all hardcoded field labels (Name, Title/Position, Business Name, Bio, Profile Image, Phone Number, Email Address, Physical Address, About Me, Service Areas, Specialties, Experience, Languages, Certifications, Portfolio)
+  - Added translation keys for all field labels in `fieldVisibilitySettings.fieldLabels` section
+  - Created `getFieldLabel` function that translates field labels while keeping provider names (Zalo, Messenger, Telegram, WhatsApp, etc.) as-is
+  - All field labels now display in Vietnamese when language is set to Vietnamese
+  - Provider names in Social Messaging and Social Channels remain unchanged (as they are brand names)
+- **Translation Issues in Share Manager Contact Form**: Fixed missing translations in Add Contact dialog
+  - Fixed all hardcoded labels in Add Contact dialog (Name, Email, Phone, Company, Share Group, Notes)
+  - Fixed all hardcoded placeholders in Add Contact dialog (namePlaceholder, emailPlaceholder, phonePlaceholder, companyPlaceholder)
+  - Fixed hardcoded tracking code info text - now uses `shareManager.trackingCodeInfo` translation key
+  - Fixed hardcoded placeholders in Edit Contact dialog to use translation keys
+  - Added missing placeholder translation keys (`namePlaceholder`, `emailPlaceholder`, `phonePlaceholder`, `companyPlaceholder`) to both en.json and vi.json
+  - All contact form labels and placeholders now display in Vietnamese when language is set to Vietnamese
 - **Translation Issues in Portfolio Form**: Fixed missing Vietnamese translations in portfolio item form
   - Fixed all hardcoded labels in `InlinePortfolioItemForm` component (Type, Title, Description, Images, Video URL, Virtual Tour URL, etc.)
   - Fixed all hardcoded labels in `PortfolioItemEditor` component (Title, Category, Description, etc.)

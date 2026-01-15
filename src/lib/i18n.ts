@@ -22,6 +22,13 @@ i18n
     defaultNS: 'translation',
     interpolation: {
       escapeValue: false, // React already escapes values
+      formatSeparator: ',',
+      format: (value, format, lng) => {
+        if (format === 'number' && typeof value === 'number') {
+          return value.toString();
+        }
+        return value;
+      },
     },
     detection: {
       // Only check localStorage for user preference

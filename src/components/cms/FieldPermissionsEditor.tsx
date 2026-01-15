@@ -150,7 +150,7 @@ export function FieldPermissionsEditor({
             {restrictedCount > 0 && (
               <p className="text-xs sm:text-sm text-blue-600">
                 <span className="font-medium">
-                  {t('fieldPermissionsEditor.fieldsRestricted', { count: restrictedCount, plural: restrictedCount !== 1 ? 's' : '' })}
+                  {t('fieldPermissionsEditor.fieldsRestricted').replace('{count}', restrictedCount.toString())}
                 </span>
               </p>
             )}
@@ -179,11 +179,15 @@ export function FieldPermissionsEditor({
                       {t('fieldPermissionsEditor.applyToFiltered')}
                     </Label>
                     <p className="text-xs text-zinc-600">
-                      {t('fieldPermissionsEditor.applyToFilteredDescription', { count: filteredEmployees.length, plural: filteredEmployees.length !== 1 ? 's' : '' })}
+                      {t('fieldPermissionsEditor.applyToFilteredDescription')
+                        .replace('{count}', filteredEmployees.length.toString())
+                        .replace('{plural}', filteredEmployees.length !== 1 ? 's' : '')}
                     </p>
                     {applyToFiltered && (
                       <p className="text-xs font-medium text-blue-700">
-                        {t('fieldPermissionsEditor.employeesWillBeAffected', { count: affectedCount, plural: affectedCount !== 1 ? 's' : '' })}
+                        {t('fieldPermissionsEditor.employeesWillBeAffected')
+                          .replace('{count}', affectedCount.toString())
+                          .replace('{plural}', affectedCount !== 1 ? 's' : '')}
                       </p>
                     )}
                   </div>
@@ -210,11 +214,15 @@ export function FieldPermissionsEditor({
                       {t('fieldPermissionsEditor.applyToAllBusiness')}
                     </Label>
                     <p className="text-xs text-amber-700">
-                      {t('fieldPermissionsEditor.applyToAllBusinessDescription', { count: allEmployees.length, plural: allEmployees.length !== 1 ? 's' : '' })}
+                      {t('fieldPermissionsEditor.applyToAllBusinessDescription')
+                        .replace('{count}', allEmployees.length.toString())
+                        .replace('{plural}', allEmployees.length !== 1 ? 's' : '')}
                     </p>
                     {applyToAllBusiness && (
                       <p className="text-xs font-medium text-amber-800">
-                        {t('fieldPermissionsEditor.employeesWillBeAffected', { count: affectedCount, plural: affectedCount !== 1 ? 's' : '' })}
+                        {t('fieldPermissionsEditor.employeesWillBeAffected')
+                          .replace('{count}', affectedCount.toString())
+                          .replace('{plural}', affectedCount !== 1 ? 's' : '')}
                       </p>
                     )}
                   </div>
@@ -333,12 +341,12 @@ export function FieldPermissionsEditor({
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? t('fieldPermissionsEditor.savingForEmployees', { count: affectedCount }) : t('fieldPermissionsEditor.saving')}</span>
+                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? t('fieldPermissionsEditor.savingForEmployees').replace('{count}', affectedCount.toString()) : t('fieldPermissionsEditor.saving')}</span>
                 <span className="sm:hidden">{t('fieldPermissionsEditor.saving')}</span>
               </>
             ) : (
               <>
-                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? t('fieldPermissionsEditor.saveForEmployees', { count: affectedCount }) : t('fieldPermissionsEditor.savePermissions')}</span>
+                <span className="hidden sm:inline">{(applyToAllBusiness || applyToFiltered) ? t('fieldPermissionsEditor.saveForEmployees').replace('{count}', affectedCount.toString()) : t('fieldPermissionsEditor.savePermissions')}</span>
                 <span className="sm:hidden">{t('fieldPermissionsEditor.save')}</span>
               </>
             )}
