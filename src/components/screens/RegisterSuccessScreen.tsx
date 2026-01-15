@@ -51,9 +51,6 @@ export function RegisterSuccessScreen() {
           <div className="flex justify-center mb-4">
             <div className="relative">
               <CheckCircle2 className="h-16 w-16 text-green-600" />
-              <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
-                <Mail className="h-6 w-6 text-primary" />
-              </div>
             </div>
           </div>
           <CardTitle className="text-2xl text-green-600">

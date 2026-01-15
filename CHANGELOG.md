@@ -112,6 +112,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Terms and Conditions CardHeader Padding**: Updated CardHeader padding-bottom from 0px to 16px for better spacing
   - Changed `pb-0` to `pb-4` (16px) in TermsAndConditionsScreen CardHeader component
   - Improves visual spacing between header content and scrollable content area
+- **Register Success Screen Icon**: Removed mail icon badge from CheckCircle2 icon in RegisterSuccessScreen
+  - Removed absolute-positioned mail icon overlay that appeared on top-right of success checkmark icon
+  - Simplified icon display to show only the green checkmark icon
 
 ### Fixed
 - **Password Reset Redirect URL Domain Normalization**: Fixed issue where password reset emails failed when users accessed site via different domains (www vs non-www)
