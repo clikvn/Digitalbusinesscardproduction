@@ -82,27 +82,30 @@ export function NavigationMenu({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="left" className="w-[300px] bg-[#faf9f5] border-r border-[#e9e6dc]">
+      <SheetContent 
+        side="left" 
+        className="w-[300px] bg-[#faf9f5] border-r border-[#e9e6dc]"
+        headerContent={
+          <>
+            <LanguageSwitcher />
+            {isAuthenticated && userPlan && (
+              <button
+                onClick={() => setShowUpgradePlanDialog(true)}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                aria-label="View upgrade options"
+              >
+                <Badge variant={getPlanBadgeVariant(userPlan.plan_name)} className="text-xs">
+                  {userPlan.display_name}
+                </Badge>
+              </button>
+            )}
+          </>
+        }
+      >
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <SheetDescription className="sr-only">
           Navigate to different sections of the app
         </SheetDescription>
-        
-        {/* Language Switcher and Plan Badge - positioned at top left, same row as X button */}
-        <div className="absolute top-4 left-4 flex items-center gap-2">
-          <LanguageSwitcher />
-          {isAuthenticated && userPlan && (
-            <button
-              onClick={() => setShowUpgradePlanDialog(true)}
-              className="cursor-pointer hover:opacity-80 transition-opacity"
-              aria-label="View upgrade options"
-            >
-              <Badge variant={getPlanBadgeVariant(userPlan.plan_name)} className="text-xs">
-                {userPlan.display_name}
-              </Badge>
-            </button>
-          )}
-        </div>
         
         <div className="flex flex-col px-4 mt-12 gap-1 overflow-y-auto flex-1 pb-6">
           {/* Top Section - Main Navigation */}

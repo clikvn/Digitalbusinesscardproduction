@@ -115,6 +115,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Register Success Screen Icon**: Removed mail icon badge from CheckCircle2 icon in RegisterSuccessScreen
   - Removed absolute-positioned mail icon overlay that appeared on top-right of success checkmark icon
   - Simplified icon display to show only the green checkmark icon
+- **Sheet Header Layout**: Fixed Sheet component header alignment to show language switcher, plan badge, and close button in the same row
+  - Modified `SheetContent` component to include a header row container similar to Dialog
+  - Added `headerContent` prop to `SheetContent` for displaying custom content in the header row
+  - Updated `NavigationMenu` to use `headerContent` prop instead of separate absolute positioned div
+  - Language switcher, plan badge, and close button now align properly in the same row at the top of navigation sheet
 
 ### Fixed
 - **Password Reset Redirect URL Domain Normalization**: Fixed issue where password reset emails failed when users accessed site via different domains (www vs non-www)
