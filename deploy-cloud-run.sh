@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+# Get substitutions from Cloud Build
+SERVICE_NAME="${_SERVICE_NAME}"
+PROJECT_ID="${PROJECT_ID}"
+COMMIT_SHA="${COMMIT_SHA}"
+DEPLOY_REGION="${_DEPLOY_REGION}"
+VITE_SUPABASE_PROJECT_ID="${_VITE_SUPABASE_PROJECT_ID}"
+VITE_SUPABASE_ANON_KEY="${_VITE_SUPABASE_ANON_KEY}"
+
+# Deploy to Cloud Run with environment variables
+gcloud run deploy "${SERVICE_NAME}" \
+  --image "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${COMMIT_SHA}" \
+  --region "${DEPLOY_REGION}" \
+  --platform managed \
+  --allow-unauthenticated \
+  --port 8080 \
+  --set-env-vars "VITE_SUPABASE_PROJECT_ID=${VITE_SUPABASE_PROJECT_ID},VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY},SUPABASE_PROJECT_ID=${VITE_SUPABASE_PROJECT_ID},SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}"

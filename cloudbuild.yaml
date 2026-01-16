@@ -24,19 +24,25 @@ steps:
       - 'push'
       - 'gcr.io/$PROJECT_ID/$_SERVICE_NAME:latest'
 
-  # Deploy container image to Cloud Run
+  # Deploy container image to Cloud Run with environment variables
+  # Using hardcoded values since Cloud Build substitutions don't expand in --set-env-vars
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: bash
+    entrypoint: gcloud
     args:
-      - '-c'
-      - |
-        gcloud run deploy $_SERVICE_NAME \
-          --image gcr.io/$PROJECT_ID/$_SERVICE_NAME:$COMMIT_SHA \
-          --region $_DEPLOY_REGION \
-          --platform managed \
-          --allow-unauthenticated \
-          --port 8080 \
-          --set-env-vars VITE_SUPABASE_PROJECT_ID=$_VITE_SUPABASE_PROJECT_ID,VITE_SUPABASE_ANON_KEY=$_VITE_SUPABASE_ANON_KEY,SUPABASE_PROJECT_ID=$_VITE_SUPABASE_PROJECT_ID,SUPABASE_ANON_KEY=$_VITE_SUPABASE_ANON_KEY
+      - 'run'
+      - 'deploy'
+      - '$_SERVICE_NAME'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/$_SERVICE_NAME:$COMMIT_SHA'
+      - '--region'
+      - '$_DEPLOY_REGION'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--set-env-vars'
+      - 'VITE_SUPABASE_PROJECT_ID=tqpgffxiewfvrwkacqry,VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxcGdmZnhpZXdmdnJ3a2FjcXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5NTI1OTUsImV4cCI6MjA3OTUyODU5NX0.CL2-C0DIo0YezAi-DU369jZeLrhoKrFI73invDmzrQc,SUPABASE_PROJECT_ID=tqpgffxiewfvrwkacqry,SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxcGdmZnhpZXdmdnJ3a2FjcXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5NTI1OTUsImV4cCI6MjA3OTUyODU5NX0.CL2-C0DIo0YezAi-DU369jZeLrhoKrFI73invDmzrQc'
 
 images:
   - 'gcr.io/$PROJECT_ID/$_SERVICE_NAME:$COMMIT_SHA'
