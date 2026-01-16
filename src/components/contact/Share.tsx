@@ -59,34 +59,53 @@ export function Share({ onAIClick }: { onAIClick?: () => void }) {
   const imageUrl = profileImageData?.imageUrl || imgImg;
   const imagePosition = calculateImagePosition(profileImageData);
 
+  // Fixed reference size matching AvatarImagePositioner (1920x1080px)
+  const REFERENCE_WIDTH = 1920;
+  const REFERENCE_HEIGHT = 1080;
+  
+  // Circle size matching AvatarImagePositioner (160px)
+  const CIRCLE_SIZE = 160;
+  
   return (
     <div className="box-border content-stretch flex flex-col gap-[24px] items-center p-[24px] relative rounded-tl-[24px] rounded-tr-[24px] shrink-0 w-full" data-name="share">
-      <div className="relative rounded-[100px] shrink-0 size-[120px]" data-name="avatar">
-        <div className="overflow-clip relative rounded-[inherit] size-[120px]">
-          <div className="absolute inset-0 rounded-[100px]" data-name="img">
-            <div className="absolute overflow-hidden pointer-events-none rounded-[100px]" style={{
-              width: '100vw',
-              height: '100vh',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%) scale(0.75)',
-              transformOrigin: 'center center'
-            }}>
-              <img 
-                alt="Profile" 
-                className="absolute h-full w-full object-contain" 
-                src={imageUrl}
-                style={{
-                  ...(imagePosition.transform && {
-                    transform: imagePosition.transform,
-                    transformOrigin: imagePosition.transformOrigin
-                  })
-                }}
-              />
+      <div className="relative rounded-[100px] shrink-0 overflow-hidden" style={{ width: `${CIRCLE_SIZE}px`, height: `${CIRCLE_SIZE}px` }} data-name="avatar">
+        {/* Fixed-size container matching AvatarImagePositioner exactly */}
+        {/* The container is 1920x1080px, same as positioner, centered and clipped to 160px circle */}
+        {/* Structure matches positioner: container -> inset-0 -> inset-0 -> img */}
+        <div 
+          className="absolute top-1/2 left-1/2 pointer-events-none"
+          style={{
+            width: `${REFERENCE_WIDTH}px`,
+            height: `${REFERENCE_HEIGHT}px`,
+            transform: 'translate(-50%, -50%)',
+            transformOrigin: 'center center'
+          }}
+        >
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0">
+                <img 
+                  alt="Profile" 
+                  className="absolute h-full w-full object-contain pointer-events-none" 
+                  src={imageUrl}
+                  style={{
+                    objectFit: 'contain',
+                    objectPosition: 'center center',
+                    ...(imagePosition.transform && {
+                      transform: imagePosition.transform,
+                      transformOrigin: imagePosition.transformOrigin || 'center center'
+                    })
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
-        <div aria-hidden="true" className="absolute border-8 border-solid border-white inset-[-8px] pointer-events-none rounded-[108px]" />
+        <div aria-hidden="true" className="absolute border-8 border-solid border-white pointer-events-none rounded-[100px]" style={{
+          inset: '-8px',
+          width: `${CIRCLE_SIZE + 16}px`,
+          height: `${CIRCLE_SIZE + 16}px`
+        }} />
       </div>
       <Headline name={data.personal.name} title={data.personal.title} />
       <CallToAction onAIClick={onAIClick} />

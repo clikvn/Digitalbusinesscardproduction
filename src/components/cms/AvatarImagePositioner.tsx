@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { X, ZoomIn, ZoomOut, Maximize2, Check } from "lucide-react";
 
@@ -19,22 +19,38 @@ export function AvatarImagePositioner({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+
+  const getRelativePosition = (clientX: number, clientY: number) => {
+    if (!containerRef.current) return { x: 0, y: 0 };
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    // Calculate position relative to container center
+    return {
+      x: clientX - centerX,
+      y: clientY - centerY
+    };
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.controls-area')) return;
     setIsDragging(true);
+    const relativePos = getRelativePosition(e.clientX, e.clientY);
     setDragStart({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
+      x: relativePos.x - position.x,
+      y: relativePos.y - position.y
     });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
+    const relativePos = getRelativePosition(e.clientX, e.clientY);
     setPosition({
       ...position,
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
+      x: relativePos.x - dragStart.x,
+      y: relativePos.y - dragStart.y
     });
   };
 
@@ -47,9 +63,10 @@ export function AvatarImagePositioner({
     e.preventDefault(); // Prevent default touch behavior
     const touch = e.touches[0];
     setIsDragging(true);
+    const relativePos = getRelativePosition(touch.clientX, touch.clientY);
     setDragStart({
-      x: touch.clientX - position.x,
-      y: touch.clientY - position.y
+      x: relativePos.x - position.x,
+      y: relativePos.y - position.y
     });
   };
 
@@ -57,10 +74,11 @@ export function AvatarImagePositioner({
     if (!isDragging) return;
     e.preventDefault();
     const touch = e.touches[0];
+    const relativePos = getRelativePosition(touch.clientX, touch.clientY);
     setPosition({
       ...position,
-      x: touch.clientX - dragStart.x,
-      y: touch.clientY - dragStart.y
+      x: relativePos.x - dragStart.x,
+      y: relativePos.y - dragStart.y
     });
   };
 
@@ -73,7 +91,7 @@ export function AvatarImagePositioner({
   };
 
   const handleZoomOut = () => {
-    setPosition({ ...position, scale: Math.max(position.scale - 0.1, 0.5) });
+    setPosition({ ...position, scale: Math.max(position.scale - 0.1, 0.2) });
   };
 
   const handleReset = () => {
@@ -84,6 +102,23 @@ export function AvatarImagePositioner({
     onSave(position);
     onClose();
   };
+
+  // Fixed reference size - use web size (1920px width) for all devices
+  const REFERENCE_WIDTH = 1920;
+  const REFERENCE_HEIGHT = 1080; // Standard 16:9 aspect ratio
+
+  // Load image dimensions
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
+
+  // Use fixed circle size - 160px base, consistent across all devices
+  const circleSize = 160;
+  const circleRadius = circleSize / 2;
 
   return (
     <div 
@@ -97,16 +132,31 @@ export function AvatarImagePositioner({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Background Image - Full Screen */}
-      <div className="h-screen relative shrink-0 w-full select-none overflow-hidden">
-        <div className="absolute bottom-0 left-0 right-0 top-0">
+      {/* Background Image - Fixed Size Container (Web Size) */}
+      <div 
+        ref={containerRef}
+        className="absolute top-1/2 left-1/2 select-none"
+        style={{
+          width: `${REFERENCE_WIDTH}px`,
+          height: `${REFERENCE_HEIGHT}px`,
+          transform: 'translate(-50%, -50%)',
+          minWidth: `${REFERENCE_WIDTH}px`,
+          minHeight: `${REFERENCE_HEIGHT}px`
+        }}
+      >
+        <div className="absolute inset-0">
           <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-0">
               <img 
+                ref={imageRef}
                 alt="" 
-                className="absolute h-full w-full object-contain pointer-events-none" 
+                className="absolute h-full w-full pointer-events-none"
                 src={imageUrl}
                 style={{
+                  // Use object-contain to show full image at exact web size
+                  // No mobile transformations - exact same view as web
+                  objectFit: 'contain',
+                  objectPosition: 'center center',
                   transform: `translate(${position.x}px, ${position.y}px) scale(${position.scale})`,
                   transformOrigin: 'center center'
                 }}
@@ -116,29 +166,46 @@ export function AvatarImagePositioner({
         </div>
       </div>
 
-      {/* Dark Overlay with Circular Cutout */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* This creates a dark overlay everywhere except the circle */}
+      {/* Dark Overlay with Circular Cutout - Fixed Size Container */}
+      <div 
+        className="absolute top-1/2 left-1/2 pointer-events-none"
+        style={{
+          width: `${REFERENCE_WIDTH}px`,
+          height: `${REFERENCE_HEIGHT}px`,
+          transform: 'translate(-50%, -50%)',
+          minWidth: `${REFERENCE_WIDTH}px`,
+          minHeight: `${REFERENCE_HEIGHT}px`
+        }}
+      >
+        {/* Dark overlay with circular cutout - use radial gradient mask */}
         <div 
           className="absolute inset-0 bg-black/60"
           style={{
-            clipPath: 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, calc(50% - 80px) 50%, calc(50% - 80px) 50%, calc(50% + 80px) 50%, calc(50% + 80px) 50%, calc(50% - 80px) 50%)'
+            maskImage: `radial-gradient(circle ${circleRadius}px at center, transparent ${circleRadius}px, black ${circleRadius + 0.5}px)`,
+            WebkitMaskImage: `radial-gradient(circle ${circleRadius}px at center, transparent ${circleRadius}px, black ${circleRadius + 0.5}px)`
           }}
         />
         
-        {/* Circular Guide Frame */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="relative">
-            {/* Circle border guide */}
-            <div 
-              className="rounded-full border-4 border-white shadow-2xl"
-              style={{ width: '160px', height: '160px' }}
-            />
-            
-            {/* Label */}
-            <div className="mt-4 text-center text-white text-sm font-medium bg-black/50 rounded-full px-4 py-2">
-              Avatar Preview
-            </div>
+        {/* Circular Guide Frame - positioned at exact center of 1920x1080 container */}
+        <div 
+          className="absolute pointer-events-none"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: `${circleSize}px`,
+            height: `${circleSize}px`
+          }}
+        >
+          {/* Circle border guide - this shows exactly what will be in the avatar */}
+          <div 
+            className="rounded-full border-4 border-white shadow-2xl"
+            style={{ width: `${circleSize}px`, height: `${circleSize}px` }}
+          />
+          
+          {/* Label */}
+          <div className="mt-4 text-center text-white text-sm font-medium bg-black/50 rounded-full px-4 py-2">
+            Avatar Preview
           </div>
         </div>
       </div>
@@ -168,7 +235,7 @@ export function AvatarImagePositioner({
           variant="ghost"
           size="sm"
           onClick={handleZoomOut}
-          disabled={position.scale <= 0.5}
+          disabled={position.scale <= 0.2}
           className="text-white hover:bg-white/20 h-9 px-3"
         >
           <ZoomOut className="w-4 h-4 mr-1" />

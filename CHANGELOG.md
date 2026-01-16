@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Avatar Position Editor Responsive Image Sizing**: Fixed issue where avatar position selection coordinates didn't match between web and mobile devices
+  - Changed to use fixed viewport size (1920x1080px) matching web view exactly, removing all mobile transformations
+  - Image container now uses exact same dimensions on all devices (1920px width, 1080px height)
+  - Image uses `object-contain` to show full image at exact web size with no mobile scaling
+  - Event handlers calculate positions relative to fixed container center for consistent coordinate system
+  - Circle guide size remains fixed at 160px for consistent visual reference
+  - Prevents issue where users selecting avatar position on web would see incorrect positioning when viewing on mobile devices
+  - Mobile users see exact same view as web users, ensuring perfect coordinate consistency across all devices
+- **Avatar Position Display on Contact Page**: Fixed issue where saved avatar position didn't match the displayed position on contact page
+  - Updated Share component to use same fixed-size container (1920x1080px) and 160px circle as AvatarImagePositioner
+  - Changed avatar circle size from 120px to 160px to match the positioner exactly
+  - Container uses same coordinate system (no scaling) - coordinates are applied in same pixel space
+  - Container is clipped to 160px circle, showing only the selected portion that was visible in the positioner
+  - Simplified container structure to match positioner exactly (same nested div hierarchy) to eliminate vertical offset issues
+  - Avatar position coordinates now correctly match between editor and display, ensuring what you select in the 160px circle is exactly what appears on the contact page
+
 ### Added
 - **Terms and Conditions Acceptance**: Added terms and conditions page that users must read and accept before registration
   - Created `TermsAndConditionsScreen` component with scrollable content area
