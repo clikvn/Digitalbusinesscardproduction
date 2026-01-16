@@ -181,21 +181,21 @@ export default function App() {
   return (
     <HelmetProvider>
       <Helmet>
-        {/* Page Title and Description */}
-        <title>CLIK DIGITAL BUSINESS CARD</title>
-        <meta name="description" content="Digital business card platform by CLIK JSC" />
-        <meta name="author" content="CLIK JSC" />
+        {/* Page Title and Description - Default fallback (will be overridden by DynamicMetaTags on public pages) */}
+        <title>Contact AI</title>
+        <meta name="description" content="Contact AI - Digital business card platform" />
+        <meta name="author" content="Contact AI" />
         
-        {/* Open Graph / Facebook Meta Tags (for sharing on social media) */}
+        {/* Open Graph / Facebook Meta Tags - Default fallback (will be overridden by DynamicMetaTags on public pages) */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="CLIK DIGITAL BUSINESS CARD" />
-        <meta property="og:description" content="Digital business card platform by CLIK JSC" />
-        <meta property="og:site_name" content="CLIK" />
+        <meta property="og:title" content="Contact AI" />
+        <meta property="og:description" content="Contact AI - Digital business card platform" />
+        <meta property="og:site_name" content="Contact AI" />
         
-        {/* Twitter Card Meta Tags (for sharing on Twitter/X) */}
+        {/* Twitter Card Meta Tags - Default fallback (will be overridden by DynamicMetaTags on public pages) */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="CLIK DIGITAL BUSINESS CARD" />
-        <meta name="twitter:description" content="Digital business card platform by CLIK JSC" />
+        <meta name="twitter:title" content="Contact AI" />
+        <meta name="twitter:description" content="Contact AI - Digital business card platform" />
         
         {/* Essential viewport meta tag for mobile compatibility */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
