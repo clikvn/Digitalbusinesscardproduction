@@ -7,20 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **Dynamic Social SEO Meta Tags**: Implemented dynamic Open Graph and Twitter Card meta tags for individual business card pages
-  - Created `DynamicMetaTags` component that sets personalized meta tags based on business card data
-  - Meta tags now show "Contact AI" as product name (instead of "Digital Business Card")
-  - Title format: "Owner Name | Contact AI"
-  - Description format: "Company - Title" (e.g., "CLIK JSC - Software Engineer")
-  - Uses owner's circular profile avatar image for social sharing previews
-  - Site name set to "Contact AI" for all shared links
-  - Integrated into `PublicLayout` component to update meta tags for all public business card pages
-  - Updated edge function `og-meta-handler` to fetch and serve dynamic meta tags for social media bots
-  - Edge function extracts userCode from URL and fetches business card data from Supabase
-  - Falls back to default meta tags if business card data is not available
-  - Social media bots (Facebook, Twitter, LinkedIn, etc.) now see personalized preview cards when users share their contact
-
 ### Fixed
 - **Avatar Position Editor Responsive Image Sizing**: Fixed issue where avatar position selection coordinates didn't match between web and mobile devices
   - Changed to use fixed viewport size (1920x1080px) matching web view exactly, removing all mobile transformations

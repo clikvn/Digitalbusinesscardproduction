@@ -17,7 +17,6 @@ import { clearSupabaseSessionStorage } from "../../utils/logout-utils";
 import { supabase } from "../../lib/supabase-client";
 import { usePublicBusinessCard } from "../../hooks/usePublicBusinessCard";
 import { AccountErrorPage } from "./AccountErrorPage";
-import { DynamicMetaTags } from "../seo/DynamicMetaTags";
 
 export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile' | 'portfolio' }) {
   const { userCode, groupCode, contactCode } = useParams<{ 
@@ -197,9 +196,6 @@ export function PublicLayout({ screen }: { screen: 'home' | 'contact' | 'profile
 
   return (
     <div className="bg-[#faf9f5] w-full h-full relative" style={{ height: 'calc(var(--vh, 1vh) * 100)', overflow: screen === 'home' ? 'visible' : 'auto' }}>
-      {/* Dynamic Meta Tags for Social Sharing */}
-      <DynamicMetaTags />
-      
       {/* Home Screen Specific Layout */}
       {screen === 'home' && (
         <div className="bg-[#c96442] w-full h-full relative">
