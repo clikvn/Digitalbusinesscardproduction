@@ -26,22 +26,17 @@ steps:
 
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: bash
     args:
-      - 'run'
-      - 'deploy'
-      - '$_SERVICE_NAME'
-      - '--image'
-      - 'gcr.io/$PROJECT_ID/$_SERVICE_NAME:$COMMIT_SHA'
-      - '--region'
-      - '$_DEPLOY_REGION'
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
-      - '--port'
-      - '8080'
-      - '--set-env-vars'
-      - 'VITE_SUPABASE_PROJECT_ID=$_VITE_SUPABASE_PROJECT_ID,VITE_SUPABASE_ANON_KEY=$_VITE_SUPABASE_ANON_KEY'
+      - '-c'
+      - |
+        gcloud run deploy $_SERVICE_NAME \
+          --image gcr.io/$PROJECT_ID/$_SERVICE_NAME:$COMMIT_SHA \
+          --region $_DEPLOY_REGION \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --set-env-vars VITE_SUPABASE_PROJECT_ID=$_VITE_SUPABASE_PROJECT_ID,VITE_SUPABASE_ANON_KEY=$_VITE_SUPABASE_ANON_KEY,SUPABASE_PROJECT_ID=$_VITE_SUPABASE_PROJECT_ID,SUPABASE_ANON_KEY=$_VITE_SUPABASE_ANON_KEY
 
 images:
   - 'gcr.io/$PROJECT_ID/$_SERVICE_NAME:$COMMIT_SHA'
@@ -52,7 +47,7 @@ options:
   machineType: 'E2_HIGHCPU_8'
 
 substitutions:
-  _SERVICE_NAME: 'digital-business-card'
+  _SERVICE_NAME: 'digitalbusinesscardproduction'
   _DEPLOY_REGION: 'us-central1'
   _VITE_SUPABASE_PROJECT_ID: 'tqpgffxiewfvrwkacqry'
   _VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxcGdmZnhpZXdmdnJ3a2FjcXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5NTI1OTUsImV4cCI6MjA3OTUyODU5NX0.CL2-C0DIo0YezAi-DU369jZeLrhoKrFI73invDmzrQc'

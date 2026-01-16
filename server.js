@@ -24,6 +24,11 @@ const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPA
 
 if (!SUPABASE_PROJECT_ID || !SUPABASE_ANON_KEY) {
   console.error('[Server] Missing Supabase credentials');
+  console.error('[Server] VITE_SUPABASE_PROJECT_ID:', process.env.VITE_SUPABASE_PROJECT_ID ? 'SET' : 'MISSING');
+  console.error('[Server] SUPABASE_PROJECT_ID:', process.env.SUPABASE_PROJECT_ID ? 'SET' : 'MISSING');
+  console.error('[Server] VITE_SUPABASE_ANON_KEY:', process.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING');
+  console.error('[Server] SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'SET' : 'MISSING');
+  console.error('[Server] All env vars:', Object.keys(process.env).filter(k => k.includes('SUPABASE')));
   process.exit(1);
 }
 
@@ -42,6 +47,9 @@ const SOCIAL_BOT_USER_AGENTS = [
   'Pinterest',
   'Discordbot',
   'SkypeUriPreview',
+  'Zalo',
+  'ZaloBot',
+  'ZaloPreviewBot',
   'Applebot',
   'Googlebot',
   'Bingbot',
