@@ -24,17 +24,30 @@ ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install production dependencies only (express, @supabase/supabase-js)
+RUN npm ci --omit=dev
 
 # Copy built files from builder
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=builder /app/build ./build
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy server file
+COPY server.js ./
 
 # Expose port 8080 (Cloud Run default)
 EXPOSE 8080
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Set environment variables (will be overridden by Cloud Run)
+ENV PORT=8080
+ENV VITE_SUPABASE_PROJECT_ID=""
+ENV VITE_SUPABASE_ANON_KEY=""
+
+# Start Node.js server
+CMD ["node", "server.js"]
 

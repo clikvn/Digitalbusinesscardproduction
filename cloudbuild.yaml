@@ -40,6 +40,8 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
+      - '--set-env-vars'
+      - 'VITE_SUPABASE_PROJECT_ID=$_VITE_SUPABASE_PROJECT_ID,VITE_SUPABASE_ANON_KEY=$_VITE_SUPABASE_ANON_KEY'
 
 images:
   - 'gcr.io/$PROJECT_ID/$_SERVICE_NAME:$COMMIT_SHA'

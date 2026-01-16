@@ -110,15 +110,17 @@ Visit `http://localhost:8080` to verify it works.
 ## Build Configuration
 
 ### Dockerfile
-- Uses multi-stage build (Node.js for building, nginx for serving)
-- Builds the Vite app and serves static files with nginx
+- Uses multi-stage build (Node.js for building and serving)
+- Builds the Vite app and serves static files with Express
 - Exposes port 8080 (Cloud Run default)
+- Node.js server handles bot detection and dynamic OG meta tags
 
-### nginx.conf
-- Configured for SPA routing (all routes serve index.html)
-- Gzip compression enabled
-- Security headers included
-- Static asset caching (1 year)
+### Server (server.js)
+- Express server for static file serving
+- Social media bot detection (Facebook, Twitter, LinkedIn, etc.)
+- Dynamic Open Graph meta tags generation from Supabase data
+- SPA routing support (all routes serve index.html for regular users)
+- Health check endpoint at `/health`
 
 ## Custom Domain (Optional)
 
@@ -144,16 +146,20 @@ Visit `http://localhost:8080` to verify it works.
 - Ensure port 8080 is exposed
 
 ### Environment variables not working
-- **Critical:** Vite requires environment variables at **build time**, not runtime
-- Pass env vars as `--build-arg` when building Docker image
-- Rebuild the Docker image after changing env vars (they're baked into the build)
-- For runtime env vars, use a server-side approach (not applicable for static SPA)
+- **Build time:** Vite requires `VITE_SUPABASE_PROJECT_ID` and `VITE_SUPABASE_ANON_KEY` at build time (passed as `--build-arg`)
+- **Runtime:** The Node.js server also needs these env vars at runtime for bot detection and OG tag generation
+- Set env vars in Cloud Run console or via `--set-env-vars` in deployment
+- The `cloudbuild.yaml` automatically sets runtime env vars during deployment
 
 ## Notes
 
-- **Critical:** The app is built as a static SPA, so environment variables must be set at **build time** (not runtime)
-- Environment variables are passed as Docker build arguments (`--build-arg`)
-- Vite bakes env vars into the JavaScript bundle during build
-- For runtime configuration changes, you'll need to rebuild and redeploy
+- **Build time:** Vite requires env vars at build time (passed as `--build-arg`)
+- **Runtime:** Node.js server needs env vars at runtime for Supabase queries (set in Cloud Run)
+- The server handles:
+  - Static file serving for regular users (SPA)
+  - Bot detection and dynamic OG meta tag generation for social media crawlers
+  - Health checks at `/health`
+- Social media bots (Facebook, Twitter, LinkedIn, etc.) receive pre-rendered HTML with dynamic meta tags
+- Regular users receive the normal SPA experience
 - The `info.tsx` file is used as a fallback for local development only
 

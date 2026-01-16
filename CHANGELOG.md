@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Dynamic Social SEO with Open Graph Meta Tags**: Implemented server-side bot detection and dynamic OG meta tag generation for social media sharing
+  - Replaced nginx with Node.js/Express server for bot detection and dynamic meta tag generation
+  - Social media bots (Facebook, Twitter, LinkedIn, WhatsApp, etc.) now receive pre-rendered HTML with dynamic meta tags
+  - Meta tags are generated from actual business card data (name, title, company, bio, avatar) fetched from Supabase
+  - Each profile page now has unique OG tags based on user's business card data
+  - Regular users continue to receive the normal SPA experience (no performance impact)
+  - Supports all route patterns: `/:userCode`, `/:userCode/:groupCode`, `/:userCode/:groupCode/:contactCode`, etc.
+  - Includes proper OG image tags using user's avatar or background image
+  - Health check endpoint at `/health` for monitoring
+  - Updated Dockerfile to use Node.js instead of nginx
+  - Updated deployment configuration to set runtime environment variables for Supabase access
+
 ### Fixed
 - **Avatar Position Editor Responsive Image Sizing**: Fixed issue where avatar position selection coordinates didn't match between web and mobile devices
   - Changed to use fixed viewport size (1920x1080px) matching web view exactly, removing all mobile transformations
