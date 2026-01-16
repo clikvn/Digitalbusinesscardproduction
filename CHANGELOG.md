@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Includes proper OG image tags using user's avatar or background image
   - Health check endpoint at `/health` for monitoring
   - Updated Dockerfile to use Node.js instead of nginx
-  - Updated deployment configuration to set runtime environment variables for Supabase access
+  - Environment variables are set manually in Cloud Run console (persist across deployments)
   - Added Zalo messenger bot detection for link previews in Zalo chat (Vietnam's popular messaging app)
 
 ### Fixed
