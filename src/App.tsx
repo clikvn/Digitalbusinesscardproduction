@@ -10,6 +10,7 @@ import { AuthScreen } from "./components/screens/AuthScreen";
 import { AuthCallbackScreen } from "./components/screens/AuthCallbackScreen";
 import { PasswordResetScreen } from "./components/screens/PasswordResetScreen";
 import { RegisterSuccessScreen } from "./components/screens/RegisterSuccessScreen";
+import { DashboardScreen } from "./components/screens/DashboardScreen";
 import { ensureDefaultUserExists } from "./utils/storage";
 import { Toaster } from "./components/ui/sonner";
 import { useChatWidget } from "./hooks/useChatWidget";
@@ -144,6 +145,9 @@ function AppContent() {
       <Route path="/auth/reset-password" element={<PasswordResetScreen />} />
       <Route path="/auth/register-success" element={<RegisterSuccessScreen />} />
       <Route path="/:userCode/auth" element={<AuthScreen />} />
+      
+      {/* Dashboard */}
+      <Route path="/dashboard" element={<DashboardScreen />} />
       
       {/* CMS Routes */}
       <Route path="/:userCode/studio" element={<CMSLayout />} />

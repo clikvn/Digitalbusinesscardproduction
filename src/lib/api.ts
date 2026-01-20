@@ -1952,4 +1952,59 @@ export const api = {
         .eq('user_id', employeeUserId);
     },
   },
+
+  // ============================================
+  // ADMIN API
+  // ============================================
+
+  admin: {
+    /**
+     * Get all registered users with their information
+     * PROTECTED - requires authentication
+     * Note: Uses business_cards table which has "Anyone can read" RLS policy
+     */
+    getAllUsers: async (): Promise<any[]> => {
+      const user = await getCurrentUser();
+      if (!user) {
+        throw new Error('Unauthorized');
+      }
+
+      // Query business_cards directly (has "Anyone can read" RLS policy)
+      // This gives us all user info in one query
+      const { data, error } = await supabase
+        .from('business_cards')
+        .select(`
+          user_id,
+          user_code,
+          name,
+          email,
+          phone,
+          title,
+          company_name,
+          created_at,
+          updated_at
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[admin.getAllUsers] Error:', error);
+        throw new Error(`Failed to fetch users: ${error.message}`);
+      }
+
+      // Transform the data to ensure consistent format
+      const users = (data || []).map((card: any) => ({
+        user_id: card.user_id,
+        user_code: card.user_code,
+        name: card.name || '',
+        email: card.email || null,
+        phone: card.phone || null,
+        title: card.title || null,
+        company_name: card.company_name || null,
+        created_at: card.created_at,
+        updated_at: card.updated_at || card.created_at,
+      }));
+
+      return users;
+    },
+  },
 };
