@@ -1960,15 +1960,11 @@ export const api = {
   admin: {
     /**
      * Get all registered users with their information
-     * PROTECTED - requires authentication
+     * PUBLIC - protected by password layer in DashboardScreen
      * Note: Uses business_cards table which has "Anyone can read" RLS policy
      */
     getAllUsers: async (): Promise<any[]> => {
-      const user = await getCurrentUser();
-      if (!user) {
-        throw new Error('Unauthorized');
-      }
-
+      // No authentication required - protected by password layer in UI
       // Query business_cards directly (has "Anyone can read" RLS policy)
       // This gives us all user info in one query
       const { data, error } = await supabase

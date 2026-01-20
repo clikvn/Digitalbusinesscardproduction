@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -6,7 +6,7 @@ import { api } from '../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Loader2, Search, User, Mail, Phone, Briefcase, Calendar, ExternalLink } from 'lucide-react';
+import { Loader2, Search, User, Mail, Phone, Briefcase, Calendar, ExternalLink, Lock } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 interface UserInfo {
@@ -21,17 +21,43 @@ interface UserInfo {
   updated_at: string;
 }
 
+const DASHBOARD_PASSWORD = 'JEGA2026';
+const PASSWORD_STORAGE_KEY = 'dashboard_password_verified';
+
 export function DashboardScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isPasswordVerified, setIsPasswordVerified] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-  // Fetch all users
+  // Check if password is already verified in session
+  useEffect(() => {
+    const verified = sessionStorage.getItem(PASSWORD_STORAGE_KEY) === 'true';
+    setIsPasswordVerified(verified);
+  }, []);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === DASHBOARD_PASSWORD) {
+      sessionStorage.setItem(PASSWORD_STORAGE_KEY, 'true');
+      setIsPasswordVerified(true);
+      setPasswordError('');
+      setPasswordInput('');
+    } else {
+      setPasswordError('Incorrect password. Please try again.');
+      setPasswordInput('');
+    }
+  };
+
+  // Fetch all users (only if password is verified)
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['dashboard-users'],
     queryFn: api.admin.getAllUsers,
     refetchOnWindowFocus: true,
     staleTime: 30 * 1000, // 30 seconds
+    enabled: isPasswordVerified, // Only fetch when password is verified
   });
 
   // Filter users based on search query
@@ -58,6 +84,48 @@ export function DashboardScreen() {
       minute: '2-digit'
     });
   };
+
+  // Show password form if not verified
+  if (!isPasswordVerified) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#e9e6dc] p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Lock className="h-6 w-6" />
+              Dashboard Access
+            </CardTitle>
+            <CardDescription>
+              Please enter the password to access the users dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Enter password"
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    setPasswordError('');
+                  }}
+                  className={passwordError ? 'border-destructive' : ''}
+                  autoFocus
+                />
+                {passwordError && (
+                  <p className="text-sm text-destructive mt-2">{passwordError}</p>
+                )}
+              </div>
+              <Button type="submit" className="w-full">
+                Access Dashboard
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
