@@ -77,19 +77,25 @@ app.get("/make-server-47604332/health", (c) => {
  * Sign Up - Creates user with auto-confirmation
  * The database trigger will automatically create user code and business card
  * POST /make-server-47604332/signup
- * Body: { email, password, name }
+ * Body: { email, password, name, phone? }
  */
 app.post("/make-server-47604332/signup", async (c) => {
   const body = await c.req.json();
-  const { email, password, name } = body;
+  const { email, password, name, phone } = body;
   
   const supabaseAdmin = getAdminClient();
   
   // Create the auth user - the trigger will handle the rest
+  // Include phone in metadata if provided (optional for backward compatibility)
+  const userMetadata: { name: string; phone?: string } = { name };
+  if (phone) {
+    userMetadata.phone = phone;
+  }
+  
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
-    user_metadata: { name },
+    user_metadata: userMetadata,
     email_confirm: true
   });
   

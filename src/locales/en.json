@@ -323,7 +323,8 @@
     "step3ReturnToLogin": "Return here and sign in with your credentials",
     "goToLogin": "Go to Login",
     "verifyEmailFirst": "Please verify your email before signing in",
-    "emailNotVerified": "Your email address has not been verified. Please check your email and click the verification link."
+    "emailNotVerified": "Your email address has not been verified. Please check your email and click the verification link.",
+    "phoneRequired": "Phone number is required"
   },
   "messages": {
     "comingSoon": "This feature will coming soon!"

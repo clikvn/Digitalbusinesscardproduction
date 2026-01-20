@@ -1067,7 +1067,7 @@ export const api = {
      * Sign up a new user (client-side with database trigger)
      * The database trigger automatically creates user code and business card
      */
-    signup: async (email: string, password: string, name: string) => {
+    signup: async (email: string, password: string, name: string, phone: string) => {
       console.log('[signup] Starting signup process...');
       
       // CRITICAL: Check if email already exists BEFORE attempting signup
@@ -1094,6 +1094,7 @@ export const api = {
         options: {
           data: {
             name,
+            phone,
           },
           emailRedirectTo: redirectUrl,
         },
@@ -1606,10 +1607,12 @@ export const api = {
       
       // 2. Create employee account via signup
       // Note: This changes the auth context to the new employee!
+      // Phone is optional for employee accounts (not collected in employee form)
       const signupResponse = await api.auth.signup(
         params.email, 
         params.password, 
-        params.name
+        params.name,
+        ''  // Empty phone for employee accounts
       );
       
       const employeeUserId = signupResponse.user.id;

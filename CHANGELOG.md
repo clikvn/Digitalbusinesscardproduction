@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Phone Number Required During Registration**: Phone number is now a required field during user registration
+  - Added phone input field to registration form (only visible during signup, not login)
+  - Phone number is stored in user metadata during signup
+  - Phone number is automatically populated in business card upon account creation
+  - Updated `initialize_user_data` RPC function to read phone from user metadata and populate both `business_cards.phone` and `custom_fields.contact.phone`
+  - Added client-side validation to require phone number before submission
+  - Added translation for phone required error message
 - **Dynamic Social SEO with Open Graph Meta Tags**: Implemented server-side bot detection and dynamic OG meta tag generation for social media sharing
   - Replaced nginx with Node.js/Express server for bot detection and dynamic meta tag generation
   - Social media bots (Facebook, Twitter, LinkedIn, WhatsApp, Zalo, etc.) now receive pre-rendered HTML with dynamic meta tags

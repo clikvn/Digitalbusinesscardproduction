@@ -17,6 +17,7 @@ export function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [showConfirmationPending, setShowConfirmationPending] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -95,6 +96,14 @@ export function AuthScreen() {
     const cleanEmail = email.trim();
     const cleanPassword = password.trim();
     const cleanName = name.trim();
+    const cleanPhone = phone.trim();
+    
+    // Validate phone number is required for signup
+    if (!isLogin && !cleanPhone) {
+      toast.error(t('auth.phoneRequired'));
+      setLoading(false);
+      return;
+    }
     
     try {
       if (isLogin) {
@@ -196,7 +205,7 @@ export function AuthScreen() {
         // 2. If email confirmation is required, show "check your email" message
         // 3. If no confirmation needed, initialize user data and navigate to studio
         
-        const signupResponse = await api.auth.signup(cleanEmail, cleanPassword, cleanName);
+        const signupResponse = await api.auth.signup(cleanEmail, cleanPassword, cleanName, cleanPhone);
         
         // Check if email confirmation is required
         if (signupResponse.needsEmailConfirmation) {
@@ -254,6 +263,7 @@ export function AuthScreen() {
          setEmail(''); // Clear email field
          setPassword(''); // Clear password field
          setName(''); // Clear name field
+         setPhone(''); // Clear phone field
       } else if (error.message?.includes("User code not found")) {
          toast.error(t('auth.profileNotFound'));
       } else if (error.message?.includes("Account deactivated")) {
@@ -466,6 +476,19 @@ export function AuthScreen() {
                   placeholder="Jane Doe" 
                   value={name} 
                   onChange={e => setName(e.target.value)} 
+                  required 
+                />
+              </div>
+            )}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">{t('common.phoneNumber')}</Label>
+                <Input 
+                  id="phone" 
+                  type="tel"
+                  placeholder={t('forms.phonePlaceholder')}
+                  value={phone} 
+                  onChange={e => setPhone(e.target.value)} 
                   required 
                 />
               </div>
