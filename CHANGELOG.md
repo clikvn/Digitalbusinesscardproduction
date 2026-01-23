@@ -44,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Container is clipped to 160px circle, showing only the selected portion that was visible in the positioner
   - Simplified container structure to match positioner exactly (same nested div hierarchy) to eliminate vertical offset issues
   - Avatar position coordinates now correctly match between editor and display, ensuring what you select in the 160px circle is exactly what appears on the contact page
+- **Zalo In-App Browser Compatibility**: Fixed issue where web application didn't load when accessed through Zalo's in-app browser
+  - Removed generic 'Zalo' from bot detection list - only actual bots (ZaloBot, ZaloPreviewBot) are now detected as bots
+  - Zalo's in-app browser user agent contains 'Zalo' but should receive the full SPA experience, not pre-rendered HTML
+  - Updated `server.js` bot detection to distinguish between Zalo's preview bots (for link previews) and Zalo's in-app browser (for actual users)
+  - Users clicking shared contacts in Zalo app now receive the full React application instead of static HTML
+  - Link previews in Zalo chat continue to work correctly with ZaloBot and ZaloPreviewBot detection
 
 ### Added
 - **Terms and Conditions Acceptance**: Added terms and conditions page that users must read and accept before registration

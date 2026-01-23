@@ -36,6 +36,8 @@ const supabaseUrl = `https://${SUPABASE_PROJECT_ID}.supabase.co`;
 const supabase = createClient(supabaseUrl, SUPABASE_ANON_KEY);
 
 // Social media bot user agents
+// Note: 'Zalo' is excluded - only ZaloBot and ZaloPreviewBot are actual bots
+// Zalo's in-app browser contains 'Zalo' in user agent but should receive the full SPA
 const SOCIAL_BOT_USER_AGENTS = [
   'facebookexternalhit',
   'Facebot',
@@ -47,7 +49,6 @@ const SOCIAL_BOT_USER_AGENTS = [
   'Pinterest',
   'Discordbot',
   'SkypeUriPreview',
-  'Zalo',
   'ZaloBot',
   'ZaloPreviewBot',
   'Applebot',
